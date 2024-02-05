@@ -1,0 +1,51 @@
+﻿<Window x:Class="UzlePlugins.WpfTest.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:UzlePlugins.WpfTest"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+
+    <Grid>
+        <TabControl x:Name="products">
+            <TabItem x:Name="smartphonesTab">
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Margin="3">Holes/Отверстия</TextBlock>
+                    </StackPanel>
+                </TabItem.Header>
+                <TabItem.Content>
+                    <StackPanel>
+                        <DataGrid Name="DG1" ItemsSource="{Binding Holes }" AutoGenerateColumns="False"  >
+                            <DataGrid.Resources>
+                            <local:YesNoToBooleanConverter x:Key="BooleanToStringConverter"/>
+                            </DataGrid.Resources>   
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="#"  Binding="{Binding Name }" />
+                                <DataGridTextColumn Header="Intersection with" Binding="{Binding Description}" />
+                                <DataGridTextColumn Header="Figure" Binding="{Binding HoleType}" />
+                                <DataGridTextColumn Header="Size" Binding="{Binding HoleSize}" />
+                                <DataGridTextColumn Header="Type of basis" Binding="{Binding HoleSourceType}"/>
+                                <DataGridTextColumn Header="Basis material" Binding="{Binding HoleSourceMaterial}"/>
+                                <DataGridComboBoxColumn Header="Hole figure" ItemsSource="{Binding Converter={StaticResource BooleanToStringConverter}}" /> 
+                                <DataGridTextColumn Header="Offset" Binding="{Binding HoleOffset}">
+                                </DataGridTextColumn>
+                                <DataGridCheckBoxColumn Header="Insert/Вставка" Binding="{Binding IsInsert}"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </StackPanel>
+                </TabItem.Content>
+            </TabItem>
+            <TabItem x:Name="tabletsTab">
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Margin="3">Settings/Настройки</TextBlock>
+                    </StackPanel>
+                </TabItem.Header>
+            </TabItem>
+        </TabControl>
+
+       
+    </Grid>
+</Window>
