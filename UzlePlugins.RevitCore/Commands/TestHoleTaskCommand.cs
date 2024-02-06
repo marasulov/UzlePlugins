@@ -5,15 +5,18 @@ using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Drawing;
 using System.Linq;
-using static Autodesk.Revit.DB.SpecTypeId;
+using Autodesk.Revit.DB.Plumbing;
 
 namespace UzlePlugins.RevitCore.Commands
 {
     [Transaction(TransactionMode.Manual)]
     public class TestHoleTaskCommand : IExternalCommand
     {
-        private const string familyName = "ОВ1";
+        private const string FAMILYNAME = "Пересечение_Стена_Круглое";
+        private const string FAMILYTYPENAME = "ОВ1";
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             var uiapp = commandData.Application;
@@ -25,41 +28,37 @@ namespace UzlePlugins.RevitCore.Commands
 
             t.Start();
 
-
-               // Задайте имя и тип семейства, которое вы ищете
-            string familyNameToFind = "Пересечение_Стена_Круглое";
-
             // Получите все семейства в проекте с заданным именем и типом
             FilteredElementCollector collector = new FilteredElementCollector(doc);
             List<FamilySymbol> foundElements = collector
                 .OfClass(typeof(FamilySymbol))
                 .WhereElementIsElementType()
                 .Cast<FamilySymbol>()
-                .Where(symbol => symbol.Family != null && symbol.Family.Name == familyNameToFind)
+                .Where(symbol => symbol.Family != null && symbol.Family.Name == FAMILYNAME)
                 .ToList();
 
             if (foundElements.Any())
             {
-                var ov1 = foundElements.Where(x => x.Name == "ОВ1");
+                var ov1 = foundElements.Where(x => x.Name == FAMILYTYPENAME);
               
                 // Выведите информацию о найденных семействах
                 foreach (var element in foundElements)
                 {
-                    if (element.Name == "ОВ1")
+                    if (element.Name == FAMILYTYPENAME)
                     {
                         if (element != null)
                         {
 
-                            foreach (var point in GetWalls(uidoc))
+                            foreach (var point in GetIntersectionPoints(uidoc,element))
                             {
-                                FamilyInstance familyInstance = doc.Create.NewFamilyInstance(point, element, StructuralType.NonStructural);    
-                                TaskDialog.Show("Success", $"Семейство успешно вставлено в {point}.");
+                                //FamilyInstance familyInstance = doc.Create.NewFamilyInstance(point, element, StructuralType.NonStructural);    
+                                Debug.Print("Success", $"Семейство успешно вставлено в {point}.");
                             }
 
                             // Создание экземпляра семейства в документе
                             
 
-                            TaskDialog.Show("Success", "Семейство успешно вставлено в проект.");
+                            Debug.Print("Семейство успешно вставлено в проект.");
                         }
                         else
                         {
@@ -70,7 +69,7 @@ namespace UzlePlugins.RevitCore.Commands
             }
             else
             {
-                TaskDialog.Show("Not Found", $"Семейство с именем '{familyNameToFind}' не найдено в проекте.");
+                TaskDialog.Show("Not Found", $"Семейство с именем '{FAMILYNAME}' не найдено в проекте.");
             }
 
             // Получите семейство в проекте по его имени
@@ -113,7 +112,7 @@ namespace UzlePlugins.RevitCore.Commands
             return Result.Succeeded;
         }
 
-        public List<XYZ> GetWalls(UIDocument uidoc)
+        public List<XYZ> GetIntersectionPoints(UIDocument uidoc, FamilySymbol symbol)
         {
             Document doc = uidoc.Document;
 
@@ -164,31 +163,25 @@ namespace UzlePlugins.RevitCore.Commands
                 .Where(p => p.GlobalPoint.DistanceTo(
                   curve.GetEndPoint(0)) < curve.Length)
                 .ToList();
-
-            IList<Element> walls = new List<Element>();
-            var points = new List<XYZ>();
-
-            foreach (var rc in references)
+          
+            foreach (Reference rc in references)
             {
                 RevitLinkInstance instance = doc.GetElement(rc) as RevitLinkInstance;
                 Document linkDoc = instance.GetLinkDocument();
-                //    Element element = linkDoc.GetElement(reference.LinkedElementId);
-                var intersectPoint = rc.GlobalPoint ;
+                var element = linkDoc.GetElement(rc.LinkedElementId) as Wall;
+                var width = element.WallType.Width;
+
+                var wallOrientation = element.Orientation;
+
+                var intersectPoint = rc.GlobalPoint - (width/2 * rayDirection);
+                FamilyInstance fi = doc.Create.NewFamilyInstance(intersectPoint, symbol, StructuralType.NonStructural);
+                var basisY = fi.GetTransform().BasisY;
+                var angle = basisY.AngleTo(rayDirection);
+
+                Line axis = Line.CreateBound(intersectPoint, intersectPoint + XYZ.BasisZ);
+                ElementTransformUtils.RotateElement(doc,fi.Id,axis, -angle);
                 intersectPoints.Add(intersectPoint);
-
             }
-
-            foreach (Reference reference in references)
-            {
-                RevitLinkInstance instance = doc.GetElement(reference) as RevitLinkInstance;
-                Document linkDoc = instance.GetLinkDocument();
-                Element element = linkDoc.GetElement(reference.LinkedElementId);
-
-                var dicPoints = GetIntersectPoints(doc, element).Values.ToList();
-
-                walls.Add(element);
-            }
-            TaskDialog.Show("Count of wall", walls.Count.ToString());
 
             return intersectPoints;
         }
