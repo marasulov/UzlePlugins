@@ -1,5 +1,6 @@
 ﻿using Autodesk.Revit.DB;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Autodesk.Revit.DB.Structure;
@@ -32,7 +33,7 @@ namespace UzlePlugins.RevitCore.Services
             
             var collector = new FilteredElementCollector(_document);
                 
-                
+            List<Wall> walls = ((IEnumerable) new FilteredElementCollector(document).OfCategoryId(new ElementId( -2000011)).OfClass(typeof (Wall)).WhereElementIsNotElementType()).Cast<Wall>().Where<Wall>((Func<Wall, bool>) (w => w.CurtainGrid == null)).Where<Wall>((Func<Wall, bool>) (w => worksetList.FirstOrDefault<Workset>((Func<Workset, bool>) (ws => WorksetId.op_Equality(((WorksetPreview) ws).Id, ((Element) w).WorksetId))) == null)).Where<Wall>((Func<Wall, bool>) (w => ((Element) w.WallType)[(BuiltInParameter) -1010109] != null)).Where<Wall>((Func<Wall, bool>) (w => ((Element) w.WallType)[(BuiltInParameter) -1010109].AsString() != "Отделка стен")).ToList<Wall>();
 
             Func<View3D, bool> isNotTemplate = v3 => !(v3.IsTemplate);
             View3D view3D = collector
