@@ -23,12 +23,13 @@ namespace UzlePlugins.RevitCore.Commands
             var uiapp = commandData.Application;
             var uidoc = uiapp.ActiveUIDocument;
             var doc = uidoc.Document;
-
+            var offset = 0.1;
             var t = new Transaction(doc, "Insert structural stiffener family instance");
 
             t.Start();
 
             var pipeRef = uidoc.Selection.PickObject(ObjectType.Element);
+            var pipe = doc.GetElement(pipeRef) as Pipe;
 
             ReferenceIntersectionFinder refFinder = new ReferenceIntersectionFinder(doc, pipeRef);
 
@@ -45,6 +46,25 @@ namespace UzlePlugins.RevitCore.Commands
 
                     Line axis = Line.CreateBound(intersectPoint, intersectPoint + XYZ.BasisZ);
                     ElementTransformUtils.RotateElement(doc, fi.Id, axis, -angle);
+                    foreach (var parameter in fi.GetOrderedParameters())
+                    {
+                        if (parameter.Definition.Name == "ADSK_Размер_Диаметр")
+                        {
+                            Debug.Print($"parameter - before {parameter.AsDouble()}");
+                            var outerDiameter = pipe.get_Parameter(BuiltInParameter.RBS_PIPE_OUTER_DIAMETER);
+                            parameter.Set(outerDiameter.AsDouble() + offset);
+                            
+                        }
+                        if (parameter.Definition.Name == "ADSK_Размер_Толщина")
+                        {
+                            Debug.Print($"parameter толщина - before {parameter.AsDouble()}");
+                            var thickness = refFinder.StartPoint.DistanceTo(refFinder.EndPoint);
+                            parameter.Set(refFinder.Thickness + offset);
+                            
+                        }
+                    }
+
+                    
                 }
                 
             }
@@ -70,120 +90,9 @@ namespace UzlePlugins.RevitCore.Commands
             return symbol;
         }
 
-        private double ConvertToRadians(double angle)
-        {
-            return (Math.PI / 180) * angle;
-        }
+     
 
-        public List<XYZ> GetIntersectionPoints(UIDocument uidoc, FamilySymbol symbol)
-        {
-            Document doc = uidoc.Document;
-            Reference pipeRef = uidoc.Selection.PickObject(ObjectType.Element);
-
-            ReferenceIntersectionFinder refFinder = new ReferenceIntersectionFinder(doc, pipeRef);
-           
-            List<XYZ> intersectPoints = new List<XYZ>();
-            foreach (Reference rc in refFinder.References)
-            {
-                RevitLinkInstance instance = doc.GetElement(rc) as RevitLinkInstance;
-                Document linkDoc = instance.GetLinkDocument();
-                var element = linkDoc.GetElement(rc.LinkedElementId) as Wall;
-                var width = element.WallType.Width;
-
-                //var wallOrientation = element.Orientation;
-
-                var intersectPoint = rc.GlobalPoint - (width/2 * refFinder.Normal);
-                FamilyInstance fi = doc.Create.NewFamilyInstance(intersectPoint, symbol, StructuralType.NonStructural);
-                var basisY = fi.GetTransform().BasisY;
-                var angle = basisY.AngleTo(refFinder.Normal);
-
-                Line axis = Line.CreateBound(intersectPoint, intersectPoint + XYZ.BasisZ);
-                ElementTransformUtils.RotateElement(doc,fi.Id,axis, -angle);
-                intersectPoints.Add(intersectPoint);
-            }
-
-            return intersectPoints;
-        }
-
-        //private void CreateFamily()
-        //{
-        //    FamilyInstance fi = doc.Create.NewFamilyInstance(intersectPoint, symbol, StructuralType.NonStructural);
-        //    var basisY = fi.GetTransform().BasisY;
-        //    var angle = basisY.AngleTo(refFinder.Normal);
-
-        //    Line axis = Line.CreateBound(intersectPoint, intersectPoint + XYZ.BasisZ);
-        //    ElementTransformUtils.RotateElement(doc,fi.Id,axis, -angle);
-        //}
-
-        //private Reference GetIntersectionReference(Document doc, Reference pipeRef)
-        //{
-        //    Element pipeElem = doc.GetElement(pipeRef);
-        //    ReferenceIntersectionFinder refFinder = new ReferenceIntersectionFinder(doc, pipeRef);
-        //    //LocationCurve lc = pipeElem.Location as LocationCurve;
-
-        //    //XYZ startPoint = lc.Curve.GetEndPoint(0);
-        //    //XYZ endPoint = lc.Curve.GetEndPoint(1);
-
-        //    //XYZ normal = endPoint.Subtract(
-        //    //    startPoint).Normalize();
-
-        //    //Curve curve = lc.Curve;
-        //    //ReferenceComparer reference1 = new ReferenceComparer();
-            
-        //    //ElementFilter filter = new ElementCategoryFilter(
-        //    //  BuiltInCategory.OST_Walls);
-
-        //    //FilteredElementCollector collector = new FilteredElementCollector(doc);
-
-        //    //Func<View3D, bool> isNotTemplate = v3 => !(v3.IsTemplate);
-        //    //View3D view3D = collector
-        //    //  .OfClass(typeof(View3D))
-        //    //  .Cast<View3D>()
-        //    //  .First<View3D>(isNotTemplate);
-
-        //    //ReferenceIntersector refIntersector
-        //    //  = new ReferenceIntersector(
-        //    //    filter, FindReferenceTarget.Element, view3D);
-
-        //    //refIntersector.FindReferencesInRevitLinks = true;
-        //    //IList<ReferenceWithContext> referenceWithContext
-        //    //  = refIntersector.Find(
-        //    //    startPoint,
-        //    //    normal);
-        //    List<XYZ> intersectPoints = new List<XYZ>();
-
-        //    //IList<Reference> references
-        //    //  = referenceWithContext
-        //    //    .Select(p => p.GetReference())
-        //    //    .Distinct(reference1)
-        //    //    .Where(p => p.GlobalPoint.DistanceTo(
-        //    //      curve.GetEndPoint(0)) < curve.Length)
-        //    //    .ToList();
-
-          
-        //    //foreach (Reference rc in refFinder.References)
-        //    //{
-        //    //    RevitLinkInstance instance = doc.GetElement(rc) as RevitLinkInstance;
-        //    //    Document linkDoc = instance.GetLinkDocument();
-        //    //    var element = linkDoc.GetElement(rc.LinkedElementId) as Wall;
-        //    //    var width = element.WallType.Width;
-
-        //    //    var wallOrientation = element.Orientation;
-
-        //    //    var intersectPoint = rc.GlobalPoint - (width/2 * refFinder.Normal);
-        //    //    FamilyInstance fi = doc.Create.NewFamilyInstance(intersectPoint, StructuralType.NonStructural);
-        //    //    var basisY = fi.GetTransform().BasisY;
-        //    //    var angle = basisY.AngleTo(refFinder.Normal);
-
-        //    //    Line axis = Line.CreateBound(intersectPoint, intersectPoint + XYZ.BasisZ);
-        //    //    ElementTransformUtils.RotateElement(doc,fi.Id,axis, -angle);
-        //    //    intersectPoints.Add(intersectPoint);
-        //    //}
-        //}
-
-
-
-        
+       
 
         public Dictionary<Reference, XYZ>  GetIntersectPoints(
             Document doc,

@@ -2,13 +2,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Autodesk.Revit.DB.Structure;
 
 namespace UzlePlugins.RevitCore.Services
 {
     public class ReferenceIntersectionFinder
     {
         private readonly Document _document;
-
 
         public ReferenceIntersectionFinder(Document document, Reference reference)
         {
@@ -17,17 +17,22 @@ namespace UzlePlugins.RevitCore.Services
             Element pipeElem = _document.GetElement(reference);
             LocationCurve lc = pipeElem.Location as LocationCurve;
 
+            
             StartPoint = lc.Curve.GetEndPoint(0);
             EndPoint = lc.Curve.GetEndPoint(1);
             Normal = EndPoint.Subtract(StartPoint).Normalize();
 
             Curve curve = lc.Curve;
-            ReferenceComparer referenceComparer = new ReferenceComparer();
+            //ReferenceComparer referenceComparer = new ReferenceComparer();
 
-            ElementFilter filter = new ElementCategoryFilter(
-                BuiltInCategory.OST_Walls);
-
-            FilteredElementCollector collector = new FilteredElementCollector(_document);
+            ElementFilter filter = new ElementCategoryFilter(BuiltInCategory.OST_Walls);
+            ElementFilter filter2 = new StructuralInstanceUsageFilter(StructuralInstanceUsage.Wall);
+            var fi = new LogicalAndFilter(filter, filter2);
+            //().Where<Wall>((Func<Wall, bool>)(w=>w.StructuralUsage == StructuralWallUsage.Bearing));
+            
+            var collector = new FilteredElementCollector(_document);
+                
+                
 
             Func<View3D, bool> isNotTemplate = v3 => !(v3.IsTemplate);
             View3D view3D = collector
@@ -37,6 +42,8 @@ namespace UzlePlugins.RevitCore.Services
 
             ReferenceIntersector refIntersector
                 = new ReferenceIntersector(filter, FindReferenceTarget.Element, view3D);
+            
+            //refIntersector.SetFilter(filter2);
 
             refIntersector.FindReferencesInRevitLinks = true;
             IList<ReferenceWithContext> referenceWithContext
@@ -51,8 +58,11 @@ namespace UzlePlugins.RevitCore.Services
                         curve.GetEndPoint(0)) < curve.Length)
                     .ToList();
 
+            
+
         }
 
+        public double Thickness { get; private set; }
 
         public XYZ StartPoint;
         public XYZ EndPoint;
@@ -70,9 +80,10 @@ namespace UzlePlugins.RevitCore.Services
 
                 var firstFaceRef = References[i] as Reference;
                 var secondFaceRef = References[i + 1] as Reference;
+
                 if (firstFaceRef.ElementId == secondFaceRef.ElementId)
                 {
-
+                    Thickness = firstFaceRef.GlobalPoint.DistanceTo(secondFaceRef.GlobalPoint);
                     intersectPoints.Add(new XYZ(
                         (firstFaceRef.GlobalPoint.X + secondFaceRef.GlobalPoint.X) / 2,
                         (firstFaceRef.GlobalPoint.Y + secondFaceRef.GlobalPoint.Y) / 2,
