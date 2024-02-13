@@ -10,77 +10,146 @@ using System.Drawing;
 using System.Linq;
 using Autodesk.Revit.DB.Plumbing;
 using UzlePlugins.RevitCore.Services;
+using System.Collections.ObjectModel;
 
 namespace UzlePlugins.RevitCore.Commands
 {
     [Transaction(TransactionMode.Manual)]
     public class TestHoleTaskCommand : IExternalCommand
     {
-        private const string Familyname = "Пересечение_Стена_Круглое";
-        private const string Familytypename = "ОВ1";
+        private const string WallFamilyName = "Пересечение_Стена_Круглое";
+        private const string FloorFamilyName = "Пересечение_Плита_Круглое";
+        private const string FamilytypeOv1 = "ОВ1";
+        private const string FamilytypeOv2 = "ОВ2";
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             var uiapp = commandData.Application;
             var uidoc = uiapp.ActiveUIDocument;
             var doc = uidoc.Document;
-            var offset = 0.1;
-            var t = new Transaction(doc, "Insert structural stiffener family instance");
+            var offset = 1.1;
+            var pipeDiametrForFilter = 50;
 
-            t.Start();
-
-            var pipeRef = uidoc.Selection.PickObject(ObjectType.Element);
-            var pipe = doc.GetElement(pipeRef) as Pipe;
-
-            ReferenceIntersectionFinder refFinder = new ReferenceIntersectionFinder(doc, pipeRef);
-
-            List<XYZ> intersectPoints = refFinder.GetIntersectionsPoint();
-
-            if (intersectPoints.Count > 0)
+            using (TransactionGroup transactionGroup = new TransactionGroup(doc))
             {
-                var symbol = GetFamilySymbolToPlace(doc, Familyname, Familytypename);
-                foreach (var intersectPoint in intersectPoints)
-                {
-                    FamilyInstance fi = doc.Create.NewFamilyInstance(intersectPoint, symbol, StructuralType.NonStructural);
-                    var basisY = fi.GetTransform().BasisY;
-                    var angle = basisY.AngleTo(refFinder.Normal);
+                var collector = new FilteredElementCollector(doc);
+                Func<View3D, bool> isNotTemplate = v3 => !(v3.IsTemplate);
+                View3D view3D = collector
+                    .OfClass(typeof(View3D))
+                    .Cast<View3D>()
+                    .First<View3D>(isNotTemplate);
 
-                    Line axis = Line.CreateBound(intersectPoint, intersectPoint + XYZ.BasisZ);
-                    ElementTransformUtils.RotateElement(doc, fi.Id, axis, -angle);
-                    foreach (var parameter in fi.GetOrderedParameters())
+                
+                var pipeCollector = new FilteredElementCollector(doc).OfClass(typeof(Pipe)).Cast<Pipe>()
+                    .Where(w => w.Diameter > pipeDiametrForFilter / 304.8);
+                transactionGroup.Start("Hole trask for walls with pipes");
+                using (Transaction t = new Transaction(doc))
+                {
+                    t.Start("Hole trask for walls with pipes");
+
+
+
+
+                    // Iterate through each pipe to get references
+                    foreach (Element pipeElement in pipeCollector)
                     {
-                        if (parameter.Definition.Name == "ADSK_Размер_Диаметр")
+                        var pipe = pipeElement as Pipe;
+
+                        Reference r = new Reference(pipeElement);
+                        ReferenceIntersectionFinder refFinder = new ReferenceIntersectionFinder(doc, r, view3D);
+                        List<XYZ> intersectPoints = refFinder.GetIntersectionsPoint();
+
+                        if (intersectPoints.Count <= 0) continue;
+                        var symbol = GetFamilySymbolToPlace(doc, WallFamilyName, FamilytypeOv1);
+                        foreach (var intersectPoint in intersectPoints)
                         {
-                            Debug.Print($"parameter - before {parameter.AsDouble()}");
-                            var outerDiameter = pipe.get_Parameter(BuiltInParameter.RBS_PIPE_OUTER_DIAMETER);
-                            parameter.Set(outerDiameter.AsDouble() + offset);
-                            
-                        }
-                        if (parameter.Definition.Name == "ADSK_Размер_Толщина")
-                        {
-                            Debug.Print($"parameter толщина - before {parameter.AsDouble()}");
-                            var thickness = refFinder.StartPoint.DistanceTo(refFinder.EndPoint);
-                            parameter.Set(refFinder.Thickness + offset);
-                            
+                            FamilyInstance fi = doc.Create.NewFamilyInstance(intersectPoint, symbol, StructuralType.NonStructural);
+                            var basisY = fi.GetTransform().BasisY;
+                            var angle = basisY.AngleTo(refFinder.Normal);
+
+                            Line axis = Line.CreateBound(intersectPoint, intersectPoint + XYZ.BasisZ);
+                            ElementTransformUtils.RotateElement(doc, fi.Id, axis, -angle);
+                            foreach (var parameter in fi.GetOrderedParameters())
+                            {
+                                if (parameter.Definition.Name == "ADSK_Размер_Диаметр")
+                                {
+                                    Debug.Print($"parameter - before {parameter.AsDouble()}");
+                                    var outerDiameter = pipe.get_Parameter(BuiltInParameter.RBS_PIPE_OUTER_DIAMETER);
+                                    parameter.Set(outerDiameter.AsDouble() + offset);
+
+                                }
+
+                                if (parameter.Definition.Name != "ADSK_Размер_Толщина") continue;
+                                Debug.Print($"parameter толщина - before {parameter.AsDouble()}");
+
+                                parameter.Set(refFinder.Thickness + (refFinder.Thickness * 1.2));
+                            }
                         }
                     }
 
-                    
+                    t.Commit();
                 }
-                
+
+                using (Transaction t = new Transaction(doc))
+                {
+                    t.Start("Hole trask for walls with floors");
+
+                    //var pipeCollector = new FilteredElementCollector(doc).OfClass(typeof(Pipe)).Cast<Pipe>()
+                    //    .Where<Pipe>((Func<Pipe, bool>)(w =>
+                    //        w.Diameter > pipeDiametrForFilter / 304.8));
+
+                    // Iterate through each pipe to get references
+                    foreach (Element pipeElement in pipeCollector)
+                    {
+                        var pipe = pipeElement as Pipe;
+
+                        Reference r = new Reference(pipeElement);
+                        ReferenceIntersectionFinder refFinder = new ReferenceIntersectionFinder(doc, r, view3D);
+                        List<XYZ> intersectPoints = refFinder.GetIntersectionsPointWithFloors();
+
+                        if (intersectPoints.Count <= 0) continue;
+                        var symbol = GetFamilySymbolToPlace(doc, FloorFamilyName, FamilytypeOv2);
+                        foreach (var intersectPoint in intersectPoints)
+                        {
+                            FamilyInstance fi = doc.Create.NewFamilyInstance(intersectPoint, symbol, StructuralType.NonStructural);
+                            var basisY = fi.GetTransform().BasisY;
+                            var angle = basisY.AngleTo(refFinder.Normal);
+
+                            Line axis = Line.CreateBound(intersectPoint, intersectPoint + XYZ.BasisZ);
+                            ElementTransformUtils.RotateElement(doc, fi.Id, axis, -angle);
+                            foreach (var parameter in fi.GetOrderedParameters())
+                            {
+                                if (parameter.Definition.Name == "ADSK_Размер_Диаметр")
+                                {
+                                    Debug.Print($"parameter - before {parameter.AsDouble()}");
+                                    var outerDiameter = pipe.get_Parameter(BuiltInParameter.RBS_PIPE_OUTER_DIAMETER);
+                                    parameter.Set(outerDiameter.AsDouble() + offset);
+
+                                }
+
+                                if (parameter.Definition.Name != "ADSK_Размер_Толщина") continue;
+                                Debug.Print($"parameter толщина - before {parameter.AsDouble()}");
+
+                                parameter.Set(1);
+                            }
+                        }
+                    }
+
+                    t.Commit();
+                }
+
+                transactionGroup.Assimilate();
             }
-            
-            t.Commit();
 
             return Result.Succeeded;
         }
 
-        private FamilySymbol GetFamilySymbolToPlace(Document doc, string familyName, string familyTypeName)
+        public static FamilySymbol GetFamilySymbolToPlace(Document doc, string familyName, string familyTypeName)
         {
             FamilySymbol symbol = null;
             foreach (FamilySymbol fSym in new FilteredElementCollector(doc).OfClass(typeof(FamilySymbol))
-                    .Cast<FamilySymbol>()) 
+                    .Cast<FamilySymbol>())
             {
-                if (fSym.FamilyName == familyName && fSym.Name == familyTypeName) 
+                if (fSym.FamilyName == familyName && fSym.Name == familyTypeName)
                 {
                     symbol = fSym;
                     Debug.Print("family selected");
@@ -90,127 +159,91 @@ namespace UzlePlugins.RevitCore.Commands
             return symbol;
         }
 
-     
 
-       
 
-        public Dictionary<Reference, XYZ>  GetIntersectPoints(
-            Document doc,
-            Element intersect)
-        {
-            // Find a 3D view to use for the 
-            // ReferenceIntersector constructor.
 
-            FilteredElementCollector collector
-                = new FilteredElementCollector(doc);
 
-            Func<View3D, bool> isNotTemplate = v3
-                => !(v3.IsTemplate);
+        //public Dictionary<Reference, XYZ>  GetIntersectPoints(
+        //    Document doc,
+        //    Element intersect)
+        //{
+        //    // Find a 3D view to use for the 
+        //    // ReferenceIntersector constructor.
 
-            View3D view3D = collector
-                .OfClass(typeof(View3D))
-                .Cast<View3D>()
-                .First<View3D>(isNotTemplate);
+        //    FilteredElementCollector collector
+        //        = new FilteredElementCollector(doc);
 
-            // Use location point as start point for intersector.
+        //    Func<View3D, bool> isNotTemplate = v3
+        //        => !(v3.IsTemplate);
 
-            LocationCurve lp = intersect.Location as LocationCurve;
-            XYZ startPoint = lp.Curve.GetEndPoint(0) as XYZ;
-            XYZ endPoint = lp.Curve.GetEndPoint(1) as XYZ;
+        //    View3D view3D = collector
+        //        .OfClass(typeof(View3D))
+        //        .Cast<View3D>()
+        //        .First<View3D>(isNotTemplate);
 
-            // Shoot intersector along element.
+        //    // Use location point as start point for intersector.
 
-            XYZ rayDirection = endPoint.Subtract(
-                startPoint).Normalize();
+        //    LocationCurve lp = intersect.Location as LocationCurve;
+        //    XYZ startPoint = lp.Curve.GetEndPoint(0) as XYZ;
+        //    XYZ endPoint = lp.Curve.GetEndPoint(1) as XYZ;
 
-            List<BuiltInCategory> builtInCats
-                = new List<BuiltInCategory>();
+        //    // Shoot intersector along element.
 
-            builtInCats.Add(BuiltInCategory.OST_Roofs);
-            builtInCats.Add(BuiltInCategory.OST_Ceilings);
-            builtInCats.Add(BuiltInCategory.OST_Floors);
-            builtInCats.Add(BuiltInCategory.OST_Walls);
+        //    XYZ rayDirection = endPoint.Subtract(
+        //        startPoint).Normalize();
 
-            ElementMulticategoryFilter intersectFilter
-                = new ElementMulticategoryFilter(builtInCats);
+        //    List<BuiltInCategory> builtInCats
+        //        = new List<BuiltInCategory>();
 
-            ReferenceIntersector refIntersector
-                = new ReferenceIntersector(intersectFilter,
-                    FindReferenceTarget.Element, view3D);
+        //    builtInCats.Add(BuiltInCategory.OST_Roofs);
+        //    builtInCats.Add(BuiltInCategory.OST_Ceilings);
+        //    builtInCats.Add(BuiltInCategory.OST_Floors);
+        //    builtInCats.Add(BuiltInCategory.OST_Walls);
 
-            refIntersector.FindReferencesInRevitLinks = true;
-            //todo
-            IList<ReferenceWithContext> referencesWithContext
-                = refIntersector.Find(startPoint,
-                    rayDirection);
-            
-            List<XYZ> intersectPoints = new List<XYZ>();
+        //    ElementMulticategoryFilter intersectFilter
+        //        = new ElementMulticategoryFilter(builtInCats);
 
-            IList<Reference> intersectRefs
-                = new List<Reference>();
+        //    ReferenceIntersector refIntersector
+        //        = new ReferenceIntersector(intersectFilter,
+        //            FindReferenceTarget.Element, view3D);
 
-            Dictionary<Reference, XYZ> dictProvisionForVoidRefs
-                = new Dictionary<Reference, XYZ>();
+        //    refIntersector.FindReferencesInRevitLinks = true;
+        //    //todo
+        //    IList<ReferenceWithContext> referencesWithContext
+        //        = refIntersector.Find(startPoint,
+        //            rayDirection);
 
-            FilteredElementCollector a
-                = new FilteredElementCollector(doc)
-                    .OfClass(typeof(Family));
+        //    List<XYZ> intersectPoints = new List<XYZ>();
 
-            Family family = a.FirstOrDefault<Element>(e => e.Name.Equals("ОВ1")) as Family;
+        //    IList<Reference> intersectRefs
+        //        = new List<Reference>();
 
-            ReferenceComparer reference1 = new ReferenceComparer();
+        //    Dictionary<Reference, XYZ> dictProvisionForVoidRefs
+        //        = new Dictionary<Reference, XYZ>();
 
-            var newref = referencesWithContext.Distinct(new ReferenceWithContextElementEqualityComparer());
+        //    FilteredElementCollector a
+        //        = new FilteredElementCollector(doc)
+        //            .OfClass(typeof(Family));
 
-            foreach (ReferenceWithContext r in
-                     newref)
-            {
-                var intersectPoint = r.GetReference().GlobalPoint;
-                intersectPoints.Add(intersectPoint);
-                dictProvisionForVoidRefs.Add(r.GetReference(),
-                    intersectPoint);
+        //    Family family = a.FirstOrDefault<Element>(e => e.Name.Equals("ОВ1")) as Family;
 
-            }
-            return dictProvisionForVoidRefs;
-        }
+        //    ReferenceComparer reference1 = new ReferenceComparer();
 
-        void CreateNurseCallDomeOnWall(Autodesk.Revit.DB.Document document, Wall wall)
-        {
-            FilteredElementCollector collector = new FilteredElementCollector(document);
-            collector.OfClass(typeof(FamilySymbol)).OfCategory(BuiltInCategory.OST_NurseCallDevices);
+        //    var newref = referencesWithContext.Distinct(new ReferenceWithContextElementEqualityComparer());
 
-            FamilySymbol symbol = collector.FirstElement() as FamilySymbol;
+        //    foreach (ReferenceWithContext r in
+        //             newref)
+        //    {
+        //        var intersectPoint = r.GetReference().GlobalPoint;
+        //        intersectPoints.Add(intersectPoint);
+        //        dictProvisionForVoidRefs.Add(r.GetReference(),
+        //            intersectPoint);
 
-            // Get interior face of wall
-            IList<Reference> sideFaces = HostObjectUtils.GetSideFaces(wall, ShellLayerType.Interior);
-            Reference interiorFaceRef = sideFaces[0];
+        //    }
+        //    return dictProvisionForVoidRefs;
+        //}
 
-            XYZ location = new XYZ(4, 2, 8);
-            XYZ refDir = new XYZ(0, 0, 1);
 
-            FamilyInstance instance = document.Create.NewFamilyInstance(interiorFaceRef, location, refDir, symbol);
-        }
 
-        public void PickPoint(UIDocument uidoc)
-        {
-            ObjectSnapTypes snapTypes = ObjectSnapTypes.Endpoints | ObjectSnapTypes.Intersections;
-            XYZ point = uidoc.Selection.PickPoint(snapTypes, "Select an end point or intersection");
-
-            string strCoords = "Selected point is " + point.ToString();
-
-            TaskDialog.Show("Revit", strCoords);
-        }
-
-        /// <summary>
-        /// Поиск элемента
-        /// по его типу и наименованию
-        /// </summary>
-        public static Element FindElementByName(Document doc, Type targetType, string targetName)
-        {
-            return new FilteredElementCollector(doc)
-                .OfClass(targetType)
-                .FirstOrDefault<Element>(
-                    e => e.Name.Equals(targetName));
-        }
     }
 }

@@ -12,24 +12,24 @@ namespace UzlePlugins.RevitCore.Services
     {
         public HoleFamilyCreator(Document doc, Reference reference, FamilySymbol symbol)
         {
-            ReferenceIntersectionFinder refFinder = new ReferenceIntersectionFinder(doc, reference);
+            //ReferenceIntersectionFinder refFinder = new ReferenceIntersectionFinder(doc, reference);
 
-            List<XYZ> intersectPoints = refFinder.GetIntersectionsPoint();
+            //List<XYZ> intersectPoints = refFinder.GetIntersectionsPoint();
 
-            if (intersectPoints.Count > 0)
-            {
-                foreach (XYZ intersectPoint in intersectPoints)
-                {
-                    FamilyInstance fi = doc.Create.NewFamilyInstance(intersectPoint, symbol, StructuralType.NonStructural);
-                    var basisY = fi.GetTransform().BasisY;
-                    var angle = basisY.AngleTo(refFinder.Normal);
+            //if (intersectPoints.Count > 0)
+            //{
+            //    foreach (XYZ intersectPoint in intersectPoints)
+            //    {
+            //        FamilyInstance fi = doc.Create.NewFamilyInstance(intersectPoint, symbol, StructuralType.NonStructural);
+            //        var basisY = fi.GetTransform().BasisY;
+            //        var angle = basisY.AngleTo(refFinder.Normal);
 
-                    Line axis = Line.CreateBound(intersectPoint, intersectPoint + XYZ.BasisZ);
+            //        Line axis = Line.CreateBound(intersectPoint, intersectPoint + XYZ.BasisZ);
                     
-                    ElementTransformUtils.RotateElement(doc, fi.Id, axis, -angle);
-                }
+            //        ElementTransformUtils.RotateElement(doc, fi.Id, axis, -angle);
+            //    }
                 
-            }
+            //}
 
             
         }

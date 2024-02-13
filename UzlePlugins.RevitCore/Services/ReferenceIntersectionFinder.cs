@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Autodesk.Revit.DB.Structure;
 
@@ -11,14 +12,13 @@ namespace UzlePlugins.RevitCore.Services
     {
         private readonly Document _document;
 
-        public ReferenceIntersectionFinder(Document document, Reference reference)
+        public ReferenceIntersectionFinder(Document document, Reference reference,View3D view3D)
         {
             _document = document;
-
+         
             Element pipeElem = _document.GetElement(reference);
             LocationCurve lc = pipeElem.Location as LocationCurve;
 
-            
             StartPoint = lc.Curve.GetEndPoint(0);
             EndPoint = lc.Curve.GetEndPoint(1);
             Normal = EndPoint.Subtract(StartPoint).Normalize();
@@ -26,25 +26,13 @@ namespace UzlePlugins.RevitCore.Services
             Curve curve = lc.Curve;
             //ReferenceComparer referenceComparer = new ReferenceComparer();
 
-            ElementFilter filter = new ElementCategoryFilter(BuiltInCategory.OST_Walls);
-            ElementFilter filter2 = new StructuralInstanceUsageFilter(StructuralInstanceUsage.Wall);
-            var fi = new LogicalAndFilter(filter, filter2);
-            //().Where<Wall>((Func<Wall, bool>)(w=>w.StructuralUsage == StructuralWallUsage.Bearing));
-            
-            var collector = new FilteredElementCollector(_document);
-                
-            List<Wall> walls = ((IEnumerable) new FilteredElementCollector(document).OfCategoryId(new ElementId( -2000011)).OfClass(typeof (Wall)).WhereElementIsNotElementType()).Cast<Wall>().Where<Wall>((Func<Wall, bool>) (w => w.CurtainGrid == null)).Where<Wall>((Func<Wall, bool>) (w => worksetList.FirstOrDefault<Workset>((Func<Workset, bool>) (ws => WorksetId.op_Equality(((WorksetPreview) ws).Id, ((Element) w).WorksetId))) == null)).Where<Wall>((Func<Wall, bool>) (w => ((Element) w.WallType)[(BuiltInParameter) -1010109] != null)).Where<Wall>((Func<Wall, bool>) (w => ((Element) w.WallType)[(BuiltInParameter) -1010109].AsString() != "Отделка стен")).ToList<Wall>();
+            var typeOfStructure = BuiltInCategory.OST_Walls;
 
-            Func<View3D, bool> isNotTemplate = v3 => !(v3.IsTemplate);
-            View3D view3D = collector
-                .OfClass(typeof(View3D))
-                .Cast<View3D>()
-                .First<View3D>(isNotTemplate);
+
+            ElementFilter filter = new ElementCategoryFilter(BuiltInCategory.OST_Walls);
 
             ReferenceIntersector refIntersector
                 = new ReferenceIntersector(filter, FindReferenceTarget.Element, view3D);
-            
-            //refIntersector.SetFilter(filter2);
 
             refIntersector.FindReferencesInRevitLinks = true;
             IList<ReferenceWithContext> referenceWithContext
@@ -52,14 +40,69 @@ namespace UzlePlugins.RevitCore.Services
                     StartPoint,
                     Normal);
 
-            References = referenceWithContext
+            var tempReferences = referenceWithContext
                     .Select(p => p.GetReference())
                     //.Distinct(referenceComparer)
                     .Where(p => p.GlobalPoint.DistanceTo(
                         curve.GetEndPoint(0)) < curve.Length)
                     .ToList();
 
-            
+            foreach (var r in tempReferences)
+            {
+                if (r == null) return;
+
+                if (document.GetElement(r.ElementId) is not RevitLinkInstance link) return;
+                
+                var ldoc =   link.GetLinkDocument();
+                
+                var el = ldoc.GetElement(r.LinkedElementId) as Wall;
+                // FLOOR_PARAM_IS_STRUCTURAL
+                //WALL_STRUCTURAL_SIGNIFICANT
+                if (el == null) continue;
+                var strP = el.get_Parameter(BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT).AsValueString();
+
+                if (strP != "Yes") continue;
+                Debug.Print(strP);
+                WallReferences.Add(r);
+            }
+
+
+            filter = new ElementCategoryFilter(BuiltInCategory.OST_Floors);
+
+            refIntersector
+                = new ReferenceIntersector(filter, FindReferenceTarget.Element, view3D);
+
+            refIntersector.FindReferencesInRevitLinks = true;
+            referenceWithContext
+                = refIntersector.Find(
+                    StartPoint,
+                    Normal);
+
+            tempReferences = referenceWithContext
+                .Select(p => p.GetReference())
+                //.Distinct(referenceComparer)
+                .Where(p => p.GlobalPoint.DistanceTo(
+                    curve.GetEndPoint(0)) < curve.Length)
+                .ToList();
+
+            foreach (var r in tempReferences)
+            {
+                if (r == null) return;
+
+                if (document.GetElement(r.ElementId) is not RevitLinkInstance link) return;
+                
+                var ldoc =   link.GetLinkDocument();
+                
+                var el = ldoc.GetElement(r.LinkedElementId) as Floor;
+                // FLOOR_PARAM_IS_STRUCTURAL
+                //WALL_STRUCTURAL_SIGNIFICANT
+                if (el == null) continue;
+                var strP = el.get_Parameter(BuiltInParameter.FLOOR_PARAM_IS_STRUCTURAL).AsValueString();
+
+                if (strP != "Yes") continue;
+                Debug.Print(strP);
+               FloorReferences.Add(r);
+            }
 
         }
 
@@ -70,17 +113,20 @@ namespace UzlePlugins.RevitCore.Services
 
         public XYZ Normal { get; set; }
 
-        public IList<Reference> References { get; private set; }
+        public IList<Reference> WallReferences { get; private set; } = new List<Reference>();
+        public IList<Reference> FloorReferences { get; private set; } = new List<Reference>();
 
         public List<XYZ> GetIntersectionsPoint()
         {
             List<XYZ> intersectPoints = new List<XYZ>();
 
-            for (int i = 0; i < References.Count; i += 2)
+            if(WallReferences.Count<=0) return intersectPoints;
+
+            for (int i = 0; i < WallReferences.Count; i += 2)
             {
 
-                var firstFaceRef = References[i] as Reference;
-                var secondFaceRef = References[i + 1] as Reference;
+                var firstFaceRef = WallReferences[i] as Reference;
+                var secondFaceRef = WallReferences[i + 1] as Reference;
 
                 if (firstFaceRef.ElementId == secondFaceRef.ElementId)
                 {
@@ -97,6 +143,57 @@ namespace UzlePlugins.RevitCore.Services
             return intersectPoints;
         }
 
+        public List<XYZ> GetIntersectionsPointWithFloors()
+        {
+            List<XYZ> intersectPoints = new List<XYZ>();
+
+            if(FloorReferences.Count<=0 && FloorReferences.Count%2!=0) return intersectPoints;
+            bool isDiv = FloorReferences.Count % 2 == 0;
+            if (!isDiv)
+            {
+                for (int i = 0; i < FloorReferences.Count; i++)
+                {
+
+                    var firstFaceRef = FloorReferences[i] as Reference;
+                    //var secondFaceRef = FloorReferences[i + 1] as Reference;
+
+
+
+                    intersectPoints.Add(new XYZ(
+                        (firstFaceRef.GlobalPoint.X + Thickness / 2),
+                        (firstFaceRef.GlobalPoint.Y + Thickness / 2),
+                        firstFaceRef.GlobalPoint.Z + Thickness));
+
+
+
+
+
+                }
+
+                return intersectPoints;
+            }
+            for (int i = 0; i < FloorReferences.Count; i += 2)
+            {
+
+                var firstFaceRef = FloorReferences[i] as Reference;
+                var secondFaceRef = FloorReferences[i + 1] as Reference;
+
+                if (firstFaceRef.ElementId == secondFaceRef.ElementId)
+                {
+                    Thickness = firstFaceRef.GlobalPoint.DistanceTo(secondFaceRef.GlobalPoint);
+                    intersectPoints.Add(new XYZ(
+                        (firstFaceRef.GlobalPoint.X + secondFaceRef.GlobalPoint.X) / 2,
+                        (firstFaceRef.GlobalPoint.Y + secondFaceRef.GlobalPoint.Y) / 2,
+                        firstFaceRef.GlobalPoint.Z + Thickness));
+
+                }
+
+
+
+            }
+
+            return intersectPoints;
+        }
 
     }
 }
