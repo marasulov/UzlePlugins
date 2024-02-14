@@ -46,10 +46,6 @@ namespace UzlePlugins.RevitCore.Commands
                 {
                     t.Start("Hole trask for walls with pipes");
 
-
-
-
-                    // Iterate through each pipe to get references
                     foreach (Element pipeElement in pipeCollector)
                     {
                         var pipe = pipeElement as Pipe;
@@ -72,14 +68,14 @@ namespace UzlePlugins.RevitCore.Commands
                             {
                                 if (parameter.Definition.Name == "ADSK_Размер_Диаметр")
                                 {
-                                    Debug.Print($"parameter - before {parameter.AsDouble()}");
+                                    //Debug.Print($"parameter - before {parameter.AsDouble()}");
                                     var outerDiameter = pipe.get_Parameter(BuiltInParameter.RBS_PIPE_OUTER_DIAMETER);
                                     parameter.Set(outerDiameter.AsDouble() + offset);
 
                                 }
 
                                 if (parameter.Definition.Name != "ADSK_Размер_Толщина") continue;
-                                Debug.Print($"parameter толщина - before {parameter.AsDouble()}");
+                                //Debug.Print($"parameter толщина - before {parameter.AsDouble()}");
 
                                 parameter.Set(refFinder.Thickness + (refFinder.Thickness * 1.2));
                             }
@@ -89,53 +85,48 @@ namespace UzlePlugins.RevitCore.Commands
                     t.Commit();
                 }
 
-                using (Transaction t = new Transaction(doc))
-                {
-                    t.Start("Hole trask for walls with floors");
+                //using (Transaction t = new Transaction(doc))
+                //{
+                //    t.Start("Hole trask for walls with floors");
 
-                    //var pipeCollector = new FilteredElementCollector(doc).OfClass(typeof(Pipe)).Cast<Pipe>()
-                    //    .Where<Pipe>((Func<Pipe, bool>)(w =>
-                    //        w.Diameter > pipeDiametrForFilter / 304.8));
+                //    foreach (Element pipeElement in pipeCollector)
+                //    {
+                //        var pipe = pipeElement as Pipe;
 
-                    // Iterate through each pipe to get references
-                    foreach (Element pipeElement in pipeCollector)
-                    {
-                        var pipe = pipeElement as Pipe;
+                //        Reference r = new Reference(pipeElement);
+                //        ReferenceIntersectionFinder refFinder = new ReferenceIntersectionFinder(doc, r, view3D);
+                //        List<XYZ> intersectPoints = refFinder.GetIntersectionsPointWithFloors();
 
-                        Reference r = new Reference(pipeElement);
-                        ReferenceIntersectionFinder refFinder = new ReferenceIntersectionFinder(doc, r, view3D);
-                        List<XYZ> intersectPoints = refFinder.GetIntersectionsPointWithFloors();
+                //        if (intersectPoints.Count <= 0) continue;
+                //        var symbol = GetFamilySymbolToPlace(doc, FloorFamilyName, FamilytypeOv2);
+                //        foreach (var intersectPoint in intersectPoints)
+                //        {
+                //            FamilyInstance fi = doc.Create.NewFamilyInstance(intersectPoint, symbol, StructuralType.NonStructural);
+                //            var basisY = fi.GetTransform().BasisY;
+                //            var angle = basisY.AngleTo(refFinder.Normal);
 
-                        if (intersectPoints.Count <= 0) continue;
-                        var symbol = GetFamilySymbolToPlace(doc, FloorFamilyName, FamilytypeOv2);
-                        foreach (var intersectPoint in intersectPoints)
-                        {
-                            FamilyInstance fi = doc.Create.NewFamilyInstance(intersectPoint, symbol, StructuralType.NonStructural);
-                            var basisY = fi.GetTransform().BasisY;
-                            var angle = basisY.AngleTo(refFinder.Normal);
+                //            Line axis = Line.CreateBound(intersectPoint, intersectPoint + XYZ.BasisZ);
+                //            ElementTransformUtils.RotateElement(doc, fi.Id, axis, -angle);
+                //            foreach (var parameter in fi.GetOrderedParameters())
+                //            {
+                //                if (parameter.Definition.Name == "ADSK_Размер_Диаметр")
+                //                {
+                //                    //Debug.Print($"parameter - before {parameter.AsDouble()}");
+                //                    var outerDiameter = pipe.get_Parameter(BuiltInParameter.RBS_PIPE_OUTER_DIAMETER);
+                //                    parameter.Set(outerDiameter.AsDouble() + offset);
 
-                            Line axis = Line.CreateBound(intersectPoint, intersectPoint + XYZ.BasisZ);
-                            ElementTransformUtils.RotateElement(doc, fi.Id, axis, -angle);
-                            foreach (var parameter in fi.GetOrderedParameters())
-                            {
-                                if (parameter.Definition.Name == "ADSK_Размер_Диаметр")
-                                {
-                                    Debug.Print($"parameter - before {parameter.AsDouble()}");
-                                    var outerDiameter = pipe.get_Parameter(BuiltInParameter.RBS_PIPE_OUTER_DIAMETER);
-                                    parameter.Set(outerDiameter.AsDouble() + offset);
+                //                }
 
-                                }
+                //                if (parameter.Definition.Name != "ADSK_Размер_Толщина") continue;
+                //                //Debug.Print($"parameter толщина - before {parameter.AsDouble()}");
 
-                                if (parameter.Definition.Name != "ADSK_Размер_Толщина") continue;
-                                Debug.Print($"parameter толщина - before {parameter.AsDouble()}");
+                //                parameter.Set(1);
+                //            }
+                //        }
+                //    }
 
-                                parameter.Set(1);
-                            }
-                        }
-                    }
-
-                    t.Commit();
-                }
+                //    t.Commit();
+                //}
 
                 transactionGroup.Assimilate();
             }

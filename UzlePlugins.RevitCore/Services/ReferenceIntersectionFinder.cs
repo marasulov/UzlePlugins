@@ -67,42 +67,42 @@ namespace UzlePlugins.RevitCore.Services
             }
 
 
-            filter = new ElementCategoryFilter(BuiltInCategory.OST_Floors);
+            //filter = new ElementCategoryFilter(BuiltInCategory.OST_Floors);
 
-            refIntersector
-                = new ReferenceIntersector(filter, FindReferenceTarget.Element, view3D);
+            //refIntersector
+            //    = new ReferenceIntersector(filter, FindReferenceTarget.Element, view3D);
 
-            refIntersector.FindReferencesInRevitLinks = true;
-            referenceWithContext
-                = refIntersector.Find(
-                    StartPoint,
-                    Normal);
+            //refIntersector.FindReferencesInRevitLinks = true;
+            //referenceWithContext
+            //    = refIntersector.Find(
+            //        StartPoint,
+            //        Normal);
 
-            tempReferences = referenceWithContext
-                .Select(p => p.GetReference())
-                //.Distinct(referenceComparer)
-                .Where(p => p.GlobalPoint.DistanceTo(
-                    curve.GetEndPoint(0)) < curve.Length)
-                .ToList();
+            //tempReferences = referenceWithContext
+            //    .Select(p => p.GetReference())
+            //    //.Distinct(referenceComparer)
+            //    .Where(p => p.GlobalPoint.DistanceTo(
+            //        curve.GetEndPoint(0)) < curve.Length)
+            //    .ToList();
 
-            foreach (var r in tempReferences)
-            {
-                if (r == null) return;
+            //foreach (var r in tempReferences)
+            //{
+            //    if (r == null) return;
 
-                if (document.GetElement(r.ElementId) is not RevitLinkInstance link) return;
+            //    if (document.GetElement(r.ElementId) is not RevitLinkInstance link) return;
                 
-                var ldoc =   link.GetLinkDocument();
+            //    var ldoc =   link.GetLinkDocument();
                 
-                var el = ldoc.GetElement(r.LinkedElementId) as Floor;
-                // FLOOR_PARAM_IS_STRUCTURAL
-                //WALL_STRUCTURAL_SIGNIFICANT
-                if (el == null) continue;
-                var strP = el.get_Parameter(BuiltInParameter.FLOOR_PARAM_IS_STRUCTURAL).AsValueString();
+            //    var el = ldoc.GetElement(r.LinkedElementId) as Floor;
+            //    // FLOOR_PARAM_IS_STRUCTURAL
+            //    //WALL_STRUCTURAL_SIGNIFICANT
+            //    if (el == null) continue;
+            //    var strP = el.get_Parameter(BuiltInParameter.FLOOR_PARAM_IS_STRUCTURAL).AsValueString();
 
-                if (strP != "Yes") continue;
-                Debug.Print(strP);
-               FloorReferences.Add(r);
-            }
+            //    if (strP != "Yes") continue;
+            //    Debug.Print(strP);
+            //   FloorReferences.Add(r);
+            //}
 
         }
 
@@ -163,9 +163,6 @@ namespace UzlePlugins.RevitCore.Services
                         (firstFaceRef.GlobalPoint.X + Thickness / 2),
                         (firstFaceRef.GlobalPoint.Y + Thickness / 2),
                         firstFaceRef.GlobalPoint.Z + Thickness));
-
-
-
 
 
                 }
