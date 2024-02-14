@@ -67,16 +67,14 @@ namespace UzlePlugins.RevitCore.Services
                    Debug.Print(structuralParameter);
                    WallReferences.Add(r);
                 }
-                if(builtInCategory)
+                if(builtInCategory == BuiltInCategory.OST_Floors)
                 {
                     el = ldoc.GetElement(r.LinkedElementId) as Floor;
                     structuralParameter = el.get_Parameter(BuiltInParameter.FLOOR_PARAM_IS_STRUCTURAL).AsValueString();
+                    if (structuralParameter != "Yes") continue;
+                    Debug.Print(structuralParameter);
+                    FloorReferences.Add(r);
                 }
-
-                // FLOOR_PARAM_IS_STRUCTURAL
-                //WALL_STRUCTURAL_SIGNIFICANT
-
-              
             }
         }
 
@@ -88,8 +86,8 @@ namespace UzlePlugins.RevitCore.Services
 
         public XYZ Normal { get; set; }
 
-        public IList<Reference> WallReferences { get; private set; } = new List<Reference>();
-        public IList<Reference> FloorReferences { get; private set; } = new List<Reference>();
+        public IList<Reference> WallReferences { get; } = new List<Reference>();
+        public IList<Reference> FloorReferences { get; } = new List<Reference>();
 
         public List<XYZ> GetIntersectionsPoint()
         {
