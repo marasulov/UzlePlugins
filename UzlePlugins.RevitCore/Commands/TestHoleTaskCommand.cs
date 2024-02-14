@@ -51,8 +51,13 @@ namespace UzlePlugins.RevitCore.Commands
                         var pipe = pipeElement as Pipe;
 
                         Reference r = new Reference(pipeElement);
+                        
                         ReferenceIntersectionFinder refFinder = new ReferenceIntersectionFinder(doc, r, view3D);
+                        var typeOfStructure = BuiltInCategory.OST_Walls;
+                        refFinder.GetReferences(typeOfStructure);
+
                         List<XYZ> intersectPoints = refFinder.GetIntersectionsPoint();
+
 
                         if (intersectPoints.Count <= 0) continue;
                         var symbol = GetFamilySymbolToPlace(doc, WallFamilyName, FamilytypeOv1);
