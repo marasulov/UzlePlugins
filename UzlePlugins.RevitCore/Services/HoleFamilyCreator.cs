@@ -14,7 +14,7 @@ namespace UzlePlugins.RevitCore.Services
         {
             //ReferenceIntersectionFinder refFinder = new ReferenceIntersectionFinder(doc, reference);
 
-            //List<XYZ> intersectPoints = refFinder.GetIntersectionsPoint();
+            //List<XYZ> intersectPoints = refFinder.GetIntersectionsPoints();
 
             //if (intersectPoints.Count > 0)
             //{

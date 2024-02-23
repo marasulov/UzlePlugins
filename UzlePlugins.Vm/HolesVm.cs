@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
+﻿using System;
+using System.Collections.Generic;
+using System.Windows;
+using System.Windows.Input;
 using UzlePlugins.Models;
 using UzlePlugins.Vm.Base;
 
@@ -10,9 +10,12 @@ namespace UzlePlugins.Vm
     public class HolesVm : BaseViewModel
     {
        
-        private ObservableCollection<HoleModel> _holes;
+        private List<HoleModel> _holes;
+        private ICommand _createHolesCommand;
+        private bool _buttonClicked;
+        private bool _canExecute = true;
 
-        public ObservableCollection<HoleModel> Holes
+        public List<HoleModel> Holes
         {
             get => _holes;
             set
@@ -20,21 +23,68 @@ namespace UzlePlugins.Vm
                 Set(ref _holes, value);
             }
         }
-
-        public HolesVm()
+        public string Title { get; set; }
+        public HolesVm(List<HoleModel> holeModels)
         {
-            
+            Holes = holeModels;
+            CreateHolesCommand = new RelayCommand(CloseWindow, t => this._canExecute);
+        }
+
+        public bool CanExecute
+        {
+            get => this._canExecute;
+
+            set
+            {
+                if (_canExecute == value)
+                {
+                    return;
+                }
+
+                this._canExecute = value;
+            }
         }
 
         public void Initialize()
         {
-            Holes = new ObservableCollection<HoleModel>
+            Holes = new List<HoleModel>
             {
-                new HoleModel("first","first description","circle", 25, "wall", "wall material", true, 10, true),
-                new HoleModel("second","second description","circle", 25, "wall", "wall material", true, 10, true),
-                new HoleModel("third","third description","circle", 25, "wall", "wall material", true, 10, true),
-                new HoleModel("fourth","fourth description","circle", 25, "wall", "wall material", true, 10, true)
+                //new HoleModel(new PointModel(),"first","first description","circle", 25, "wall", "wall material", true, 10, true),
+                //new HoleModel(2,"second","second description","circle", 25, "wall", "wall material", true, 10, true),
+                //new HoleModel(3,"third","third description","circle", 25, "wall", "wall material", true, 10, true),
+                //new HoleModel(4,"fourth","fourth description","circle", 25, "wall", "wall material", true, 10, true)
             };
+        }
+        public Action CloseAction  { get; set;}
+        /// <summary>
+        /// Команда для перенумерования
+        /// </summary>
+        public ICommand CreateHolesCommand
+        {
+            get => _createHolesCommand;
+            set => Set(ref _createHolesCommand, value);
+        }
+
+        public void CloseWindow(object parameter)
+        {
+            string clicked = parameter as string;
+            if (clicked == "Clicked")
+            {
+                _buttonClicked = true;
+                CloseAction();
+                // OnRequestClose(this, new EventArgs());
+                var h = Holes;
+            }
+
+
+        }
+
+        public event EventHandler OnRequestClose;
+
+        public bool ButtonClicked
+        {
+            get => _buttonClicked;
+            set => Set(ref _buttonClicked, value);
         }
     }
 }

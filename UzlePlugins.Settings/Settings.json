@@ -1,0 +1,26 @@
+{
+  "FamilyTypes": {
+    "Circled": {
+      "FamilyNames": {
+        "WallType": "opening_wall_circ",
+        "FloorType": "opening_slab_circ"
+      },
+      "FamilyParameters": [
+        "Diameter",
+        "Depth"
+      ]
+    },
+    "Rectangled": {
+      "FamilyNames": {
+        "WallType": "opening_wall_rect",
+        "FloorType": "opening_slab_rect"
+      },
+
+      "FamilyParameters": [
+        "Width",
+        "Height",
+        "Depth"
+      ]
+    }
+  }
+}

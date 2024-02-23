@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections;
-using Autodesk.Revit.Attributes;
+﻿using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
-using Autodesk.Revit.DB.Mechanical;
 using Autodesk.Revit.DB.Plumbing;
+using Autodesk.Revit.DB.Structure;
 using Autodesk.Revit.UI;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.InteropServices;
-using Autodesk.Revit.ApplicationServices;
-using Autodesk.Revit.UI.Selection;
-using Autodesk.Revit.DB.Structure;
 
 
 namespace UzlePlugins.RevitCore.Commands
@@ -91,9 +86,6 @@ namespace UzlePlugins.RevitCore.Commands
 
                     Outline outline = new Outline(bb.Min, bb.Max);
                     BoundingBoxIntersectsFilter bFilter = new BoundingBoxIntersectsFilter(outline);
-                    //ElementIntersectsElementFilter
-                    //    elementFilter = new ElementIntersectsElementFilter(wall)
-
 
                     ElementIntersectsSolidFilter
                         elementFilter = new ElementIntersectsSolidFilter(transformed);
@@ -166,36 +158,36 @@ namespace UzlePlugins.RevitCore.Commands
                                 //    intersectionPoint.Z + origin.Z);
 
                                 //Debug.Print($"point {intersectionPoint} - {intPointFromOrigin}");
-                                var symbol =
-                                    TestHoleTaskCommand.GetFamilySymbolToPlace(doc, Familyname, Familytypename);
-                                FamilyInstance fi = doc.Create.NewFamilyInstance(intersectionPoint, symbol,
-                                    StructuralType.NonStructural);
-                                var basisY = fi.GetTransform().BasisY;
+                                //var symbol =
+                                //    TestHoleTaskCommand.GetFamilySymbolToPlace(doc, Familyname);
+                                //FamilyInstance fi = doc.Create.NewFamilyInstance(intersectionPoint, symbol,
+                                //    StructuralType.NonStructural);
+                                //var basisY = fi.GetTransform().BasisY;
 
-                                var angle = basisY.AngleTo(pipeNormal);
+                                //var angle = basisY.AngleTo(pipeNormal);
 
-                                Line axis = Line.CreateBound(intersectionPoint, intersectionPoint + XYZ.BasisZ);
-                                ElementTransformUtils.RotateElement(doc, fi.Id, axis, -angle);
+                                //Line axis = Line.CreateBound(intersectionPoint, intersectionPoint + XYZ.BasisZ);
+                                //ElementTransformUtils.RotateElement(doc, fi.Id, axis, -angle);
 
-                                foreach (var parameter in fi.GetOrderedParameters())
-                                {
-                                    if (parameter.Definition.Name == "ADSK_Размер_Диаметр")
-                                    {
-                                        Debug.Print($"parameter - before {parameter.AsDouble()}");
-                                        var outerDiameter =
-                                            pipe.get_Parameter(BuiltInParameter.RBS_PIPE_OUTER_DIAMETER);
-                                        parameter.Set(outerDiameter.AsDouble() + offset);
+                                //foreach (var parameter in fi.GetOrderedParameters())
+                                //{
+                                //    if (parameter.Definition.Name == "ADSK_Размер_Диаметр")
+                                //    {
+                                //        Debug.Print($"parameter - before {parameter.AsDouble()}");
+                                //        var outerDiameter =
+                                //            pipe.get_Parameter(BuiltInParameter.RBS_PIPE_OUTER_DIAMETER);
+                                //        parameter.Set(outerDiameter.AsDouble() + offset);
 
-                                    }
+                                //    }
 
-                                    if (parameter.Definition.Name == "ADSK_Размер_Толщина")
-                                    {
-                                        Debug.Print($"parameter толщина - before {parameter.AsDouble()}");
+                                //    if (parameter.Definition.Name == "ADSK_Размер_Толщина")
+                                //    {
+                                //        Debug.Print($"parameter толщина - before {parameter.AsDouble()}");
 
-                                        parameter.Set(wallThickness + offset + 2);
+                                //        parameter.Set(wallThickness + offset + 2);
 
-                                    }
-                                }
+                                //    }
+                                //}
                             }
                         }
                         Debug.Print($"стена {wall.Id} - труба {element.Id}");

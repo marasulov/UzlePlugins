@@ -15,7 +15,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UzlePlugins.WpfTest", "Uzle
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UzlePlugins.TestConsole", "UzlePlugins.TestConsole\UzlePlugins.TestConsole.csproj", "{5ED0C98C-218C-460B-958B-705CF7C15609}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UzlePlugins.Models", "UzlePlugins.Models\UzlePlugins.Models.csproj", "{F6C840B5-BD7F-41C9-9095-0FAED4F430D1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UzlePlugins.Models", "UzlePlugins.Models\UzlePlugins.Models.csproj", "{F6C840B5-BD7F-41C9-9095-0FAED4F430D1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UzlePlugins.Settings", "UzlePlugins.Settings\UzlePlugins.Settings.csproj", "{CCCDBE7E-4860-40D9-A27C-BE639B4C2073}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -47,6 +49,10 @@ Global
 		{F6C840B5-BD7F-41C9-9095-0FAED4F430D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F6C840B5-BD7F-41C9-9095-0FAED4F430D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F6C840B5-BD7F-41C9-9095-0FAED4F430D1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CCCDBE7E-4860-40D9-A27C-BE639B4C2073}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CCCDBE7E-4860-40D9-A27C-BE639B4C2073}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CCCDBE7E-4860-40D9-A27C-BE639B4C2073}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CCCDBE7E-4860-40D9-A27C-BE639B4C2073}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

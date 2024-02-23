@@ -8,41 +8,83 @@
         mc:Ignorable="d"
         Title="HoleTaskView" Height="450" Width="800">
 
-    <Grid>
-        <TabControl x:Name="products">
-            <TabItem x:Name="smartphonesTab">
-                <TabItem.Header>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Margin="3">Holes/Отверстия</TextBlock>
-                    </StackPanel>
-                </TabItem.Header>
-                <TabItem.Content>
-                    <StackPanel>
-                        <DataGrid Name="DG1" ItemsSource="{Binding HolesVm }" AutoGenerateColumns="False" >
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="#"  Binding="{Binding FirstName}" />
-                                <DataGridTextColumn Header="Intersection with" Binding="{Binding LastName}" />
-                                <DataGridTextColumn Header="Figure" Binding="{Binding Email}" />
-                                <DataGridTextColumn Header="Size" Binding="{Binding IsMember}" />
-                                <DataGridTextColumn Header="Type of basis"/>
-                                <DataGridTextColumn Header="Basis material"/>
-                                <DataGridComboBoxColumn Header="Hole figure">
-                                </DataGridComboBoxColumn>
-                                <DataGridTextColumn Header="Offset">
-                                </DataGridTextColumn>
-                                <DataGridCheckBoxColumn Header="Insert/Вставка" />
-                            </DataGrid.Columns>
-                        </DataGrid>
-                    </StackPanel>
-                </TabItem.Content>
-            </TabItem>
-            <TabItem x:Name="tabletsTab">
-                <TabItem.Header>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Margin="3">Settings/Настройки</TextBlock>
-                    </StackPanel>
-                </TabItem.Header>
-            </TabItem>
-        </TabControl>
+    <Grid >
+         <DockPanel>
+     <GroupBox Header="New Holes" DockPanel.Dock="Top">
+         <StackPanel Orientation="Horizontal">
+             <TabControl x:Name="Holes" Width="Auto" Height="Auto">
+                 <TabItem x:Name="holesTab">
+                     <TabItem.Header>
+                         <StackPanel Orientation="Horizontal">
+                             <TextBlock Margin="3">Holes</TextBlock>
+                         </StackPanel>
+                     </TabItem.Header>
+                     <TabItem.Content>
+                         <StackPanel>
+                             <DataGrid Name="NewHolesGrid" 
+                                ItemsSource="{Binding Holes}" 
+                                
+                                AutoGenerateColumns="False"
+                                ScrollViewer.CanContentScroll="True" 
+                                ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                ScrollViewer.HorizontalScrollBarVisibility="Auto">
+                                 <DataGrid.Columns>
+                                     <DataGridTextColumn Header="#"  Binding="{Binding Id}" />
+                                     <DataGridTextColumn Header="Intersection with" Binding="{Binding IntersectionPoint}" />
+                                     <DataGridTextColumn Header="Figure" Binding="{Binding HoleType}" />
+                                     <DataGridTextColumn Header="Size" Binding="{Binding HoleSize}" />
+                                     <DataGridTextColumn Header="Type of basis" Binding="{Binding HoleSourceType}"/>
+                                     <DataGridTextColumn Header="Basis material" Binding="{Binding IsHoleCircled}"/>
+                                     <DataGridComboBoxColumn Header="Hole figure" >
+                                     </DataGridComboBoxColumn>
+                                     <DataGridTextColumn Header="Offset" Binding="{Binding HoleOffset}"/>
+                                     <DataGridCheckBoxColumn Header="Insert/Вставка" Binding="{Binding IsInsert}"/>
+                                 </DataGrid.Columns>
+                             </DataGrid>
+                         </StackPanel>
+                     </TabItem.Content>
+                 </TabItem>
+                 <TabItem x:Name="tabletsTab">
+                     <TabItem.Header>
+                         <StackPanel Orientation="Horizontal">
+                             <TextBlock Margin="3">Settings</TextBlock>
+                         </StackPanel>
+                     </TabItem.Header>
+                 </TabItem>
+             </TabControl>
+         </StackPanel>
+     </GroupBox>
+
+     <GroupBox Header="Existing " DockPanel.Dock="Top">
+         <StackPanel Orientation="Horizontal">
+             <DataGrid Width="800">
+                 <DataGrid.Columns>
+                     <DataGridTextColumn Header="Header1" Width="100" />
+                     <DataGridTextColumn Header="Header2" Width="*" />
+                     <DataGridTextColumn Header="Header3" Width="*" />
+                     <DataGridTextColumn Header="Header4" Width="*" />
+                 </DataGrid.Columns>
+             </DataGrid>
+         </StackPanel>
+     </GroupBox>
+  
+     <StackPanel 
+          
+         HorizontalAlignment="Right" VerticalAlignment="Stretch">
+          <Button 
+              Name="OkButton" 
+              Width="100" 
+              Height="20" 
+              Content="Ok" 
+              Command="{Binding CreateHolesCommand}" 
+              CommandParameter="Clicked"/>
+     </StackPanel>
+     <StackPanel 
+         HorizontalAlignment="Right" 
+         VerticalAlignment="Stretch" >
+          <Button Name="CancelButton" Width="100" Height="20" Content="Cancel"   />
+     </StackPanel>
+ </DockPanel>
+
     </Grid>
 </Window>

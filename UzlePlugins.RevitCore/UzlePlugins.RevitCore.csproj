@@ -3,10 +3,23 @@
 	<PropertyGroup>
 		<TargetFramework>net48</TargetFramework>
 		<Nullable>enable</Nullable>
-		<LangVersion>preview</LangVersion>
+		<LangVersion>latest</LangVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <PackageReference Include="System.Text.Json" Version="8.0.2" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\UzlePlugins.Models\UzlePlugins.Models.csproj" />
+	  <ProjectReference Include="..\UzlePlugins.Settings\UzlePlugins.Settings.csproj" />
+	  <ProjectReference Include="..\UzlePlugins.Views\UzlePlugins.Views.csproj" />
+	  <ProjectReference Include="..\UzlePlugins.Vm\UzlePlugins.Vm.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Reference Include="PresentationCore" />
+	  <Reference Include="PresentationFramework" />
 	  <Reference Include="RevitAPI">
 	    <HintPath>..\..\..\..\..\..\Program Files\Autodesk\Revit 2022\RevitAPI.dll</HintPath>
 	    <Private>False</Private>
@@ -15,6 +28,7 @@
 	    <HintPath>..\..\..\..\..\..\Program Files\Autodesk\Revit 2022\RevitAPIUI.dll</HintPath>
 	    <Private>False</Private>
 	  </Reference>
+	  <Reference Include="WindowsBase" />
 	</ItemGroup>
 
 </Project>
