@@ -67,6 +67,7 @@ namespace UzlePlugins.RevitCore.Commands
                 circledFamilyNames.WallType
             };
 
+            // список семейств
             List<FamilyInstance> familyInstances = new List<FamilyInstance>();
             foreach (var familyName in familyNames)
             {
@@ -91,12 +92,10 @@ namespace UzlePlugins.RevitCore.Commands
 
                 //исходные точки
                 var newIntersections = new List<XYZ>();
+
                 var familyPoints = familyInstances.Where(w => w.Location is LocationPoint)
                     .Select(f => f.Location as LocationPoint)
                     .Select(loc => loc.Point).ToList();
-
-                
-                
 
                 var smallestDiametr = UnitUtils.ConvertToInternalUnits(pipeDiametrForFilter, UnitTypeId.Millimeters);
                 var pipeCollector = new FilteredElementCollector(doc).OfClass(typeof(Pipe)).Cast<Pipe>()
@@ -142,15 +141,29 @@ namespace UzlePlugins.RevitCore.Commands
                     }
 
                 }
-
-                var intPoints = newIntersections.Intersect(familyPoints, new XYZComparer()).ToArray();
-                var newPoints = newIntersections.Except(familyPoints, new XYZComparer()).ToArray(); // newIntersections.Except(familyPoints)
-                var deletedPoints = familyPoints.Except(newIntersections, new XYZComparer()).ToArray(); // familyPoints.Except(newIntersections)
-
                 List<HoleModel> actualHoles = new();
                 List<HoleModel> outdatedHoles = new();
                 List<HoleModel> newHoles = new();
 
+                if (familyPoints.Count > 0)
+                {
+                    var intPoints = newIntersections.Intersect(familyPoints, new XYZComparer()).ToArray();
+                
+                    var newPoints = newIntersections.Except(familyPoints, new XYZComparer()).ToArray(); // newIntersections.Except(familyPoints)
+                    var deletedPoints = familyPoints.Except(newIntersections, new XYZComparer()).ToArray(); // familyPoints.Except(newIntersections)
+                    string typeOfSource = "Wall";
+                    foreach (var point in newPoints)
+                    {
+                       var els = GetObjectByFamilyLocation(point, doc,typeOfSource);
+                       foreach (var element in els)
+                       {
+                           
+                           var wall = element as Wall;
+
+                       }
+                    }
+
+                }
 
                 var j = 0;
                 foreach (var hole in wallHoles)
@@ -247,32 +260,43 @@ namespace UzlePlugins.RevitCore.Commands
         //    // поиск свойств стены по точке расположения семейства
         //    foreach (var familyInstance in familyInstances)
         //    {
-               
+
 
         //        Debug.Print($"{containFounds.Count}");
         //    }
         //}
 
-        //private Element GetObjectByFamilyLocation(FamilyInstance familyInstance, Document doc)
-        //{
-        //    LocationPoint basePnt = familyInstance.Location as LocationPoint;
+        private Element GetObjectByFamilyLocation(XYZ basePnt, Document doc, string objectType)
+        {
+            //var basePnt = familyInstance.Location as LocationPoint;
+             
+            BoundingBoxContainsPointFilter containsPointFilter =
+                new BoundingBoxContainsPointFilter(basePnt); // inverted filter
 
-        //    BoundingBoxContainsPointFilter containsPointFilter =
-        //        new BoundingBoxContainsPointFilter(basePnt.Point); // inverted filter
+            var collector = new FilteredElementCollector(doc);
+            Element containFounds = new Element();
+            if (objectType == "Wall")
+            {
+                containFounds = collector.OfClass(typeof(Wall)).WherePasses(containsPointFilter).ToElements().First();
+            }
+            if (objectType == "Floor")
+            {
+                containFounds = collector.OfClass(typeof(Floor)).WherePasses(containsPointFilter).ToElements().First();
+            }
 
-        //    var collector = new FilteredElementCollector(doc);
-        //    IList<Element> containFounds =
-        //        collector.OfClass(typeof(Wall)).WherePasses(containsPointFilter).ToElements();
+            return containFounds;
 
-        //    Element element;
+            //Element element;
 
-        //    foreach (var containFound in containFounds)
-        //    {
-        //        element = containFound as Wall;
+            //foreach (var containFound in containFounds)
+            //{
+            //    element = containFound as Wall;
 
-        //        Debug.Print($"{element.WallType.Name} тип стены");
-        //    }
-        //}
+            //    Debug.Print($"{element.WallType.Name} тип стены");
+            //}
+
+        }
+
 
         //private void InsertFamily(Document doc, Element ductElement, View3D view3D, double offset,
         //    BuiltInCategory builtInCategory, bool isCircled)

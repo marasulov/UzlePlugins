@@ -21,12 +21,11 @@
                      </TabItem.Header>
                      <TabItem.Content>
                          <StackPanel>
-                             <DataGrid Name="NewHolesGrid" 
-                                ItemsSource="{Binding Holes}" 
-                                
+                             <DataGrid Name="NewHolesGrid"
+                                ItemsSource="{Binding Holes}"
                                 AutoGenerateColumns="False"
                                 ScrollViewer.CanContentScroll="True" 
-                                ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                ScrollViewer.VerticalScrollBarVisibility="Visible"
                                 ScrollViewer.HorizontalScrollBarVisibility="Auto">
                                  <DataGrid.Columns>
                                      <DataGridTextColumn Header="#"  Binding="{Binding Id}" />
