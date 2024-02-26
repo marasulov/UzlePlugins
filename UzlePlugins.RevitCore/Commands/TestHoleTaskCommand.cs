@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.Serialization.Configuration;
 using UzlePlugins.Models;
 using UzlePlugins.RevitCore.Models;
 using UzlePlugins.RevitCore.Services;
@@ -79,7 +78,7 @@ namespace UzlePlugins.RevitCore.Commands
             }
 
             Debug.Print($"{familyInstances.Count} exist");
-            
+
 
             using (TransactionGroup transactionGroup = new TransactionGroup(doc))
             {
@@ -92,35 +91,12 @@ namespace UzlePlugins.RevitCore.Commands
 
                 //исходные точки
                 var newIntersections = new List<XYZ>();
-                var familyPoints = familyInstances.Where(w => w.Location is LocationPoint).Cast<LocationPoint>().Select(x=>x.Point);
+                var familyPoints = familyInstances.Where(w => w.Location is LocationPoint)
+                    .Select(f => f.Location as LocationPoint)
+                    .Select(loc => loc.Point).ToList();
 
-                // точки с различными статусами
-                var existPoints = new List<XYZ>(); //intersections familyPoints newIntersections
-                var newPoints = new List<XYZ>(); // newIntersections.Except(familyPoints)
-                var deletedPoints = new List<XYZ>(); // familyPoints.Except(newIntersections)
-
-                var existWallHoles = new List<HoleFamilyModel<Wall>>();
-
-                foreach (var familyInstance in familyInstances)
-                {
-                    LocationPoint basePnt = familyInstance.Location as LocationPoint;
-
-                    BoundingBoxContainsPointFilter containsPointFilter =
-                        new BoundingBoxContainsPointFilter(basePnt.Point); // inverted filter
-
-                    var collector = new FilteredElementCollector(linkedDocs.First());
-                    IList<Element> containFounds =
-                        collector.OfClass(typeof(Wall)).WherePasses(containsPointFilter).ToElements();
-
-                    foreach (var containFound in containFounds)
-                    {
-                        var el = containFound as Wall;
-                        
-                        Debug.Print($"{el.WallType.Name} тип стены");
-                    }
-
-                    Debug.Print($"{containFounds.Count}");
-                }
+                
+                
 
                 var smallestDiametr = UnitUtils.ConvertToInternalUnits(pipeDiametrForFilter, UnitTypeId.Millimeters);
                 var pipeCollector = new FilteredElementCollector(doc).OfClass(typeof(Pipe)).Cast<Pipe>()
@@ -133,6 +109,7 @@ namespace UzlePlugins.RevitCore.Commands
 
                 List<HoleFamilyModel<Wall>> wallHoles = new List<HoleFamilyModel<Wall>>();
 
+                //из коллекции труб создаем отверстия
                 foreach (Element pipeElement in pipeCollector)
                 {
                     ReferenceIntersectionFinder refFinder = new ReferenceIntersectionFinder(doc, pipeElement, view3D);
@@ -155,6 +132,7 @@ namespace UzlePlugins.RevitCore.Commands
                         }
                         wallHoles.AddRange(holes);
                     }
+
                     //Debug.Print($"references {refFinder.WallReferences.Count}-{wallHoles.Count}");
 
                     refFinder.GetStructuralReferences(BuiltInCategory.OST_Floors);
@@ -165,32 +143,34 @@ namespace UzlePlugins.RevitCore.Commands
 
                 }
 
-                List<HoleModel> holeModels = new();
-                var j = 0;
+                var intPoints = newIntersections.Intersect(familyPoints, new XYZComparer()).ToArray();
+                var newPoints = newIntersections.Except(familyPoints, new XYZComparer()).ToArray(); // newIntersections.Except(familyPoints)
+                var deletedPoints = familyPoints.Except(newIntersections, new XYZComparer()).ToArray(); // familyPoints.Except(newIntersections)
 
+                List<HoleModel> actualHoles = new();
+                List<HoleModel> outdatedHoles = new();
+                List<HoleModel> newHoles = new();
+
+
+                var j = 0;
                 foreach (var hole in wallHoles)
                 {
-                    var x = hole.IntersectionPoint.X;
-                    var y = hole.IntersectionPoint.Y;
-                    var z = hole.IntersectionPoint.Z;
-                    var point = new PointModel(x, y, z);
-
                     var holeModel = new HoleModel(
-                        j,
-                        hole.IntersectionPoint.ToString(),
-                        hole.IntersectingElementName,
-                        hole.IntersectedSourceType,
-                        hole.IntersectingElementType,
-                        hole.IntersectingElementTypeSize,
-                        "", hole.IsHoleRectangled, hole.HoleOffset, hole.IsInsert);
+                           j,
+                           hole.IntersectionPoint.ToString(),
+                           hole.IntersectingElementName,
+                           hole.IntersectedSourceType,
+                           hole.IntersectingElementType,
+                           hole.IntersectingElementTypeSize,
+                           "", hole.IsHoleRectangled, hole.HoleOffset, hole.IsInsert);
 
-                    holeModels.Add(holeModel);
+                    actualHoles.Add(holeModel);
                     j++;
                 }
 
                 Debug.Print($"{newIntersections.Count} точек {wallHoles.Count} отверстий");
 
-                HolesVm holesVm = new HolesVm(holeModels);
+                HolesVm holesVm = new HolesVm(actualHoles, outdatedHoles, newHoles);
                 HoleTaskView view = new HoleTaskView(holesVm);
                 view.ShowDialog();
 
@@ -260,6 +240,39 @@ namespace UzlePlugins.RevitCore.Commands
 
             return Result.Succeeded;
         }
+
+
+        //private void GetObjectsByFamilyLocations()
+        //{
+        //    // поиск свойств стены по точке расположения семейства
+        //    foreach (var familyInstance in familyInstances)
+        //    {
+               
+
+        //        Debug.Print($"{containFounds.Count}");
+        //    }
+        //}
+
+        //private Element GetObjectByFamilyLocation(FamilyInstance familyInstance, Document doc)
+        //{
+        //    LocationPoint basePnt = familyInstance.Location as LocationPoint;
+
+        //    BoundingBoxContainsPointFilter containsPointFilter =
+        //        new BoundingBoxContainsPointFilter(basePnt.Point); // inverted filter
+
+        //    var collector = new FilteredElementCollector(doc);
+        //    IList<Element> containFounds =
+        //        collector.OfClass(typeof(Wall)).WherePasses(containsPointFilter).ToElements();
+
+        //    Element element;
+
+        //    foreach (var containFound in containFounds)
+        //    {
+        //        element = containFound as Wall;
+
+        //        Debug.Print($"{element.WallType.Name} тип стены");
+        //    }
+        //}
 
         //private void InsertFamily(Document doc, Element ductElement, View3D view3D, double offset,
         //    BuiltInCategory builtInCategory, bool isCircled)
@@ -446,7 +459,86 @@ namespace UzlePlugins.RevitCore.Commands
         //    return dictProvisionForVoidRefs;
         //}
 
+        /// <summary>
+        /// Default tolerance used to add fuzz 
+        /// for real number equality detection
+        /// </summary>
+        public const double _eps = 1.0e-9;
 
+        /// <summary>
+        /// Predicate to determine whether the given 
+        /// real number should be considered equal to
+        /// zero, adding fuzz according to the specified 
+        /// tolerance
+        /// </summary>
+        public static bool IsZero(
+            double a,
+            double tolerance = _eps)
+        {
+            return tolerance > Math.Abs(a);
+        }
 
+        /// <summary>
+        /// Predicate to determine whether the two given 
+        /// real numbers should be considered equal, adding 
+        /// fuzz according to the specified tolerance
+        /// </summary>
+        public static bool IsEqual(
+            double a,
+            double b,
+            double tolerance = _eps)
+        {
+            return IsZero(b - a, tolerance);
+        }
+
+        /// <summary>
+        /// Comparison method for two real numbers
+        /// returning 0 if they are to be considered equal,
+        /// -1 if the first is smaller and +1 otherwise
+        /// </summary>
+        public static int Compare(
+            double a,
+            double b,
+            double tolerance = _eps)
+        {
+            return IsEqual(a, b, tolerance)
+                ? 0
+                : (a < b ? -1 : 1);
+        }
+
+        /// <summary>
+        /// Comparison method for two XYZ objects
+        /// returning 0 if they are to be considered equal,
+        /// -1 if the first is smaller and +1 otherwise
+        /// </summary>
+        public static int Compare(
+            XYZ p,
+            XYZ q,
+            double tolerance = _eps)
+        {
+            int d = Compare(p.X, q.X, tolerance);
+
+            if (0 == d)
+            {
+                d = Compare(p.Y, q.Y, tolerance);
+
+                if (0 == d)
+                {
+                    d = Compare(p.Z, q.Z, tolerance);
+                }
+            }
+            return d;
+        }
     }
+    public class XYZComparer : IEqualityComparer<XYZ>
+    {
+        public bool Equals(XYZ pt1, XYZ pt2) => pt1.IsAlmostEqualTo(pt2);
+
+
+        public int GetHashCode(XYZ obj)
+        {
+            return (int)obj.X ^ (int)obj.Y ^ (int)obj.Z;
+        }
+    }
+
 }

@@ -11,6 +11,9 @@ namespace UzlePlugins.Vm
     {
        
         private List<HoleModel> _holes;
+        private List<HoleModel> _outdatedHoles;
+        private List<HoleModel> _newHoles;
+
         private ICommand _createHolesCommand;
         private bool _buttonClicked;
         private bool _canExecute = true;
@@ -18,15 +21,26 @@ namespace UzlePlugins.Vm
         public List<HoleModel> Holes
         {
             get => _holes;
-            set
-            {
-                Set(ref _holes, value);
-            }
+            set => Set(ref _holes, value);
         }
-        public string Title { get; set; }
-        public HolesVm(List<HoleModel> holeModels)
+
+        public List<HoleModel> OutdatedHoles
         {
-            Holes = holeModels;
+            get => _outdatedHoles;
+            set => Set(ref _outdatedHoles, value);
+        }
+
+        public List<HoleModel> NewHoles
+        {
+            get => _newHoles;
+            set => Set(ref _newHoles, value);
+        }
+        
+        public HolesVm(List<HoleModel> holes, List<HoleModel> outdatedHoles, List<HoleModel> newHoles)
+        {
+            _holes = holes;
+            _outdatedHoles = outdatedHoles;
+            _newHoles = newHoles;
             CreateHolesCommand = new RelayCommand(CloseWindow, t => this._canExecute);
         }
 
@@ -73,7 +87,6 @@ namespace UzlePlugins.Vm
                 _buttonClicked = true;
                 CloseAction();
                 // OnRequestClose(this, new EventArgs());
-                var h = Holes;
             }
 
 
