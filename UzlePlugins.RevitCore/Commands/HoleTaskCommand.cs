@@ -37,7 +37,6 @@ namespace UzlePlugins.RevitCore.Commands
 
             FilteredElementCollector collector = new FilteredElementCollector(doc);
 
-
             IList<Element> rvtLinks = collector
                 .OfCategory(BuiltInCategory.OST_RvtLinks)
                 .OfClass(typeof(RevitLinkInstance))
@@ -171,7 +170,7 @@ namespace UzlePlugins.RevitCore.Commands
 
                                 //foreach (var parameter in fi.GetOrderedParameters())
                                 //{
-                                //    if (parameter.Definition.Name == "ADSK_Размер_Диаметр")
+                                //    if (parameter.Definition.IntersectingElementName == "ADSK_Размер_Диаметр")
                                 //    {
                                 //        Debug.Print($"parameter - before {parameter.AsDouble()}");
                                 //        var outerDiameter =
@@ -180,7 +179,7 @@ namespace UzlePlugins.RevitCore.Commands
 
                                 //    }
 
-                                //    if (parameter.Definition.Name == "ADSK_Размер_Толщина")
+                                //    if (parameter.Definition.IntersectingElementName == "ADSK_Размер_Толщина")
                                 //    {
                                 //        Debug.Print($"parameter толщина - before {parameter.AsDouble()}");
 

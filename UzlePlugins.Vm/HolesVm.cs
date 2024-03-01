@@ -1,47 +1,53 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Windows;
+using System.Diagnostics;
 using System.Windows.Input;
-using UzlePlugins.Models;
+using UzlePlugins.Contracts;
 using UzlePlugins.Vm.Base;
+using UzlePlugins.Vm.Commands;
 
 namespace UzlePlugins.Vm
 {
     public class HolesVm : BaseViewModel
     {
-       
-        private List<HoleModel> _holes;
-        private List<HoleModel> _outdatedHoles;
-        private List<HoleModel> _newHoles;
+        private List<IHoleModel> _holes;
+        private List<IOutdatedFamily> _outdatedHoles;
+        private readonly IIntersectionPointZoom _zoomToPoint;
+        private List<IHoleModel> _newHoles;
 
         private ICommand _createHolesCommand;
         private bool _buttonClicked;
         private bool _canExecute = true;
+        private ICommand _zoomToPointCommand;
 
-        public List<HoleModel> Holes
+        public List<IHoleModel> Holes
         {
             get => _holes;
             set => Set(ref _holes, value);
         }
 
-        public List<HoleModel> OutdatedHoles
+        public List<IOutdatedFamily> OutdatedHoles
         {
             get => _outdatedHoles;
             set => Set(ref _outdatedHoles, value);
         }
 
-        public List<HoleModel> NewHoles
+        public List<IHoleModel> NewHoles
         {
             get => _newHoles;
             set => Set(ref _newHoles, value);
         }
-        
-        public HolesVm(List<HoleModel> holes, List<HoleModel> outdatedHoles, List<HoleModel> newHoles)
+
+        public HolesVm(List<IHoleModel> newHoles, List<IHoleModel> holes, List<IOutdatedFamily> outdatedHoles, IIntersectionPointZoom pointZoom)
         {
+            _newHoles = newHoles;
             _holes = holes;
             _outdatedHoles = outdatedHoles;
-            _newHoles = newHoles;
+            //_zoomToPoint = zoomToPoint;
+
             CreateHolesCommand = new RelayCommand(CloseWindow, t => this._canExecute);
+            ZoomToPointCommand = new ZoomToPointCommand(pointZoom);
+
         }
 
         public bool CanExecute
@@ -59,24 +65,19 @@ namespace UzlePlugins.Vm
             }
         }
 
-        public void Initialize()
-        {
-            Holes = new List<HoleModel>
-            {
-                //new HoleModel(new PointModel(),"first","first description","circle", 25, "wall", "wall material", true, 10, true),
-                //new HoleModel(2,"second","second description","circle", 25, "wall", "wall material", true, 10, true),
-                //new HoleModel(3,"third","third description","circle", 25, "wall", "wall material", true, 10, true),
-                //new HoleModel(4,"fourth","fourth description","circle", 25, "wall", "wall material", true, 10, true)
-            };
-        }
-        public Action CloseAction  { get; set;}
-        /// <summary>
-        /// Команда для перенумерования
-        /// </summary>
+        public Action CloseAction { get; set; }
+
+
         public ICommand CreateHolesCommand
         {
             get => _createHolesCommand;
             set => Set(ref _createHolesCommand, value);
+        }
+
+        public ICommand ZoomToPointCommand
+        {
+            get => _zoomToPointCommand;
+            set => Set(ref _zoomToPointCommand, value);
         }
 
         public void CloseWindow(object parameter)
@@ -88,8 +89,12 @@ namespace UzlePlugins.Vm
                 CloseAction();
                 // OnRequestClose(this, new EventArgs());
             }
-
-
+            if (clicked == "Canceled")
+            {
+                _buttonClicked = true;
+                Debug.Print($"Origin {parameter}");
+                
+            }
         }
 
         public event EventHandler OnRequestClose;

@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Autodesk.Revit.DB;
+﻿using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Plumbing;
+using Autodesk.Revit.UI;
+using System.Collections.Generic;
 using UzlePlugins.RevitCore.Models;
 
 
@@ -27,7 +24,7 @@ namespace UzlePlugins.RevitCore.Services
         public XYZ IntersectionPoint { get; set; }
         public List<HoleFamilyModel<Wall>> WallHoles { get; set; } = new List<HoleFamilyModel<Wall>>();
 
-        public void GetHoles(XYZ point)
+        public void GetHoles(XYZ point, UIDocument uidoc)
         {
             int i = 0;
 
@@ -39,18 +36,19 @@ namespace UzlePlugins.RevitCore.Services
 
             Element el = ldoc.GetElement(IntersectedSourceElement.LinkedElementId) as Wall;
 
-            var holeFamily = GetHoleProps(point, el, IntersectingElement);
+            var holeFamily = GetHoleProps(point, el, IntersectingElement, uidoc);
             WallHoles.Add(holeFamily);
         }
 
-        public HoleFamilyModel<Wall> GetHoleProps(XYZ intPoint, Element sourceElement, Element element)
+        public HoleFamilyModel<Wall> GetHoleProps(XYZ intPoint, Element sourceElement, Element element, UIDocument uidoc)
         {
+
             var elType = element.GetType();
             var pipeElement = element as Pipe;
             var elName = pipeElement.PipeType.Name;
             var pipeSize = pipeElement.get_Parameter(BuiltInParameter.RBS_PIPE_OUTER_DIAMETER).AsDouble();
 
-            return new HoleFamilyModel<Wall>(intPoint, element, elType.Name, elName, pipeSize,
+            return new HoleFamilyModel<Wall>(uidoc, intPoint, element, elType.Name, elName, pipeSize,
                 sourceElement.Name, true, 20, true);
         }
     }

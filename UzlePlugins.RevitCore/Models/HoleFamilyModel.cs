@@ -1,14 +1,21 @@
-﻿using Autodesk.Revit.DB;
+﻿using Autodesk.Revit.UI;
 using System.Collections.Generic;
+using Autodesk.Revit.DB;
+using UzlePlugins.Contracts;
 
 namespace UzlePlugins.RevitCore.Models
 {
     
 
-    public record HoleFamilyModel<T>
+    public record HoleFamilyModel<T> : IIntersectionPointZoom
     {
-        public HoleFamilyModel(XYZ intersectionPoint, Element intersectingElement)
+        private readonly UIDocument _uidoc;
+
+
+        public HoleFamilyModel(UIDocument uidoc, XYZ intersectionPoint, Element intersectingElement)
         {
+            _uidoc = uidoc;
+
             IntersectionPoint = intersectionPoint;
             IntersectingElement = intersectingElement;
         }
@@ -27,6 +34,7 @@ namespace UzlePlugins.RevitCore.Models
         /// <param name="holeOffset"></param>
         /// <param name="isInsert"></param>
         public HoleFamilyModel(
+            UIDocument uidoc,
             XYZ intersectionPoint, 
             Element intersectingElement, 
             string intersectingElementName, 
@@ -37,6 +45,7 @@ namespace UzlePlugins.RevitCore.Models
             double holeOffset, 
             bool isInsert)
         {
+            _uidoc = uidoc;
             IntersectionPoint = intersectionPoint;
             IntersectingElement = intersectingElement;
             IntersectingElementName = intersectingElementName;
@@ -91,6 +100,19 @@ namespace UzlePlugins.RevitCore.Models
         /// Вставка
         /// </summary>
         public bool IsInsert { get; set; }
+
+        public void FamilyZoom(int id)
+        {
+            //XYZ point = new XYZ();// TODO
+            //Options opt = new Options();
+            //opt.View = _uidoc.ActiveView;
+            //GeometryElement geoEle = point.get_Geometry(opt);
+
+            //_uidoc.ActiveView = view
+            //UIView.ZoomAndCenterRectangle(m, n);
+
+            _uidoc.ShowElements(new ElementId(id));
+        }
     }
 
 }

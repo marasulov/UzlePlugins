@@ -1,13 +1,6 @@
 ﻿using Autodesk.Revit.DB;
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using Autodesk.Revit.DB.Structure;
-using UzlePlugins.RevitCore.Models;
-using System.Runtime.Serialization.Configuration;
-using Autodesk.Revit.DB.Plumbing;
 
 namespace UzlePlugins.RevitCore.Services
 {
@@ -38,14 +31,12 @@ namespace UzlePlugins.RevitCore.Services
 
         public XYZ StartPoint;
         public XYZ EndPoint;
-
-
         public XYZ Normal { get; set; }
 
         public IList<Reference> WallReferences { get; } = new List<Reference>();
         public IList<Reference> FloorReferences { get; } = new List<Reference>();
-        public List<HoleFamilyModel<Wall>> WallHoles { get; } = new List<HoleFamilyModel<Wall>>();
-        public List<HoleFamilyModel<Floor>> FloorHoles { get; } = new List<HoleFamilyModel<Floor>>();
+        //public List<HoleFamilyModel<Wall>> WallHoles { get; } = new List<HoleFamilyModel<Wall>>();
+        //public List<HoleFamilyModel<Floor>> FloorHoles { get; } = new List<HoleFamilyModel<Floor>>();
 
          private List<Reference> GetAllReferences(BuiltInCategory builtInCategory)
         {
@@ -92,30 +83,6 @@ namespace UzlePlugins.RevitCore.Services
             return intersectPoints;
         }
 
-
-
-        public XYZ GetIntersectionPoint(IList<Reference> references)
-        {
-
-            var intPoint = new XYZ();
-            if (references.Count <= 0) ;
-
-            var firstFaceRef = references[0];
-            var secondFaceRef = references[0 + 1];
-
-            if (firstFaceRef.ElementId == secondFaceRef.ElementId)
-            {
-                Thickness = firstFaceRef.GlobalPoint.DistanceTo(secondFaceRef.GlobalPoint);
-                intPoint = new XYZ(
-                    (firstFaceRef.GlobalPoint.X + secondFaceRef.GlobalPoint.X) / 2,
-                    (firstFaceRef.GlobalPoint.Y + secondFaceRef.GlobalPoint.Y) / 2,
-                    firstFaceRef.GlobalPoint.Z);
-
-            }
-
-            return intPoint;
-        }
-
         public void GetStructuralReferences(BuiltInCategory builtInCategory)
         {
             var tempReferences = GetAllReferences(builtInCategory);
@@ -154,41 +121,5 @@ namespace UzlePlugins.RevitCore.Services
                 }
             }
         }
-
-        public void GetHoles()
-        {
-            if (WallReferences.Count <= 0) return;
-            var points = GetIntersectionsPoints(WallReferences);
-                
-            int i = 0;
-            foreach (var point in points)
-            {
-                var sourceElement = WallReferences[i];
-                if (sourceElement == null) continue;
-
-                if (_document.GetElement(sourceElement.ElementId) is not RevitLinkInstance link) continue;
-
-                var ldoc = link.GetLinkDocument();
-
-                Element el = ldoc.GetElement(sourceElement.LinkedElementId) as Wall;
-
-                var holeFamily = GetHoleProps(point, el, _intersectingElement);
-                WallHoles.Add(holeFamily);
-                i++;
-            }
-        }
-
-        public HoleFamilyModel<Wall> GetHoleProps(XYZ intPoint, Element sourceElement, Element element)
-        {
-            var elType = element.GetType();
-            var pipeElement = element as Pipe;
-            var elName = pipeElement.PipeType.Name;
-            var pipeSize = pipeElement.get_Parameter(BuiltInParameter.RBS_PIPE_OUTER_DIAMETER).AsDouble();
-
-            return new HoleFamilyModel<Wall>(intPoint, element, elType.Name, elName, pipeSize,
-                sourceElement.Name, true, 20, true);
-        }
-
-       
     }
 }

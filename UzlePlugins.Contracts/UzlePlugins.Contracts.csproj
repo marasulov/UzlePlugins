@@ -6,8 +6,4 @@
 	  <LangVersion>preview</LangVersion>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\UzlePlugins.Contracts\UzlePlugins.Contracts.csproj" />
-  </ItemGroup>
-
 </Project>

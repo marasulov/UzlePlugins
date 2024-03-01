@@ -4,19 +4,11 @@ using System.Collections.ObjectModel;
 using System.Drawing;
 using System.Windows.Documents;
 using System.Windows.Media.Media3D;
-using UzlePlugins.Models;
 
 
 
-var holes = new ObservableCollection<HoleModel>
-{
-    //new HoleModel("first","first description","circle", 25, "wall", "wall material", true, 10, true),
-    //new HoleModel("second","second description","circle", 25, "wall", "wall material", true, 10, true),
-    //new HoleModel("third","third description","circle", 25, "wall", "wall material", true, 10, true),
-    //new HoleModel("fourth","fourth description","circle", 25, "wall", "wall material", true, 10, true)
 
 
-};
 //SettingsReader reader = new SettingsReader();
 //reader.GetFamilyTypes();
 
@@ -80,7 +72,7 @@ public class Part : IEquatable<Part>
 
     public override string ToString()
     {
-        return "ID: " + PartId + "   Name: " + PartName;
+        return "ID: " + PartId + "   IntersectingElementName: " + PartName;
     }
     public override bool Equals(object obj)
     {
@@ -138,16 +130,16 @@ public class Example
 
         /*This code example produces the following output:
 
-        ID: 1234   Name: crank arm
-        ID: 1334   Name: chain ring
-        ID: 1434   Name: regular seat
-        ID: 1444   Name: banana seat
-        ID: 1534   Name: cassette
-        ID: 1634   Name: shift lever
+        ID: 1234   IntersectingElementName: crank arm
+        ID: 1334   IntersectingElementName: chain ring
+        ID: 1434   IntersectingElementName: regular seat
+        ID: 1444   IntersectingElementName: banana seat
+        ID: 1534   IntersectingElementName: cassette
+        ID: 1634   IntersectingElementName: shift lever
 
         Contains: Part with Id=1734: False
 
-        Find: Part where name contains "seat": ID: 1434   Name: regular seat
+        Find: Part where name contains "seat": ID: 1434   IntersectingElementName: regular seat
 
         Exists: Part with Id=1444: True
          */
