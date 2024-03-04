@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace UzlePlugins.Models
 {
-    public class PointModel
+    public class PointDTO
     {
-        public PointModel(double x, double y, double z)
+        public PointDTO(double x, double y, double z)
         {
             X = x;
             Y = y;

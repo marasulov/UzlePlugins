@@ -14,14 +14,11 @@ namespace UzlePlugins.RevitCore.Commands
     [Transaction(TransactionMode.Manual)]
     public class HoleTaskCommand : IExternalCommand
     {
-        private const string Familyname = "Пересечение_Стена_Круглое";
-        private const string Familytypename = "ОВ1";
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             var uiapp = commandData.Application;
             var uidoc = uiapp.ActiveUIDocument;
             var doc = uidoc.Document;
-            var offset = 1;
             var t = new Transaction(doc, "Insert structural stiffener family instance");
             
             t.Start();

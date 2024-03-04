@@ -10,7 +10,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\UzlePlugins.Models\UzlePlugins.Dtos.csproj" />
     <ProjectReference Include="..\UzlePlugins.Vm\UzlePlugins.Vm.csproj" />
   </ItemGroup>
 

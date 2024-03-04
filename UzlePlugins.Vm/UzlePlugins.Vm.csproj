@@ -8,7 +8,6 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\UzlePlugins.Contracts\UzlePlugins.Contracts.csproj" />
-	  <ProjectReference Include="..\UzlePlugins.Dtos\UzlePlugins.Dtos.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
