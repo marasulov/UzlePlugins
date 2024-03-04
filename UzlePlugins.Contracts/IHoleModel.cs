@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace UzlePlugins.Contracts
 {
-    public interface IHoleModel
+    public interface IHoleModel : IIntersectionPointZoom
     {
         int Id { get; set; }
         string IntersectionPoint { get; set; }

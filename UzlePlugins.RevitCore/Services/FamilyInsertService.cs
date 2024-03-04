@@ -6,25 +6,28 @@ using System.Threading.Tasks;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Plumbing;
 using Autodesk.Revit.DB.Structure;
+using UzlePlugins.Contracts;
 
 namespace UzlePlugins.RevitCore.Services
 {
-    public class FamilyInserter
+    public class FamilyInsertService : IFamilyInsertService
     {
+        private readonly Document _doc;
         private readonly FamilySymbol _familySymbol;
         private List<XYZ> _intersectPoints;
         private readonly List<string> _familyParameters;
         private readonly ReferenceIntersectionFinder _refFinder;
 
-        public FamilyInserter(FamilySymbol familySymbol, List<string> familyParameters, ReferenceIntersectionFinder refFinder )
+        public FamilyInsertService(Document doc, FamilySymbol familySymbol, List<string> familyParameters, ReferenceIntersectionFinder refFinder )
         {
+            _doc = doc;
             _familySymbol = familySymbol;
             _familyParameters = familyParameters;
             _refFinder = refFinder;
         }
 
 
-        public void InsertFamily(Document doc, Element pipeElement, double offset, BuiltInCategory builtInCategory, FamilySymbol symbol, bool isCircled)
+        public void InsertFamily( Element pipeElement, double offset, BuiltInCategory builtInCategory, FamilySymbol symbol, bool isCircled)
         {
             
             var elementType = pipeElement.GetType().Name;
@@ -42,12 +45,12 @@ namespace UzlePlugins.RevitCore.Services
 
             foreach (var intersectPoint in _intersectPoints)
             {
-                FamilyInstance fi = doc.Create.NewFamilyInstance(intersectPoint, symbol, StructuralType.NonStructural);
+                FamilyInstance fi = _doc.Create.NewFamilyInstance(intersectPoint, symbol, StructuralType.NonStructural);
                 var basisY = fi.GetTransform().BasisY;
                 var angle = basisY.AngleTo(_refFinder.Normal);
 
                 Line axis = Line.CreateBound(intersectPoint, intersectPoint + XYZ.BasisZ);
-                ElementTransformUtils.RotateElement(doc, fi.Id, axis, -angle);
+                ElementTransformUtils.RotateElement(_doc, fi.Id, axis, -angle);
                 var parameters = fi.GetOrderedParameters();
                 if (isCircled)
                 {
@@ -107,6 +110,11 @@ namespace UzlePlugins.RevitCore.Services
             }
         }
 
+
+        public void InsertFamily(object parameter)
+        {
+            throw new NotImplementedException();
+        }
     }
 
 

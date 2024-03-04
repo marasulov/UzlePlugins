@@ -1,11 +1,10 @@
-﻿using Autodesk.Revit.UI;
-using System.Collections.Generic;
-using Autodesk.Revit.DB;
+﻿using Autodesk.Revit.DB;
+using Autodesk.Revit.UI;
 using UzlePlugins.Contracts;
 
 namespace UzlePlugins.RevitCore.Models
 {
-    
+
 
     public record HoleFamilyModel<T> : IIntersectionPointZoom
     {

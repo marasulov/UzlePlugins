@@ -11,7 +11,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\UzlePlugins.Models\UzlePlugins.Models.csproj" />
+	  <ProjectReference Include="..\UzlePlugins.Dtos\UzlePlugins.Dtos.csproj" />
 	  <ProjectReference Include="..\UzlePlugins.Settings\UzlePlugins.Settings.csproj" />
 	  <ProjectReference Include="..\UzlePlugins.Views\UzlePlugins.Views.csproj" />
 	  <ProjectReference Include="..\UzlePlugins.Vm\UzlePlugins.Vm.csproj" />

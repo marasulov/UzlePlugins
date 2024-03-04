@@ -4,7 +4,7 @@ using UzlePlugins.Contracts;
 
 namespace UzlePlugins.Models
 {
-    public class HoleModel : IHoleModel, IIntersectionPointZoom
+    public class ActualHoleModelDto : IHoleModel, IIntersectionPointZoom
 
     {
         public int Id { get; set; }
@@ -18,7 +18,7 @@ namespace UzlePlugins.Models
         public double HoleOffset { get; set; }
         public bool IsInsert { get; set; }
 
-        public HoleModel(int id, string point, string intersectingElementName, string description, string holeType,
+        public ActualHoleModelDto(int id, string point, string intersectingElementName, string description, string holeType,
             double intersectingElementTypeSize, string intersectedSourceType, bool isHoleRectangled, double holeOffset,
             bool isInsert)
         {

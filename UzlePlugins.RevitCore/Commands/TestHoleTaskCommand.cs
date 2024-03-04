@@ -133,7 +133,7 @@ namespace UzlePlugins.RevitCore.Commands
                             actualPoint == holeFamilyModel.IntersectionPoint);
 
                         actualHoles.AddRange(actualModels.Select(actualModel => 
-                            new HoleModel(
+                            new ActualHoleModelDto(
                                 actualModel.IntersectingElement.Id.IntegerValue, 
                                 actualModel.IntersectionPoint.ToString(), 
                                 actualModel.IntersectingElementName, 
@@ -153,7 +153,7 @@ namespace UzlePlugins.RevitCore.Commands
 
                         newHoles.AddRange(
                             newModels.Select(actualModel => 
-                                new HoleModel(
+                                new ActualHoleModelDto(
                                     actualModel.IntersectingElement.Id.IntegerValue, 
                                     actualModel.IntersectionPoint.ToString(), 
                                     actualModel.IntersectingElementName, 
@@ -175,7 +175,7 @@ namespace UzlePlugins.RevitCore.Commands
                             if (deletedPoint.IsAlmostEqualTo(loc?.Point))
                             {
                                 var familyName = family.Symbol.Family.Name;
-                                outdatedFamilies.Add(new OutdatedFamily(family.Id.IntegerValue, familyName, loc.Point.ToString()));
+                                outdatedFamilies.Add(new OutdatedFamilyDto(family.Id.IntegerValue, familyName));
                             }
                         }
                     }
@@ -186,7 +186,7 @@ namespace UzlePlugins.RevitCore.Commands
                     var j = 0;
                     foreach (var hole in wallHoles)
                     {
-                        var holeModel = new HoleModel(
+                        var holeModel = new ActualHoleModelDto(
                             j,
                             hole.IntersectionPoint.ToString(),
                             hole.IntersectingElementName,
@@ -224,12 +224,12 @@ namespace UzlePlugins.RevitCore.Commands
 
                     FamilySymbol symbol = familyTypeFinder.GetFamilySymbolToPlace(doc, wallsFamilyName);
 
-                    foreach (Element pipeElement in pipeCollector)
+                    foreach (var pipeElement in pipeCollector)
                     {
                         //Reference r = new Reference(pipeElement);
                         ReferenceIntersectionFinder refFinder = new ReferenceIntersectionFinder(doc, pipeElement, view3D);
-                        FamilyInserter inserter = new FamilyInserter(symbol, wallsFamilyType, refFinder);
-                        inserter.InsertFamily(doc, pipeElement, offset, BuiltInCategory.OST_Walls, symbol, true);
+                        FamilyInsertService insertService = new FamilyInsertService(doc, symbol, wallsFamilyType, refFinder);
+                        insertService.InsertFamily(pipeElement, offset, BuiltInCategory.OST_Walls, symbol, true);
                     }
 
                     familyTypeFinder.GetFamilyType(BuiltInCategory.OST_Floors, true);
@@ -237,13 +237,13 @@ namespace UzlePlugins.RevitCore.Commands
                     var floorsFamilyType = familyTypeFinder.FamilyParameters;
                     symbol = familyTypeFinder.GetFamilySymbolToPlace(doc, floorsFamilyName);
                     if (symbol != null)
-                        foreach (Element pipeElement in pipeCollector)
+                        foreach (var pipeElement in pipeCollector)
                         {
                             //InsertFamily(doc, pipeElement, view3D, 1, BuiltInCategory.OST_Floors, symbol, true);
                             //Reference r = new Reference(pipeElement);
                             ReferenceIntersectionFinder refFinder = new ReferenceIntersectionFinder(doc, pipeElement, view3D);
-                            FamilyInserter inserter = new FamilyInserter(symbol, floorsFamilyType, refFinder);
-                            inserter.InsertFamily(doc, pipeElement, offset, BuiltInCategory.OST_Floors, symbol, true);
+                            FamilyInsertService insertService = new FamilyInsertService(doc,symbol, floorsFamilyType, refFinder);
+                            insertService.InsertFamily(pipeElement, offset, BuiltInCategory.OST_Floors, symbol, true);
 
                         }
 

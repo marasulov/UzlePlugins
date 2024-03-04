@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Windows.Input;
 using UzlePlugins.Contracts;
 using UzlePlugins.Vm.Base;
@@ -8,17 +7,27 @@ using UzlePlugins.Vm.Commands;
 
 namespace UzlePlugins.Vm
 {
-    public class HolesVm : BaseViewModel
+    public class HolesVm : BaseViewModel, IFamilyInsertService
     {
         private List<IHoleModel> _holes;
         private List<IOutdatedFamily> _outdatedHoles;
-        private readonly IIntersectionPointZoom _zoomToPoint;
         private List<IHoleModel> _newHoles;
 
         private ICommand _createHolesCommand;
         private bool _buttonClicked;
         private bool _canExecute = true;
         private ICommand _zoomToPointCommand;
+
+        public HolesVm(List<IHoleModel> newHoles, List<IHoleModel> holes, List<IOutdatedFamily> outdatedHoles, IIntersectionPointZoom pointZoom)
+        {
+            _newHoles = newHoles;
+            _holes = holes;
+            _outdatedHoles = outdatedHoles;
+
+            CreateHolesCommand = new CreateHolesCommand();
+            ZoomToPointCommand = new ZoomToPointCommand(pointZoom);
+
+        }
 
         public List<IHoleModel> Holes
         {
@@ -36,18 +45,6 @@ namespace UzlePlugins.Vm
         {
             get => _newHoles;
             set => Set(ref _newHoles, value);
-        }
-
-        public HolesVm(List<IHoleModel> newHoles, List<IHoleModel> holes, List<IOutdatedFamily> outdatedHoles, IIntersectionPointZoom pointZoom)
-        {
-            _newHoles = newHoles;
-            _holes = holes;
-            _outdatedHoles = outdatedHoles;
-            //_zoomToPoint = zoomToPoint;
-
-            CreateHolesCommand = new RelayCommand(CloseWindow, t => this._canExecute);
-            ZoomToPointCommand = new ZoomToPointCommand(pointZoom);
-
         }
 
         public bool CanExecute
@@ -89,12 +86,6 @@ namespace UzlePlugins.Vm
                 CloseAction();
                 // OnRequestClose(this, new EventArgs());
             }
-            if (clicked == "Canceled")
-            {
-                _buttonClicked = true;
-                Debug.Print($"Origin {parameter}");
-                
-            }
         }
 
         public event EventHandler OnRequestClose;
@@ -103,6 +94,11 @@ namespace UzlePlugins.Vm
         {
             get => _buttonClicked;
             set => Set(ref _buttonClicked, value);
+        }
+
+        public void InsertFamily(object parameter)
+        {
+            
         }
     }
 }
