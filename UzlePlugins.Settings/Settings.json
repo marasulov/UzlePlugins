@@ -22,5 +22,12 @@
         "Depth"
       ]
     }
-  }
+  },
+  "FamilyNames": [
+    "opening_wall_circ",
+    "opening_slab_circ",
+    "opening_wall_rect",
+    "opening_slab_rect"
+  ]
+
 }

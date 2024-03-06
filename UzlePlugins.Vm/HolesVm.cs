@@ -7,7 +7,7 @@ using UzlePlugins.Vm.Commands;
 
 namespace UzlePlugins.Vm
 {
-    public class HolesVm : BaseViewModel, IFamilyInsertService
+    public class HolesVm : BaseViewModel
     {
         private List<IHoleModel> _holes;
         private List<IOutdatedFamily> _outdatedHoles;
@@ -84,7 +84,7 @@ namespace UzlePlugins.Vm
             {
                 _buttonClicked = true;
                 CloseAction();
-                // OnRequestClose(this, new EventArgs());
+                OnRequestClose(this, new EventArgs());
             }
         }
 

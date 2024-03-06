@@ -1,5 +1,4 @@
-﻿using Autodesk.Revit.Attributes;
-using Autodesk.Revit.DB;
+﻿using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Mechanical;
 using Autodesk.Revit.DB.Plumbing;
 using Autodesk.Revit.UI;
@@ -7,11 +6,12 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using Autodesk.Revit.Attributes;
 using UzlePlugins.Contracts;
-using UzlePlugins.Models;
+using UzlePlugins.Contracts.DTOs;
 using UzlePlugins.RevitCore.Models;
 using UzlePlugins.RevitCore.Services;
-using UzlePlugins.RevitCore.Settings;
+using UzlePlugins.Settings;
 using UzlePlugins.Views;
 using UzlePlugins.Vm;
 
@@ -29,18 +29,34 @@ namespace UzlePlugins.RevitCore.Commands
             double pipeDiametrForFilter = 50;
 
             var settingsReader = new SettingsReader();
+            var holeFamilyNames = settingsReader.GetFamilyNames().FamilyNames;
             var recFamilyNames = settingsReader.GetFamilyTypes().FamilyTypes.Rectangled.FamilyNames;
             var circledFamilyNames = settingsReader.GetFamilyTypes().FamilyTypes.Circled.FamilyNames;
             var linkedDocs = GetLinkedDocuments(doc);
 
-            var familyNames = new List<string>()
-            {
-                recFamilyNames.FloorType, recFamilyNames.WallType, circledFamilyNames.FloorType,
-                circledFamilyNames.WallType
-            };
+            //var familyNames = new HashSet<string>()
+            //{
+            //    recFamilyNames.FloorType, recFamilyNames.WallType, circledFamilyNames.FloorType,
+            //    circledFamilyNames.WallType
+            //};
 
-            // список семейств
+            //var familyInstances = new FilteredElementCollector(doc)
+            //    .WhereElementIsElementType()
+            //    .OfClass(typeof(FamilyInstance))
+            //    .Cast<FamilyInstance>()
+            //    .Where(fi => familyNames.Contains(
+            //        fi.get_Parameter(BuiltInParameter.ELEM_FAMILY_PARAM)?
+            //            .AsValueString()))
+            //    .ToArray();
+
+            var familyNames = new HashSet<string>();
+            foreach (var name in holeFamilyNames)
+            {
+                familyNames.Add(name);
+            }
+
             List<FamilyInstance> familyInstances = new List<FamilyInstance>();
+
             foreach (var familyName in familyNames)
             {
                 var result = new FilteredElementCollector(doc)
@@ -179,7 +195,6 @@ namespace UzlePlugins.RevitCore.Commands
                             }
                         }
                     }
-                    
                 }
                 else
                 {
@@ -201,7 +216,7 @@ namespace UzlePlugins.RevitCore.Commands
                 }
                 
                 Debug.Print($"{newIntersections.Count} точек {wallHoles.Count} отверстий");
-
+                
                 HolesVm holesVm = new HolesVm(newHoles,actualHoles, outdatedFamilies, wallHoles[0]);
                 HoleTaskView view = new HoleTaskView(holesVm);
                 view.Show();

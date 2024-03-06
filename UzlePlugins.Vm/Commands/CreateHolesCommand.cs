@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Windows.Input;
 using UzlePlugins.Contracts;
-using UzlePlugins.Models;
 
 namespace UzlePlugins.Vm.Commands
 {
@@ -11,7 +10,7 @@ namespace UzlePlugins.Vm.Commands
 
         public CreateHolesCommand()
         {
-            _familyInsertService = familyInsertService;
+            //_familyInsertService = familyInsertService;
         }
 
         public event EventHandler? CanExecuteChanged
@@ -27,7 +26,7 @@ namespace UzlePlugins.Vm.Commands
 
         public override void Execute(object parameter)
         {
-            _familyInsertService.InsertFamily((HolesVm) parameter);
+            _familyInsertService?.InsertFamily((HolesVm) parameter);
         }
 
 

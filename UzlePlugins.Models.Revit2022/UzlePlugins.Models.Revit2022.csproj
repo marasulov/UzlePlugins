@@ -8,6 +8,7 @@
 
 	<ItemGroup>
 	  <PackageReference Include="System.Text.Json" Version="8.0.2" />
+	  <PackageReference Include="SimpleInjector" Version="5.4.4" />
 	</ItemGroup>
 
 	<ItemGroup>

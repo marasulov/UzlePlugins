@@ -11,6 +11,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <ProjectReference Include="..\UzlePlugins.Contracts\UzlePlugins.Contracts.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
 	  <None Update="Settings.json">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>

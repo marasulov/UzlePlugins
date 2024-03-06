@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net48</TargetFramework>
+		<Nullable>enable</Nullable>
+		<LangVersion>latest</LangVersion>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="Autodesk.Revit.SDK" Version="2022.0.2.392" />
+	  <PackageReference Include="SimpleInjector" Version="5.4.4" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\UzlePlugins.Contracts\UzlePlugins.Contracts.csproj" />
+	  <ProjectReference Include="..\UzlePlugins.Models.Revit2022\UzlePlugins.Models.Revit2022.csproj" />
+	  <ProjectReference Include="..\UzlePlugins.Settings\UzlePlugins.Settings.csproj" />
+	  <ProjectReference Include="..\UzlePlugins.Views\UzlePlugins.Views.csproj" />
+	</ItemGroup>
+
+</Project>

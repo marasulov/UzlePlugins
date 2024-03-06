@@ -19,7 +19,7 @@ namespace UzlePlugins.RevitCore.Services
             _view3D = view3D;
             Element element = _document.GetElement(reference);
             LocationCurve lc = element.Location as LocationCurve;
-            if(lc == null) return;
+            if (lc == null) return;
             StartPoint = lc.Curve.GetEndPoint(0);
             EndPoint = lc.Curve.GetEndPoint(1);
             Normal = EndPoint.Subtract(StartPoint).Normalize();
@@ -27,18 +27,20 @@ namespace UzlePlugins.RevitCore.Services
             _curve = lc.Curve;
         }
 
+        public IList<Reference> WallReferences { get; } = new List<Reference>();
+        public IList<Reference> FloorReferences { get; } = new List<Reference>();
+
         public double Thickness { get; private set; }
 
         public XYZ StartPoint;
         public XYZ EndPoint;
         public XYZ Normal { get; set; }
 
-        public IList<Reference> WallReferences { get; } = new List<Reference>();
-        public IList<Reference> FloorReferences { get; } = new List<Reference>();
+
         //public List<HoleFamilyModel<Wall>> WallHoles { get; } = new List<HoleFamilyModel<Wall>>();
         //public List<HoleFamilyModel<Floor>> FloorHoles { get; } = new List<HoleFamilyModel<Floor>>();
 
-         private List<Reference> GetAllReferences(BuiltInCategory builtInCategory)
+        private List<Reference> GetAllReferences(BuiltInCategory builtInCategory)
         {
             ElementFilter filter = new ElementCategoryFilter(builtInCategory);
 
@@ -77,7 +79,7 @@ namespace UzlePlugins.RevitCore.Services
                     (firstFaceRef.GlobalPoint.Y + secondFaceRef.GlobalPoint.Y) / 2,
                     firstFaceRef.GlobalPoint.Z);
                 intersectPoints.Add(intPoint);
-                
+
             }
 
             return intersectPoints;
@@ -86,38 +88,52 @@ namespace UzlePlugins.RevitCore.Services
         public void GetStructuralReferences(BuiltInCategory builtInCategory)
         {
             var tempReferences = GetAllReferences(builtInCategory);
-            if (tempReferences.Count > 0)
+            if (tempReferences.Count <= 0) return;
+            foreach (var r in tempReferences)
             {
-                foreach (var r in tempReferences)
+                if (r == null) return;
+
+                if (_document.GetElement(r.ElementId) is not RevitLinkInstance link) return;
+
+                var ldoc = link.GetLinkDocument();
+
+                Element el = ldoc.GetElement(r.LinkedElementId) as HostObject; ;
+                double structuralParameter;
+
+                Dictionary<BuiltInCategory, BuiltInParameter> builtInParameters =
+                    new Dictionary<BuiltInCategory, BuiltInParameter>()
+                    {
+                        {BuiltInCategory.OST_Walls,  BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT},
+                        {BuiltInCategory.OST_Floors, BuiltInParameter.FLOOR_PARAM_IS_STRUCTURAL}
+
+                    };
+
+
+                //structuralParameter = el.get_Parameter(builtInParameters[builtInCategory])
+                //    .AsInteger();
+                //if (structuralParameter != 1) continue;
+                //WallReferences.Add(r);
+
+                switch (builtInCategory)
                 {
-                    if (r == null) return;
+                    case BuiltInCategory.OST_Walls:
+                        {
+                            structuralParameter = el.get_Parameter(BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT)
+                                .AsInteger();
+                            if (structuralParameter != 1) continue;
+                            WallReferences.Add(r);
 
-                    if (_document.GetElement(r.ElementId) is not RevitLinkInstance link) return;
+                            break;
+                        }
+                    case BuiltInCategory.OST_Floors:
+                        {
+                            structuralParameter =
+                                el.get_Parameter(BuiltInParameter.FLOOR_PARAM_IS_STRUCTURAL).AsInteger();
+                            if (structuralParameter != 1) continue;
 
-                    var ldoc = link.GetLinkDocument();
-
-                    Element el;
-                    string structuralParameter;
-
-                    if (builtInCategory == BuiltInCategory.OST_Walls)
-                    {
-                        el = ldoc.GetElement(r.LinkedElementId) as Wall;
-                        structuralParameter = el.get_Parameter(BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT)
-                            .AsValueString();
-                        if (structuralParameter != "Yes") continue;
-                        WallReferences.Add(r);
-
-                    }
-
-                    if (builtInCategory == BuiltInCategory.OST_Floors)
-                    {
-                        el = ldoc.GetElement(r.LinkedElementId) as Floor;
-                        structuralParameter =
-                            el.get_Parameter(BuiltInParameter.FLOOR_PARAM_IS_STRUCTURAL).AsValueString();
-                        if (structuralParameter != "Yes") continue;
-
-                        FloorReferences.Add(r);
-                    }
+                            FloorReferences.Add(r);
+                            break;
+                        }
                 }
             }
         }

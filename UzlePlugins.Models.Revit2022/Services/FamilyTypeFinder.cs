@@ -1,7 +1,6 @@
 ﻿using Autodesk.Revit.DB;
 using System.Collections.Generic;
 using System.Linq;
-using UzlePlugins.RevitCore.Settings;
 using UzlePlugins.Settings;
 
 namespace UzlePlugins.RevitCore.Services

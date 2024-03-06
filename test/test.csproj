@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net48</TargetFramework>
+		<Nullable>enable</Nullable>
+		<LangVersion>latest</LangVersion>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Autodesk.Revit.SDK" Version="2022.0.2.392" />
+		<PackageReference Include="SimpleInjector" Version="5.4.4" />
+	</ItemGroup>
+</Project>

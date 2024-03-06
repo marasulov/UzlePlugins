@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UzlePlugins.RevitCore", "UzlePlugins.RevitCore\UzlePlugins.RevitCore.csproj", "{2E36DDF6-E8F9-4F00-8495-AB51F4EBF14E}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UzlePlugins.Vm", "UzlePlugins.Vm\UzlePlugins.Vm.csproj", "{1C637B50-1AE1-4898-A035-341AF35EBB6B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UzlePlugins.Views", "UzlePlugins.Views\UzlePlugins.Views.csproj", "{C6A13D3B-64AD-4DDD-968A-031211F6EEDD}"
@@ -19,16 +17,16 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UzlePlugins.Settings", "Uzl
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UzlePlugins.Contracts", "UzlePlugins.Contracts\UzlePlugins.Contracts.csproj", "{04DC4DE9-B5BD-4C12-9F63-A733254D5C24}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UzlePlugins.Addin.Revit2022", "UzlePlugins.Addin.Revit2022\UzlePlugins.Addin.Revit2022.csproj", "{E3221384-8ADD-45CF-9981-5F5148AFFC2A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UzlePlugins.Models.Revit2022", "UzlePlugins.Models.Revit2022\UzlePlugins.Models.Revit2022.csproj", "{350BE67A-96BC-4545-8FAA-6771969BAB05}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{2E36DDF6-E8F9-4F00-8495-AB51F4EBF14E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2E36DDF6-E8F9-4F00-8495-AB51F4EBF14E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2E36DDF6-E8F9-4F00-8495-AB51F4EBF14E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2E36DDF6-E8F9-4F00-8495-AB51F4EBF14E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1C637B50-1AE1-4898-A035-341AF35EBB6B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{1C637B50-1AE1-4898-A035-341AF35EBB6B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1C637B50-1AE1-4898-A035-341AF35EBB6B}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -53,6 +51,14 @@ Global
 		{04DC4DE9-B5BD-4C12-9F63-A733254D5C24}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{04DC4DE9-B5BD-4C12-9F63-A733254D5C24}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{04DC4DE9-B5BD-4C12-9F63-A733254D5C24}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E3221384-8ADD-45CF-9981-5F5148AFFC2A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E3221384-8ADD-45CF-9981-5F5148AFFC2A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E3221384-8ADD-45CF-9981-5F5148AFFC2A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E3221384-8ADD-45CF-9981-5F5148AFFC2A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{350BE67A-96BC-4545-8FAA-6771969BAB05}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{350BE67A-96BC-4545-8FAA-6771969BAB05}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{350BE67A-96BC-4545-8FAA-6771969BAB05}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{350BE67A-96BC-4545-8FAA-6771969BAB05}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
