@@ -20,7 +20,8 @@
 
                     <GroupBox Grid.Row="0" Grid.Column="0">
                         <GroupBox.Header>
-                            <Label Content="New holes"></Label>
+                            <Label Content="{Binding ElementName=NewHolesGrid, Path=Items.Count}"
+                                   ContentStringFormat="New Holes {0}"/>
                         </GroupBox.Header >
                         <DataGrid Name="NewHolesGrid" 
                               VerticalAlignment="Top"
@@ -55,7 +56,8 @@
 
                     <GroupBox Grid.Row="1" Grid.Column="0">
                         <GroupBox.Header>
-                            <Label Content="Exist holes"></Label>
+                            <Label Content="{Binding ElementName=ExistHolesGrid, Path=Items.Count}"
+                                   ContentStringFormat="ExistHolesGrid {0}"/>
                         </GroupBox.Header >
                         <DataGrid Name="ExistHolesGrid" 
                               VerticalAlignment="Top"
@@ -89,7 +91,8 @@
 
                     <GroupBox Grid.Row="2" Grid.Column="0">
                         <GroupBox.Header>
-                            <Label Content="Outdated holes"></Label>
+                            <Label Content="{Binding ElementName=OutdatedGrid, Path=Items.Count}"
+                                   ContentStringFormat="Outdated holes {0}"/>
                         </GroupBox.Header >
                         <DataGrid Name="OutdatedGrid" 
                               VerticalAlignment="Top"

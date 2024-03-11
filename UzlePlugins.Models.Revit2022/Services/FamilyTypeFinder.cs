@@ -21,26 +21,30 @@ namespace UzlePlugins.RevitCore.Services
         public string FamilyName { get; set; }
         //public FamilySymbol FamilySymbol { get; set; }
 
-        public void GetFamilyType(BuiltInCategory builtInCategory, bool isHoleCircled)
+        public string GetFamilyType(BuiltInCategory builtInCategory, bool isHoleCircled)
         {
             FamilyParameters = isHoleCircled ? _familyTypes.FamilyTypes.Circled.FamilyParameters : _familyTypes.FamilyTypes.Rectangled.FamilyParameters;
 
+            var familyName = string.Empty;
+
             if (builtInCategory == BuiltInCategory.OST_Floors & isHoleCircled)
             {
-                FamilyName = _familyTypes.FamilyTypes.Circled.FamilyNames.FloorType;
+                familyName = _familyTypes.FamilyTypes.Circled.FamilyNames.FloorType;
             }
             else if (builtInCategory == BuiltInCategory.OST_Floors & !isHoleCircled)
             {
-                FamilyName = _familyTypes.FamilyTypes.Rectangled.FamilyNames.FloorType;
+                familyName = _familyTypes.FamilyTypes.Rectangled.FamilyNames.FloorType;
             }
             else if (builtInCategory == BuiltInCategory.OST_Walls & isHoleCircled)
             {
-                FamilyName = _familyTypes.FamilyTypes.Circled.FamilyNames.WallType;
+                familyName = _familyTypes.FamilyTypes.Circled.FamilyNames.WallType;
             }
             else
             {
-                FamilyName = _familyTypes.FamilyTypes.Rectangled.FamilyNames.WallType;
+                familyName = _familyTypes.FamilyTypes.Rectangled.FamilyNames.WallType;
             }
+
+            return familyName;
         }
 
         public FamilySymbol GetFamilySymbolToPlace(Document doc, string familyName/*, string familyTypeName*/)

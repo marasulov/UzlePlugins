@@ -37,7 +37,7 @@ namespace UzlePlugins.RevitCore.Services
         public XYZ Normal { get; set; }
 
 
-        //public List<HoleFamilyModel<Wall>> WallHoles { get; } = new List<HoleFamilyModel<Wall>>();
+        //public List<HoleFamilyModel<Wall>> HolesProps { get; } = new List<HoleFamilyModel<Wall>>();
         //public List<HoleFamilyModel<Floor>> FloorHoles { get; } = new List<HoleFamilyModel<Floor>>();
 
         private List<Reference> GetAllReferences(BuiltInCategory builtInCategory)

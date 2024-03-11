@@ -2,6 +2,7 @@
 using Autodesk.Revit.DB.Plumbing;
 using Autodesk.Revit.UI;
 using System.Collections.Generic;
+using Autodesk.Revit.DB.Mechanical;
 using UzlePlugins.RevitCore.Models;
 
 
@@ -22,7 +23,7 @@ namespace UzlePlugins.RevitCore.Services
         public Element IntersectingElement { get; set; }
         public Reference IntersectedSourceElement { get; set; }
         public XYZ IntersectionPoint { get; set; }
-        public List<HoleFamilyModel<Wall>> WallHoles { get; set; } = new List<HoleFamilyModel<Wall>>();
+        public List<HoleFamilyModel> HolesProps { get; set; } = new ();
 
         public void GetHoles(XYZ point, UIDocument uidoc)
         {
@@ -35,21 +36,41 @@ namespace UzlePlugins.RevitCore.Services
             var ldoc = link.GetLinkDocument();
 
             Element el = ldoc.GetElement(IntersectedSourceElement.LinkedElementId) as Wall;
-
+            
             var holeFamily = GetHoleProps(point, el, IntersectingElement, uidoc);
-            WallHoles.Add(holeFamily);
+            HolesProps.Add(holeFamily);
         }
 
-        public HoleFamilyModel<Wall> GetHoleProps(XYZ intPoint, Element sourceElement, Element element, UIDocument uidoc)
+        public HoleFamilyModel GetHoleProps(XYZ intPoint, Element sourceElement, Element element, UIDocument uidoc)
         {
 
             var elType = element.GetType();
-            var pipeElement = element as Pipe;
-            var elName = pipeElement.PipeType.Name;
-            var pipeSize = pipeElement.get_Parameter(BuiltInParameter.RBS_PIPE_OUTER_DIAMETER).AsDouble();
+            double pipeSize = default;
+            string elName = default;
+            switch (elType.Name)
+            {
+                //TODO 
+                case "Duct":
+                {
+                    var intersectElement = element as Duct;
+                    elName = intersectElement.MEPSystem.Name;
+                    pipeSize = intersectElement.get_Parameter(BuiltInParameter.RBS_CALCULATED_SIZE).AsDouble();
+                    break;
+                }
+                case "Pipe":
+                {
+                    var intersectElement = element as Pipe;
+                    elName = intersectElement.PipeType.Name;
+                    pipeSize = intersectElement.get_Parameter(BuiltInParameter.RBS_PIPE_OUTER_DIAMETER).AsDouble();
+                    break;
+                }
+            }
 
-            return new HoleFamilyModel<Wall>(uidoc, intPoint, element, elType.Name, elName, pipeSize,
-                sourceElement.Name, true, 20, true);
+            var sourceElementThickness = (sourceElement as Wall).Width;
+            //(element as Floor).get_Parameter();
+
+            return new HoleFamilyModel(uidoc, intPoint, element, elName,elType.Name, pipeSize,
+                sourceElement.Name, sourceElementThickness,true, 20, true,sourceElementThickness);
         }
     }
 }

@@ -6,10 +6,9 @@ namespace UzlePlugins.RevitCore.Models
 {
 
 
-    public record HoleFamilyModel<T> : IIntersectionPointZoom
+    public record HoleFamilyModel 
     {
         private readonly UIDocument _uidoc;
-
 
         public HoleFamilyModel(UIDocument uidoc, XYZ intersectionPoint, Element intersectingElement)
         {
@@ -19,30 +18,37 @@ namespace UzlePlugins.RevitCore.Models
             IntersectingElement = intersectingElement;
         }
 
+
         /// <summary>
         /// Информация для семейства отверстия
         /// </summary>
+        /// <param name="uidoc"></param>
         /// <param name="intersectionPoint"></param>
         /// <param name="intersectingElement"></param>
         /// <param name="intersectingElementName"></param>
         /// <param name="intersectingElementType"></param>
         /// <param name="intersectingElementTypeSize"></param>
         /// <param name="intersectedSourceType"></param>
-        /// <param name="intersectedSourceMaterial"></param>
-        /// <param name="holeFormType"></param>
+        /// <param name="intersectedSourceThickness"></param>
+        /// <param name="isHoleRectangled"></param>
         /// <param name="holeOffset"></param>
         /// <param name="isInsert"></param>
+        /// <param name="intersectingElementHeight"></param>
+        /// <param name="intersectingElementWidth"></param>
         public HoleFamilyModel(
             UIDocument uidoc,
             XYZ intersectionPoint, 
-            Element intersectingElement, 
+            Element intersectingElement,
             string intersectingElementName, 
             string intersectingElementType,
-            double intersectingElementTypeSize, 
+            double intersectingElementTypeSize,
             string intersectedSourceType,
-            bool isHoleRectangled, 
+            double intersectedSourceThickness,
+            bool isHoleRectangled,
             double holeOffset, 
-            bool isInsert)
+            bool isInsert,
+            double intersectingElementHeight,
+            double intersectingElementWidth = 0)
         {
             _uidoc = uidoc;
             IntersectionPoint = intersectionPoint;
@@ -50,7 +56,10 @@ namespace UzlePlugins.RevitCore.Models
             IntersectingElementName = intersectingElementName;
             IntersectingElementType = intersectingElementType;
             IntersectingElementTypeSize = intersectingElementTypeSize;
+            IntersectingElementHeight = intersectingElementHeight;
+            IntersectingElementWidth = intersectingElementWidth;
             IntersectedSourceType = intersectedSourceType;
+            IntersectedSourceThickness = intersectedSourceThickness;
             IsHoleRectangled = isHoleRectangled;
             HoleOffset = holeOffset;
             IsInsert = isInsert;
@@ -80,10 +89,16 @@ namespace UzlePlugins.RevitCore.Models
         /// Размер пересекающего элемента
         /// </summary>
         public double IntersectingElementTypeSize { get; set; }
+
+        public double IntersectingElementHeight { get; }
+        public double IntersectingElementWidth { get; }
+
         /// <summary>
         /// Тип материала пересеченной основы
         /// </summary>
         public string IntersectedSourceType { get; set; }
+
+        public double IntersectedSourceThickness { get; }
 
         /// <summary>
         /// Форма проема
@@ -100,18 +115,18 @@ namespace UzlePlugins.RevitCore.Models
         /// </summary>
         public bool IsInsert { get; set; }
 
-        public void FamilyZoom(int id)
-        {
-            //XYZ point = new XYZ();// TODO
-            //Options opt = new Options();
-            //opt.View = _uidoc.ActiveView;
-            //GeometryElement geoEle = point.get_Geometry(opt);
+        //public void FamilyZoom(int id)
+        //{
+        //    //XYZ point = new XYZ();// TODO
+        //    //Options opt = new Options();
+        //    //opt.View = _uidoc.ActiveView;
+        //    //GeometryElement geoEle = point.get_Geometry(opt);
 
-            //_uidoc.ActiveView = view
-            //UIView.ZoomAndCenterRectangle(m, n);
+        //    //_uidoc.ActiveView = view
+        //    //UIView.ZoomAndCenterRectangle(m, n);
 
-            _uidoc.ShowElements(new ElementId(id));
-        }
+        //    _uidoc.ShowElements(new ElementId(id));
+        //}
     }
 
 }

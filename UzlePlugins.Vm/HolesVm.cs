@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Windows.Input;
 using UzlePlugins.Contracts;
+using UzlePlugins.Contracts.DTOs;
 using UzlePlugins.Vm.Base;
 using UzlePlugins.Vm.Commands;
 
@@ -9,43 +10,50 @@ namespace UzlePlugins.Vm
 {
     public class HolesVm : BaseViewModel
     {
-        private List<IHoleModel> _holes;
-        private List<IOutdatedFamily> _outdatedHoles;
-        private List<IHoleModel> _newHoles;
+        private List<ActualHoleModelDto> _holes;
+        private List<OutdatedFamilyDto> _outdatedHoles;
+        private List<ActualHoleModelDto> _newHoles;
 
         private ICommand _createHolesCommand;
         private bool _buttonClicked;
         private bool _canExecute = true;
         private ICommand _zoomToPointCommand;
 
-        public HolesVm(List<IHoleModel> newHoles, List<IHoleModel> holes, List<IOutdatedFamily> outdatedHoles, IIntersectionPointZoom pointZoom)
+        public HolesVm(
+            List<ActualHoleModelDto> newHoles, 
+            List<ActualHoleModelDto> holes, 
+            List<OutdatedFamilyDto> outdatedHoles, 
+            ZoomToPointCommand zoomToPointCommand)
         {
             _newHoles = newHoles;
             _holes = holes;
             _outdatedHoles = outdatedHoles;
 
             CreateHolesCommand = new CreateHolesCommand();
-            ZoomToPointCommand = new ZoomToPointCommand(pointZoom);
+            ZoomToPointCommand = zoomToPointCommand;
 
         }
 
-        public List<IHoleModel> Holes
+        public List<ActualHoleModelDto> Holes
         {
             get => _holes;
             set => Set(ref _holes, value);
         }
 
-        public List<IOutdatedFamily> OutdatedHoles
+        public List<OutdatedFamilyDto> OutdatedHoles
         {
             get => _outdatedHoles;
             set => Set(ref _outdatedHoles, value);
         }
 
-        public List<IHoleModel> NewHoles
+        public List<ActualHoleModelDto> NewHoles
         {
             get => _newHoles;
             set => Set(ref _newHoles, value);
         }
+
+
+
 
         public bool CanExecute
         {
@@ -96,9 +104,5 @@ namespace UzlePlugins.Vm
             set => Set(ref _buttonClicked, value);
         }
 
-        public void InsertFamily(object parameter)
-        {
-            
-        }
     }
 }

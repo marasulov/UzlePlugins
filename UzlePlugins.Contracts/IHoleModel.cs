@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace UzlePlugins.Contracts
 {
-    public interface IHoleModel : IIntersectionPointZoom
+    public interface IHoleModel //: IIntersectionPointZoom
     {
         int Id { get; set; }
         string IntersectionPoint { get; set; }
@@ -15,6 +15,7 @@ namespace UzlePlugins.Contracts
         string HoleType { get; set; }
         double IntersectingElementTypeSize { get; set; }
         string IntersectedSourceType { get; set; }
+        double SourceElementWidth { get; set; }
         bool IsHoleRectangled { get; set; }
         double HoleOffset { get; set; }
         bool IsInsert { get; set; }
