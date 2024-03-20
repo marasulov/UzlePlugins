@@ -1,4 +1,4 @@
-﻿namespace UzlePlugins.Vm;
+﻿namespace UzlePlugins.Contracts;
 
 public interface IOutdatedFamily
 {

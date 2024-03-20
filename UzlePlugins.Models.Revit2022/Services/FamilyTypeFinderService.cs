@@ -5,15 +5,14 @@ using UzlePlugins.Settings;
 
 namespace UzlePlugins.RevitCore.Services
 {
-    public class FamilyTypeFinder
+    public class FamilyTypeFinderService
     {
         private HoleFamilyTypes _familyTypes;
 
-        public FamilyTypeFinder()
+        public FamilyTypeFinderService()
         {
             SettingsReader reader = new SettingsReader();
             _familyTypes = reader.GetFamilyTypes();
-
         }
 
         public List<string> FamilyParameters { get; set; }
@@ -21,21 +20,21 @@ namespace UzlePlugins.RevitCore.Services
         public string FamilyName { get; set; }
         //public FamilySymbol FamilySymbol { get; set; }
 
-        public string GetFamilyType(BuiltInCategory builtInCategory, bool isHoleCircled)
+        public string GetFamilyType(BuiltInCategory builtInCategory, string shape)
         {
-            FamilyParameters = isHoleCircled ? _familyTypes.FamilyTypes.Circled.FamilyParameters : _familyTypes.FamilyTypes.Rectangled.FamilyParameters;
+            FamilyParameters = shape!="Circle" ? _familyTypes.FamilyTypes.Circled.FamilyParameters : _familyTypes.FamilyTypes.Rectangled.FamilyParameters;
 
-            var familyName = string.Empty;
+            string familyName;
 
-            if (builtInCategory == BuiltInCategory.OST_Floors & isHoleCircled)
+            if (builtInCategory == BuiltInCategory.OST_Floors & shape == "Circle")
             {
                 familyName = _familyTypes.FamilyTypes.Circled.FamilyNames.FloorType;
             }
-            else if (builtInCategory == BuiltInCategory.OST_Floors & !isHoleCircled)
+            else if (builtInCategory == BuiltInCategory.OST_Floors & shape == "Square")
             {
                 familyName = _familyTypes.FamilyTypes.Rectangled.FamilyNames.FloorType;
             }
-            else if (builtInCategory == BuiltInCategory.OST_Walls & isHoleCircled)
+            else if (builtInCategory == BuiltInCategory.OST_Walls & shape=="Circle")
             {
                 familyName = _familyTypes.FamilyTypes.Circled.FamilyNames.WallType;
             }

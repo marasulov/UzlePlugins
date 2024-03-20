@@ -6,7 +6,7 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="800" Width="820" MaxHeight="800" MaxWidth="820">
 
-    <Grid>
+        <Grid>
         <TabControl Width="Auto" Height="Auto">
             <TabItem Header="Connection">
                 <Grid>
@@ -19,46 +19,78 @@
 
                     <GroupBox Grid.Row="0" Grid.Column="0">
                         <GroupBox.Header>
-                            <Label Content="New holes"></Label>
+                            <Label Content="{Binding ElementName=NewHolesGrid, Path=Items.Count}"
+                                   ContentStringFormat="New ActualHoles {0}"/>
                         </GroupBox.Header >
                         <DataGrid Name="NewHolesGrid" 
-                                  VerticalAlignment="Top"
-                                  Height="230"
-                                  ItemsSource="{Binding Holes}"
-                                  AutoGenerateColumns="False"
-                                  ScrollViewer.CanContentScroll="True" 
-                                  ScrollViewer.VerticalScrollBarVisibility="Auto"
-                                  ScrollViewer.HorizontalScrollBarVisibility="Auto">
+                              VerticalAlignment="Top"
+                              Height="230"
+                              ItemsSource="{Binding NewHoles}"
+                              AutoGenerateColumns="False"
+                              ScrollViewer.CanContentScroll="True" 
+                              ScrollViewer.VerticalScrollBarVisibility="Auto"
+                              ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                              IsReadOnly="True">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="#"  Binding="{Binding Id}" />
-                                <DataGridTextColumn Header="Intersection with" Binding="{Binding IntersectionPoint}" />
-                                <DataGridTextColumn Header="Figure" Binding="{Binding HoleType}" />
-                                <DataGridTextColumn Header="Size" Binding="{Binding HoleSize}" />
-                                <DataGridTextColumn Header="Type of basis" Binding="{Binding HoleSourceType}"/>
-                                <DataGridTextColumn Header="Basis material" Binding="{Binding IsHoleCircled}"/>
-                                <DataGridComboBoxColumn Header="Hole figure" >
-                                </DataGridComboBoxColumn>
+
+                                <DataGridTemplateColumn>
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button Command="{Binding ElementName = window1, Path= DataContext.ZoomToPointCommand}" CommandParameter="{Binding Id}" Content="Show"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+
+                                <DataGridTextColumn Header="Figure" Binding="{Binding IntersectingElementName}" />
+                                <DataGridTextColumn Header="Size" Binding="{Binding IntersectingElementTypeSize}" />
+                                <DataGridTextColumn Header="Type of basis" Binding="{Binding SourceType}"/>
+                                <DataGridTextColumn Header="Basis material" Binding="{Binding SourceName}"/>
+
+                                <DataGridTemplateColumn Header="Shape">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <ComboBox ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.HoleFigureTypes}"
+                                                      SelectedIndex="0"
+                                                      SelectedItem="{Binding Shape, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
                                 <DataGridTextColumn Header="Offset" Binding="{Binding HoleOffset}"/>
-                                <DataGridCheckBoxColumn Header="Insert/Вставка" Binding="{Binding IsInsert}"/>
+                                <DataGridTemplateColumn Header="Insert">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <CheckBox IsChecked="{Binding IsInsert, UpdateSourceTrigger=PropertyChanged}" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
                             </DataGrid.Columns>
                         </DataGrid>
                     </GroupBox >
 
                     <GroupBox Grid.Row="1" Grid.Column="0">
                         <GroupBox.Header>
-                            <Label Content="Exist holes"></Label>
+                            <Label Content="{Binding ElementName=ExistHolesGrid, Path=Items.Count}"
+                                   ContentStringFormat="ExistHolesGrid {0}"/>
                         </GroupBox.Header >
                         <DataGrid Name="ExistHolesGrid" 
-                                  VerticalAlignment="Top"
-                                  Height="230"
-                                  ItemsSource="{Binding Holes}"
-                                  AutoGenerateColumns="False"
-                                  ScrollViewer.CanContentScroll="True" 
-                                  ScrollViewer.VerticalScrollBarVisibility="Auto"
-                                  ScrollViewer.HorizontalScrollBarVisibility="Auto">
+                              VerticalAlignment="Top"
+                              Height="230"
+                              ItemsSource="{Binding ActualHoles}"
+                              AutoGenerateColumns="False"
+                              ScrollViewer.CanContentScroll="True" 
+                              ScrollViewer.VerticalScrollBarVisibility="Auto"
+                              ScrollViewer.HorizontalScrollBarVisibility="Auto">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="#"  Binding="{Binding Id}" />
-                                <DataGridTextColumn Header="Intersection with" Binding="{Binding IntersectionPoint}" />
+                                <DataGridTemplateColumn>
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button Command="{Binding ElementName = window1, Path= DataContext.ZoomToPointCommand}" CommandParameter="{Binding Id}" Content="Show"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <!--<DataGridTextColumn Header="Intersection with" Binding="{Binding IntersectionPoint}" />-->
                                 <DataGridTextColumn Header="Figure" Binding="{Binding HoleType}" />
                                 <DataGridTextColumn Header="Size" Binding="{Binding HoleSize}" />
                                 <DataGridTextColumn Header="Type of basis" Binding="{Binding HoleSourceType}"/>
@@ -66,46 +98,58 @@
                                 <DataGridComboBoxColumn Header="Hole figure" >
                                 </DataGridComboBoxColumn>
                                 <DataGridTextColumn Header="Offset" Binding="{Binding HoleOffset}"/>
-                                <DataGridCheckBoxColumn Header="Insert/Вставка" Binding="{Binding IsInsert}"/>
-                            </DataGrid.Columns>
-                        </DataGrid>
-                    </GroupBox >
-
-                    <GroupBox Grid.Row="2" Grid.Column="0">
-                        <GroupBox.Header>
-                            <Label Content="Exist holes"></Label>
-                        </GroupBox.Header >
-                        <DataGrid Name="OutdatedGrid" 
-                                  VerticalAlignment="Top"
-                                  Height="130"
-                                  ItemsSource="{Binding Holes}"
-                                  AutoGenerateColumns="False"
-                                  ScrollViewer.CanContentScroll="True" 
-                                  ScrollViewer.VerticalScrollBarVisibility="Auto"
-                                  ScrollViewer.HorizontalScrollBarVisibility="Auto">
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="#"  Binding="{Binding Id}" />
-                                <DataGridTextColumn Header="Intersection with" Binding="{Binding IntersectionPoint}" />
-                                <DataGridTextColumn Header="Figure" Binding="{Binding HoleType}" />
-                                <DataGridTextColumn Header="Size" Binding="{Binding HoleSize}" />
-                                <DataGridTextColumn Header="Type of basis" Binding="{Binding HoleSourceType}"/>
-                                <DataGridTextColumn Header="Basis material" Binding="{Binding IsHoleCircled}"/>
-                                <DataGridComboBoxColumn Header="Hole figure" >
-                                </DataGridComboBoxColumn>
-                                <DataGridTextColumn Header="Offset" Binding="{Binding HoleOffset}"/>
-                                <DataGridCheckBoxColumn Header="Insert/Вставка" Binding="{Binding IsInsert}"/>
+                                <DataGridCheckBoxColumn Header="Insert/Вставка" Binding="{Binding IsDelete}"/>
                             </DataGrid.Columns>
                         </DataGrid>
                     </GroupBox>
 
-                    <Grid Row="3" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Top" >
+                    <GroupBox Grid.Row="2" Grid.Column="0">
+                        <GroupBox.Header>
+                            <Label Content="{Binding ElementName=OutdatedGrid, Path=Items.Count}"
+                                   ContentStringFormat="Outdated holes {0}"/>
+                        </GroupBox.Header >
+                        <DataGrid Name="OutdatedGrid" 
+                              VerticalAlignment="Top"
+                              Height="130"
+                              ItemsSource="{Binding OutdatedHoles}"
+                              AutoGenerateColumns="False"
+                              ScrollViewer.CanContentScroll="True" 
+                              ScrollViewer.VerticalScrollBarVisibility="Auto"
+                              ScrollViewer.HorizontalScrollBarVisibility="Auto">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="#"  Binding="{Binding Id}" />
+                                <DataGridTemplateColumn>
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button Command="{Binding ElementName = window1, Path= DataContext.ZoomToPointCommand}" CommandParameter="{Binding Id}" Content="Show"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTextColumn Header="Intersection with" Binding="{Binding Name}" />
+                                <DataGridTextColumn Header="Figure" Binding="{Binding HoleType}" />
+                                <DataGridTextColumn Header="Size" Binding="{Binding HoleSize}" />
+                                <DataGridTextColumn Header="Type of basis" Binding="{Binding HoleSourceType}"/>
+                                <DataGridTextColumn Header="Basis material" Binding="{Binding IsHoleCircled}"/>
+                                <DataGridComboBoxColumn Header="Hole figure" >
+                                </DataGridComboBoxColumn>
+                                <DataGridTextColumn Header="Offset" Binding="{Binding HoleOffset}"/>
+                                <DataGridCheckBoxColumn Header="Insert/Вставка" Binding="{Binding isDelete}"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </GroupBox>
+
+                    <Grid Row="3" HorizontalAlignment="Center" VerticalAlignment="Top" >
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="auto"/>
                         </Grid.ColumnDefinitions >
                         <Button Name="OkButton" Grid.Column="0" Width="100" Height="20" Content="Ok" Margin="5"
-                                Command="{Binding CreateHolesCommand}" CommandParameter="Clicked"/>
-                        <Button Name="CancelButton" Grid.Column="1" Width="100" Height="20" Content="Cancel" Command="{Binding ZoomToPointCommand}"  />
+                            Command="{Binding CreateHolesCommand}" CommandParameter="{Binding }"/>
+                        
+                        <Button Name="CancelButton" Grid.Column="1" Width="100" Height="20" Content="Cancel" 
+                                Command="{Binding CloseCommand}" >
+                            
+                        </Button>
                     </Grid>
                 </Grid>
             </TabItem>

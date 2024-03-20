@@ -11,11 +11,12 @@ namespace UzlePlugins.Views
         public HoleTaskView(HolesVm holesVm)
         {
             InitializeComponent();
-            
+
             DataContext = holesVm;
+
             holesVm.CloseAction ??= new Action(this.Close);
         }
     }
 
-   
+
 }

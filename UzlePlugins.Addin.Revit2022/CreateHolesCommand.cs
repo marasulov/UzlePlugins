@@ -10,8 +10,8 @@ using UzlePlugins.Views;
 namespace UzlePlugins.Addin.Revit2022
 {
 
-    [Transaction(TransactionMode.Manual)]
-    public class CreateHolesCommand : IExternalCommand
+    //[Transaction(TransactionMode.Manual)]
+    public class CreateHolesCommand //: IExternalCommand
     {
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
@@ -32,7 +32,7 @@ namespace UzlePlugins.Addin.Revit2022
             var holeInserter = container
                 .GetInstance<CreateHoleModel>();
 
-            holeInserter.CreateHole();
+            //holeInserter.CreateHole();
 
 
 

@@ -14,17 +14,6 @@ namespace UzlePlugins.Models.Revit2022.Services
             _uiDocument = uiDocument;
         }
 
-
-
-        //public void Zoom(EntityDTO element)
-        //{
-        //    var ids = new ElementId[]
-        //    {
-        //        new ElementId(int.Parse(element.Id))
-        //    };
-
-        //    _uiDocument?.ShowElements(ids);
-        //}
         public void Zoom(int id)
         {
             _uiDocument?.ShowElements(new ElementId(id));

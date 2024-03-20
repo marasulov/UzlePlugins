@@ -7,7 +7,7 @@ using UzlePlugins.Contracts;
 
 namespace UzlePlugins.Settings
 {
-    public class SettingsReader //: ISettingsReader
+    public class SettingsReader : ISettingsReader
     {
         private readonly string _jsonFileName;
 
@@ -31,12 +31,15 @@ namespace UzlePlugins.Settings
             return JsonSerializer.Deserialize<HoleFamilyTypes>(fs,options);
         }
 
-        public HoleFamilyNames GetFamilyNames()
+        public List<string> GetFamilyNames()
         {
             var options = new JsonSerializerOptions { WriteIndented = true };
 
             using FileStream fs = new FileStream(_jsonFileName, FileMode.Open);
-            return JsonSerializer.Deserialize<HoleFamilyNames>(fs,options);
+            var names = JsonSerializer.Deserialize<HoleFamilyNames>(fs,options);
+
+            return names.FamilyNames;
+
         }
 
         static string GetAssemblyDirectory(System.Reflection.Assembly assembly) {

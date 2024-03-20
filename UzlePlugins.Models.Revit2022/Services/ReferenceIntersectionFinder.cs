@@ -71,16 +71,13 @@ namespace UzlePlugins.RevitCore.Services
             var firstFaceRef = references[0];
             var secondFaceRef = references[0 + 1];
 
-            if (firstFaceRef.ElementId == secondFaceRef.ElementId)
-            {
-                Thickness = firstFaceRef.GlobalPoint.DistanceTo(secondFaceRef.GlobalPoint);
-                var intPoint = new XYZ(
-                    (firstFaceRef.GlobalPoint.X + secondFaceRef.GlobalPoint.X) / 2,
-                    (firstFaceRef.GlobalPoint.Y + secondFaceRef.GlobalPoint.Y) / 2,
-                    firstFaceRef.GlobalPoint.Z);
-                intersectPoints.Add(intPoint);
-
-            }
+            if (firstFaceRef.ElementId != secondFaceRef.ElementId) return intersectPoints;
+            Thickness = firstFaceRef.GlobalPoint.DistanceTo(secondFaceRef.GlobalPoint);
+            var intPoint = new XYZ(
+                (firstFaceRef.GlobalPoint.X + secondFaceRef.GlobalPoint.X) / 2,
+                (firstFaceRef.GlobalPoint.Y + secondFaceRef.GlobalPoint.Y) / 2,
+                firstFaceRef.GlobalPoint.Z);
+            intersectPoints.Add(intPoint);
 
             return intersectPoints;
         }
@@ -97,7 +94,7 @@ namespace UzlePlugins.RevitCore.Services
 
                 var ldoc = link.GetLinkDocument();
 
-                Element el = ldoc.GetElement(r.LinkedElementId) as HostObject; ;
+                Element el = ldoc.GetElement(r.LinkedElementId) as HostObject;
                 double structuralParameter;
 
                 Dictionary<BuiltInCategory, BuiltInParameter> builtInParameters =

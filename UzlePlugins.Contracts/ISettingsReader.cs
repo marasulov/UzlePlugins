@@ -6,6 +6,6 @@ namespace UzlePlugins.Contracts
 {
     public interface ISettingsReader
     {
-        string GetFamilyNames();
+        List<string> GetFamilyNames();
     }
 }

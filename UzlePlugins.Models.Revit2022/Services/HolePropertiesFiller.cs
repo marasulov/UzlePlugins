@@ -23,9 +23,9 @@ namespace UzlePlugins.RevitCore.Services
         public Element IntersectingElement { get; set; }
         public Reference IntersectedSourceElement { get; set; }
         public XYZ IntersectionPoint { get; set; }
-        public List<HoleFamilyModel> HolesProps { get; set; } = new ();
+        public List<HoleFamilyModel> HolesProps { get; set; } = new();
 
-        public void GetHoles(XYZ point, UIDocument uidoc)
+        public void GetHoles(XYZ point, UIDocument uidoc, XYZ normal)
         {
             int i = 0;
 
@@ -35,42 +35,70 @@ namespace UzlePlugins.RevitCore.Services
 
             var ldoc = link.GetLinkDocument();
 
-            Element el = ldoc.GetElement(IntersectedSourceElement.LinkedElementId) as Wall;
-            
-            var holeFamily = GetHoleProps(point, el, IntersectingElement, uidoc);
+            Element el = ldoc.GetElement(IntersectedSourceElement.LinkedElementId);
+            Element sourceElement = el.GetType().Name switch
+            {
+                "Wall" => el as Wall,
+                "Floor" => el as Floor,
+                _ => default
+            };
+
+            if (sourceElement == null) return;
+            var holeFamily = GetHoleProps(point, sourceElement, IntersectingElement, normal);
             HolesProps.Add(holeFamily);
         }
 
-        public HoleFamilyModel GetHoleProps(XYZ intPoint, Element sourceElement, Element element, UIDocument uidoc)
+        public HoleFamilyModel GetHoleProps(XYZ intPoint, Element sourceElement, Element element, XYZ normal)
         {
 
             var elType = element.GetType();
             double pipeSize = default;
             string elName = default;
+
+            double width = default;
+            double height = default;
             switch (elType.Name)
             {
                 //TODO 
                 case "Duct":
-                {
-                    var intersectElement = element as Duct;
-                    elName = intersectElement.MEPSystem.Name;
-                    pipeSize = intersectElement.get_Parameter(BuiltInParameter.RBS_CALCULATED_SIZE).AsDouble();
-                    break;
-                }
+                    {
+                        var intersectElement = element as Duct;
+                        elName = intersectElement.MEPSystem.Name;
+                        width = intersectElement.Width;
+                        height = intersectElement.Height;
+
+                        //pipeSize = intersectElement.get_Parameter(BuiltInParameter.RBS_CALCULATED_SIZE).AsDouble();
+                        break;
+                    }
                 case "Pipe":
-                {
-                    var intersectElement = element as Pipe;
-                    elName = intersectElement.PipeType.Name;
-                    pipeSize = intersectElement.get_Parameter(BuiltInParameter.RBS_PIPE_OUTER_DIAMETER).AsDouble();
-                    break;
-                }
+                    {
+                        var intersectElement = element as Pipe;
+                        elName = intersectElement.PipeType.Name;
+                        pipeSize = intersectElement.get_Parameter(BuiltInParameter.RBS_PIPE_OUTER_DIAMETER).AsDouble();
+                        break;
+                    }
             }
 
-            var sourceElementThickness = (sourceElement as Wall).Width;
-            //(element as Floor).get_Parameter();
+            var sourceType = sourceElement.GetType();
+            double sourceElementThickness = default;
+            switch (sourceType.Name)
+            {
+                case "Wall":
+                    {
+                        sourceElementThickness = (sourceElement as Wall).Width;
+                        break;
+                    }
+                case "Floor":
+                    {
+                        sourceElementThickness = (sourceElement as Floor).get_Parameter(BuiltInParameter.FLOOR_ATTR_THICKNESS_PARAM).AsDouble();
+                        break;
+                    }
+            }
 
-            return new HoleFamilyModel(uidoc, intPoint, element, elName,elType.Name, pipeSize,
-                sourceElement.Name, sourceElementThickness,true, 20, true,sourceElementThickness);
+            var holeFamilyModel = new HoleFamilyModel(intPoint, element, normal, sourceElement.Name, sourceType.Name, elName, elType.Name, pipeSize,
+                sourceElementThickness, true, 20, true, height, width);
+
+            return holeFamilyModel;
         }
     }
 }

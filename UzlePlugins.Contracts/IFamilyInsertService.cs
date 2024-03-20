@@ -1,6 +1,8 @@
-﻿namespace UzlePlugins.Contracts;
+﻿using UzlePlugins.Contracts.DTOs;
+
+namespace UzlePlugins.Contracts;
 
 public interface IFamilyInsertService
 {
-    void InsertFamily(object parameter);
+    void InsertFamily(AllHolesDto allHoles);
 }

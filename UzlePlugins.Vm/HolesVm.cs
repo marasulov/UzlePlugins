@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Windows.Input;
 using UzlePlugins.Contracts;
 using UzlePlugins.Contracts.DTOs;
 using UzlePlugins.Vm.Base;
@@ -10,34 +9,85 @@ namespace UzlePlugins.Vm
 {
     public class HolesVm : BaseViewModel
     {
-        private List<ActualHoleModelDto> _holes;
+        private List<ActualHoleModelDto> _actualHoles;
         private List<OutdatedFamilyDto> _outdatedHoles;
-        private List<ActualHoleModelDto> _newHoles;
+        private List<NewHolesDto> _newHoles;
 
-        private ICommand _createHolesCommand;
-        private bool _buttonClicked;
         private bool _canExecute = true;
-        private ICommand _zoomToPointCommand;
+        private string[] _holeFigureTypes;
+        private bool _isAllActualHoleSelected;
+        private bool _isAllNewHoleSelected;
+        private bool _isAllOutdatedHoleSelected;
 
         public HolesVm(
-            List<ActualHoleModelDto> newHoles, 
-            List<ActualHoleModelDto> holes, 
-            List<OutdatedFamilyDto> outdatedHoles, 
+            FindHolesCommand findHolesCommand,
+            CreateHolesCommand createHolesCommand,
             ZoomToPointCommand zoomToPointCommand)
         {
-            _newHoles = newHoles;
-            _holes = holes;
-            _outdatedHoles = outdatedHoles;
-
-            CreateHolesCommand = new CreateHolesCommand();
+            FindHolesCommand = findHolesCommand;
+            findHolesCommand.ResultObtained += FindHolesCommand_ResultObtained;
+            CreateHolesCommand = createHolesCommand;
             ZoomToPointCommand = zoomToPointCommand;
-
+            HoleFigureTypes = new[] { "Square", "Circle" };
         }
 
-        public List<ActualHoleModelDto> Holes
+
+        public bool IsAllNewHoleSelected
         {
-            get => _holes;
-            set => Set(ref _holes, value);
+            get => _isAllNewHoleSelected;
+            set
+            {
+                _isAllNewHoleSelected = value;
+                OnPropertyChanged();
+                NewHoles.ForEach(x => x.IsInsert = IsAllNewHoleSelected);
+            }
+        }
+
+        public bool IsAllActualHoleSelected
+        {
+            get => _isAllActualHoleSelected;
+            set
+            {
+                _isAllActualHoleSelected = value;
+                OnPropertyChanged();
+                ActualHoles.ForEach(x => x.IsDelete = IsAllActualHoleSelected);
+            }
+        }
+
+        public bool IsAllOutdatedHoleSelected
+        {
+            get => _isAllOutdatedHoleSelected;
+            set
+            {
+                _isAllOutdatedHoleSelected = value;
+                OnPropertyChanged();
+                OutdatedHoles.ForEach(x => x.IsDelete = IsAllOutdatedHoleSelected);
+            }
+        }
+
+        private void FindHolesCommand_ResultObtained(AllHolesDto obj)
+        {
+            ActualHoles = obj.ActualFamiliesDtos;
+            NewHoles = obj.NewFamiliesDtos;
+            OutdatedHoles = obj.OutdatedFamiliesDtos;
+        }
+
+        public string[] HoleFigureTypes
+        {
+            get => _holeFigureTypes;
+            set => Set(ref _holeFigureTypes, value);
+        }
+
+        public List<NewHolesDto> NewHoles
+        {
+            get => _newHoles;
+            set => Set(ref _newHoles, value);
+        }
+
+        public List<ActualHoleModelDto> ActualHoles
+        {
+            get => _actualHoles;
+            set => Set(ref _actualHoles, value);
         }
 
         public List<OutdatedFamilyDto> OutdatedHoles
@@ -46,63 +96,12 @@ namespace UzlePlugins.Vm
             set => Set(ref _outdatedHoles, value);
         }
 
-        public List<ActualHoleModelDto> NewHoles
-        {
-            get => _newHoles;
-            set => Set(ref _newHoles, value);
-        }
-
-
-
-
-        public bool CanExecute
-        {
-            get => this._canExecute;
-
-            set
-            {
-                if (_canExecute == value)
-                {
-                    return;
-                }
-
-                this._canExecute = value;
-            }
-        }
-
         public Action CloseAction { get; set; }
 
+        public FindHolesCommand FindHolesCommand { get; }
 
-        public ICommand CreateHolesCommand
-        {
-            get => _createHolesCommand;
-            set => Set(ref _createHolesCommand, value);
-        }
+        public CreateHolesCommand CreateHolesCommand { get; }
 
-        public ICommand ZoomToPointCommand
-        {
-            get => _zoomToPointCommand;
-            set => Set(ref _zoomToPointCommand, value);
-        }
-
-        public void CloseWindow(object parameter)
-        {
-            string clicked = parameter as string;
-            if (clicked == "Clicked")
-            {
-                _buttonClicked = true;
-                CloseAction();
-                OnRequestClose(this, new EventArgs());
-            }
-        }
-
-        public event EventHandler OnRequestClose;
-
-        public bool ButtonClicked
-        {
-            get => _buttonClicked;
-            set => Set(ref _buttonClicked, value);
-        }
-
+        public ZoomToPointCommand ZoomToPointCommand { get; }
     }
 }

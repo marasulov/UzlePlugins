@@ -24,6 +24,7 @@ namespace UzlePlugins.Vm.Commands
         public override void Execute(object parameter)
         {
             var id = Convert.ToInt32(parameter);
+
             _intersectionPointZoom.Zoom(id);
         }
     }

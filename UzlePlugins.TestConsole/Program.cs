@@ -5,65 +5,50 @@ using System.Drawing;
 using System.Windows.Documents;
 using System.Windows.Media.Media3D;
 
-
-
-
-
-//SettingsReader reader = new SettingsReader();
-//reader.GetFamilyTypes();
-
-// Create a list of parts.
-List<Part> parts = new List<Part>();
-
-// Add parts to the list.
-parts.Add(new Part() { PartName = "crank arm", PartId = 1234 });
-parts.Add(new Part() { PartName = "chain ring", PartId = 1334 });
-parts.Add(new Part() { PartName = "regular seat", PartId = 1434 });
-parts.Add(new Part() { PartName = "banana seat", PartId = 1444 });
-parts.Add(new Part() { PartName = "cassette", PartId = 1534 });
-parts.Add(new Part() { PartName = "shift lever", PartId = 1634 }); ;
-
-// Write out the parts in the list. This will call the overridden ToString method
-// in the Part class.
-Console.WriteLine();
-foreach (Part aPart in parts)
+// Sample list of PointData instances
+List<PointData> pointDataList = new List<PointData>
 {
-    Console.WriteLine(aPart);
+    new PointData(1, new XYZ(1, 2, 3)),
+    new PointData(2, new XYZ(4, 5, 6)),
+    new PointData(3, new XYZ(7, 8, 9))
+};
+
+// Select all XYZ objects from the list of PointData instances
+var allXYZs = pointDataList.Select(pd => pd.Position);
+
+// Output the selected XYZ objects
+Console.WriteLine("All XYZ objects from the list of PointData:");
+foreach (var xyz in allXYZs)
+{
+    Console.WriteLine($"({xyz.X}, {xyz.Y}, {xyz.Z})");
 }
 
-// Check the list for part #1734. This calls the IEquatable.Equals method
-// of the Part class, which checks the PartId for equality.
-Console.WriteLine("\nContains: Part with Id=1734: {0}",
-    parts.Contains(new Part { PartId = 1234, PartName = "crank arm" }));
+// Your XYZ class
+public class XYZ
+{
+    public int X { get; set; }
+    public int Y { get; set; }
+    public int Z { get; set; }
 
-// Find items where name contains "seat".
-Console.WriteLine("\nFind: Part where name contains \"seat\": {0}",
-    parts.Find(x => x.PartName.Contains("seat")));
+    public XYZ(int x, int y, int z)
+    {
+        X = x;
+        Y = y;
+        Z = z;
+    }
+}
 
-// Check if an item with Id 1444 exists.
-Console.WriteLine("\nExists: Part with Id=1444: {0}",
-    parts.Exists(x => x.PartId == 1444));
+public class PointData
+{
+    public int ID { get; set; }
+    public XYZ Position { get; set; }
 
-
-List<Point3D> exitList = new List<Point3D>();
-
-exitList.Add(new (55,10,5));
-exitList.Add(new (10,12,6));
-exitList.Add(new (5,1,6));
-exitList.Add(new (1,56,133));
-exitList.Add(new (3,85,6565));
-
-Console.WriteLine("\nContains: POint: {0}",
-    exitList.Contains(new (1,56,133) ));
-
-
-var source = new List<string>() { "a", "b", "c" };
-var compare = new List<string>() { "b", "c", "d" };
-var result = source.Intersect(compare);
-
-var old = source.Except(compare);
-var newP = compare.Except(source);
-Console.WriteLine("Hello, World!");
+    public PointData(int id, XYZ position)
+    {
+        ID = id;
+        Position = position;
+    }
+}
 
 public class Part : IEquatable<Part>
 {

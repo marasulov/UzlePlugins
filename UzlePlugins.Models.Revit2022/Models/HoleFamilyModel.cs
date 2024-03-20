@@ -10,13 +10,13 @@ namespace UzlePlugins.RevitCore.Models
     {
         private readonly UIDocument _uidoc;
 
-        public HoleFamilyModel(UIDocument uidoc, XYZ intersectionPoint, Element intersectingElement)
-        {
-            _uidoc = uidoc;
+        //public HoleFamilyModel(UIDocument uidoc, XYZ intersectionPoint, Element intersectingElement)
+        //{
+        //    _uidoc = uidoc;
 
-            IntersectionPoint = intersectionPoint;
-            IntersectingElement = intersectingElement;
-        }
+        //    IntersectionPoint = intersectionPoint;
+        //    IntersectingElement = intersectingElement;
+        //}
 
 
         /// <summary>
@@ -25,45 +25,51 @@ namespace UzlePlugins.RevitCore.Models
         /// <param name="uidoc"></param>
         /// <param name="intersectionPoint"></param>
         /// <param name="intersectingElement"></param>
+        /// <param name="normal"></param>
         /// <param name="intersectingElementName"></param>
         /// <param name="intersectingElementType"></param>
         /// <param name="intersectingElementTypeSize"></param>
-        /// <param name="intersectedSourceType"></param>
+        /// <param name="sourceType"></param>
         /// <param name="intersectedSourceThickness"></param>
         /// <param name="isHoleRectangled"></param>
         /// <param name="holeOffset"></param>
         /// <param name="isInsert"></param>
         /// <param name="intersectingElementHeight"></param>
+        /// <param name="sourceName"></param>
         /// <param name="intersectingElementWidth"></param>
         public HoleFamilyModel(
-            UIDocument uidoc,
-            XYZ intersectionPoint, 
+            XYZ intersectionPoint,
             Element intersectingElement,
-            string intersectingElementName, 
+            XYZ normal,
+            string sourceName,
+            string sourceType,
+            string intersectingElementName,
             string intersectingElementType,
             double intersectingElementTypeSize,
-            string intersectedSourceType,
             double intersectedSourceThickness,
             bool isHoleRectangled,
-            double holeOffset, 
+            double holeOffset,
             bool isInsert,
             double intersectingElementHeight,
             double intersectingElementWidth = 0)
         {
-            _uidoc = uidoc;
             IntersectionPoint = intersectionPoint;
             IntersectingElement = intersectingElement;
+            Normal = normal;
             IntersectingElementName = intersectingElementName;
             IntersectingElementType = intersectingElementType;
             IntersectingElementTypeSize = intersectingElementTypeSize;
             IntersectingElementHeight = intersectingElementHeight;
             IntersectingElementWidth = intersectingElementWidth;
-            IntersectedSourceType = intersectedSourceType;
+            SourceType = sourceType;
+            SourceName = sourceName;
             IntersectedSourceThickness = intersectedSourceThickness;
             IsHoleRectangled = isHoleRectangled;
             HoleOffset = holeOffset;
             IsInsert = isInsert;
         }
+
+        public string SourceName { get; set; }
 
         /// <summary>
         /// Точка пересечения
@@ -74,6 +80,8 @@ namespace UzlePlugins.RevitCore.Models
         /// Пересекающийся элемент
         /// </summary>
         public Element IntersectingElement { get; set; }
+
+        public XYZ Normal { get; }
 
         /// <summary>
         /// Название пересекающего элемента
@@ -96,7 +104,7 @@ namespace UzlePlugins.RevitCore.Models
         /// <summary>
         /// Тип материала пересеченной основы
         /// </summary>
-        public string IntersectedSourceType { get; set; }
+        public string SourceType { get; set; }
 
         public double IntersectedSourceThickness { get; }
 
@@ -114,19 +122,6 @@ namespace UzlePlugins.RevitCore.Models
         /// Вставка
         /// </summary>
         public bool IsInsert { get; set; }
-
-        //public void FamilyZoom(int id)
-        //{
-        //    //XYZ point = new XYZ();// TODO
-        //    //Options opt = new Options();
-        //    //opt.View = _uidoc.ActiveView;
-        //    //GeometryElement geoEle = point.get_Geometry(opt);
-
-        //    //_uidoc.ActiveView = view
-        //    //UIView.ZoomAndCenterRectangle(m, n);
-
-        //    _uidoc.ShowElements(new ElementId(id));
-        //}
     }
 
 }

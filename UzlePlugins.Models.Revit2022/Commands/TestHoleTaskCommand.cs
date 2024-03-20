@@ -29,7 +29,7 @@ namespace UzlePlugins.RevitCore.Commands
             double pipeDiametrForFilter = 50;
 
             var settingsReader = new SettingsReader();
-            var holeFamilyNames = settingsReader.GetFamilyNames().FamilyNames;
+            var holeFamilyNames = settingsReader.GetFamilyNames();
             var recFamilyNames = settingsReader.GetFamilyTypes().FamilyTypes.Rectangled.FamilyNames;
             var circledFamilyNames = settingsReader.GetFamilyTypes().FamilyTypes.Circled.FamilyNames;
             var linkedDocs = GetLinkedDocuments(doc);
@@ -68,227 +68,227 @@ namespace UzlePlugins.RevitCore.Commands
 
             Debug.Print($"{familyInstances.Count} exist");
 
-            using (TransactionGroup transactionGroup = new TransactionGroup(doc))
-            {
-                var collector3dView = new FilteredElementCollector(doc);
-                Func<View3D, bool> isNotTemplate = v3 => !(v3.IsTemplate);
-                View3D view3D = collector3dView
-                    .OfClass(typeof(View3D))
-                    .Cast<View3D>()
-                    .First(isNotTemplate);
+            //using (TransactionGroup transactionGroup = new TransactionGroup(doc))
+            //{
+            //    var collector3dView = new FilteredElementCollector(doc);
+            //    Func<View3D, bool> isNotTemplate = v3 => !(v3.IsTemplate);
+            //    View3D view3D = collector3dView
+            //        .OfClass(typeof(View3D))
+            //        .Cast<View3D>()
+            //        .First(isNotTemplate);
 
-                //исходные точки
-                var newIntersections = new List<XYZ>();
+            //    //исходные точки
+            //    var newIntersections = new List<XYZ>();
 
-                var familyPoints = familyInstances.Where(w => w.Location is LocationPoint)
-                    .Select(f => f.Location as LocationPoint)
-                    .Select(loc => loc.Point).ToArray();
+            //    var familyPoints = familyInstances.Where(w => w.Location is LocationPoint)
+            //        .Select(f => f.Location as LocationPoint)
+            //        .Select(loc => loc.Point).ToArray();
 
-                var smallestDiametr = UnitUtils.ConvertToInternalUnits(pipeDiametrForFilter, UnitTypeId.Millimeters);
-                var pipeCollector = new FilteredElementCollector(doc).OfClass(typeof(Pipe)).Cast<Pipe>()
-                    .Where(w => w.Diameter > smallestDiametr);
+            //    var smallestDiametr = UnitUtils.ConvertToInternalUnits(pipeDiametrForFilter, UnitTypeId.Millimeters);
+            //    var pipeCollector = new FilteredElementCollector(doc).OfClass(typeof(Pipe)).Cast<Pipe>()
+            //        .Where(w => w.Diameter > smallestDiametr);
 
-                var ductCollector = new FilteredElementCollector(doc).OfClass(typeof(Duct)).Cast<Duct>()
-                    .Where(w => w.Width > smallestDiametr);
+            //    var ductCollector = new FilteredElementCollector(doc).OfClass(typeof(Duct)).Cast<Duct>()
+            //        .Where(w => w.Width > smallestDiametr);
 
-                //Todo : надо сделать чтобы создались список моделей которые содержат инфу о точках пересечения
+            //   
 
-                List<HoleFamilyModel> wallHoles = new List<HoleFamilyModel>();
+            //    List<HoleFamilyModel> wallHoles = new List<HoleFamilyModel>();
 
-                //из коллекции труб создаем отверстия
-                foreach (var pipeElement in pipeCollector)
-                {
-                    ReferenceIntersectionFinder refFinder = new ReferenceIntersectionFinder(doc, pipeElement, view3D);
+            //    //из коллекции труб создаем отверстия
+            //    foreach (var pipeElement in pipeCollector)
+            //    {
+            //        ReferenceIntersectionFinder refFinder = new ReferenceIntersectionFinder(doc, pipeElement, view3D);
 
-                    refFinder.GetStructuralReferences(BuiltInCategory.OST_Walls);
+            //        refFinder.GetStructuralReferences(BuiltInCategory.OST_Walls);
 
-                    if (refFinder.WallReferences.Count > 0)
-                    {
-                        var points = refFinder.GetIntersectionsPoints(refFinder.WallReferences);
+            //        if (refFinder.WallReferences.Count > 0)
+            //        {
+            //            var points = refFinder.GetIntersectionsPoints(refFinder.WallReferences);
 
-                        newIntersections.AddRange(points);
+            //            newIntersections.AddRange(points);
 
-                        var i = 0;
+            //            var i = 0;
 
-                        var holes = new List<HoleFamilyModel>();
-                        foreach (var point in points)
-                        {
-                            var sourceElement = refFinder.WallReferences[i];
-                            if (sourceElement == null) continue;
-                            var holeFiller = new HolePropertiesFiller(doc, pipeElement, sourceElement, point);
-                            holeFiller.GetHoles(point, uidoc);
-                            holes = holeFiller.HolesProps;
-                        }
-                        wallHoles.AddRange(holes);
-                    }
+            //            var holes = new List<HoleFamilyModel>();
+            //            foreach (var point in points)
+            //            {
+            //                var sourceElement = refFinder.WallReferences[i];
+            //                if (sourceElement == null) continue;
+            //                var holeFiller = new HolePropertiesFiller(doc, pipeElement, sourceElement, point);
+            //                holeFiller.GetHoles(point, uidoc);
+            //                holes = holeFiller.HolesProps;
+            //            }
+            //            wallHoles.AddRange(holes);
+            //        }
 
-                    refFinder.GetStructuralReferences(BuiltInCategory.OST_Floors);
-                    if (refFinder.FloorReferences.Count > 0)
-                    {
-                        newIntersections.AddRange(refFinder.GetIntersectionsPoints(refFinder.FloorReferences));
-                    }
-                }
+            //        refFinder.GetStructuralReferences(BuiltInCategory.OST_Floors);
+            //        if (refFinder.FloorReferences.Count > 0)
+            //        {
+            //            newIntersections.AddRange(refFinder.GetIntersectionsPoints(refFinder.FloorReferences));
+            //        }
+            //    }
 
-                List<IHoleModel> actualHoles = new();
-                List<IHoleModel> newHoles = new();
+            //    List<IHoleModel> actualHoles = new();
+            //    List<IHoleModel> newHoles = new();
 
-                var outdatedFamilies = new List<IOutdatedFamily>();
+            //    var outdatedFamilies = new List<IOutdatedFamily>();
 
-                // если есть семейства значит не первый раз вставляются семейства отверстий
+            //    // если есть семейства значит не первый раз вставляются семейства отверстий
 
-                if (familyPoints.Length > 0)
-                {
-                    var actualPoints = newIntersections.Intersect(familyPoints, new XYZComparer()).ToArray();
-                    var newPoints = newIntersections.Except(familyPoints, new XYZComparer()).ToArray(); // newIntersections.Except(familyPoints)
-                    var deletedPoints = familyPoints.Except(newIntersections, new XYZComparer()).ToArray(); // familyPoints.Except(newIntersections)
-                    var typeOfSource = "Wall";
+            //    if (familyPoints.Length > 0)
+            //    {
+            //        var actualPoints = newIntersections.Intersect(familyPoints, new XYZComparer()).ToArray();
+            //        var newPoints = newIntersections.Except(familyPoints, new XYZComparer()).ToArray(); // newIntersections.Except(familyPoints)
+            //        var deletedPoints = familyPoints.Except(newIntersections, new XYZComparer()).ToArray(); // familyPoints.Except(newIntersections)
+            //        var typeOfSource = "Wall";
 
-                    foreach (var actualPoint in actualPoints)
-                    {
-                        var actualModels = wallHoles.Where(holeFamilyModel =>
-                            actualPoint == holeFamilyModel.IntersectionPoint);
+            //        foreach (var actualPoint in actualPoints)
+            //        {
+            //            var actualModels = wallHoles.Where(holeFamilyModel =>
+            //                actualPoint == holeFamilyModel.IntersectionPoint);
 
-                        actualHoles.AddRange(actualModels.Select(actualModel =>
-                            new ActualHoleModelDto(
-                                actualModel.IntersectingElement.Id.IntegerValue,
-                                actualModel.IntersectionPoint.ToString(),
-                                actualModel.IntersectingElementName,
-                                actualModel.IntersectedSourceType,
-                                actualModel.IntersectedSourceType,
-                                actualModel.IntersectingElementTypeSize,
-                                actualModel.IntersectedSourceType,
-                                true,
-                                UnitUtils.ConvertToInternalUnits(20, UnitTypeId.Millimeters),
-                                true,
-                                actualModel.IntersectedSourceThickness)));
-                    }
+            //            actualHoles.AddRange(actualModels.Select(actualModel =>
+            //                new ActualHoleModelDto(
+            //                    actualModel.IntersectingElement.Id.IntegerValue,
+            //                    actualModel.IntersectionPoint.ToString(),
+            //                    actualModel.IntersectingElementName,
+            //                    actualModel.SourceType,
+            //                    actualModel.SourceType,
+            //                    actualModel.IntersectingElementTypeSize,
+            //                    actualModel.SourceType,
+            //                    true,
+            //                    UnitUtils.ConvertToInternalUnits(20, UnitTypeId.Millimeters),
+            //                    true,
+            //                    actualModel.IntersectedSourceThickness)));
+            //        }
 
-                    foreach (var newPoint in newPoints)
-                    {
-                        var newModels = wallHoles.Where(holeFamilyModel =>
-                            newPoint == holeFamilyModel.IntersectionPoint);
+            //        foreach (var newPoint in newPoints)
+            //        {
+            //            var newModels = wallHoles.Where(holeFamilyModel =>
+            //                newPoint == holeFamilyModel.IntersectionPoint);
 
-                        newHoles.AddRange(
-                            newModels.Select(actualModel =>
-                                new ActualHoleModelDto(
-                                    actualModel.IntersectingElement.Id.IntegerValue,
-                                    actualModel.IntersectionPoint.ToString(),
-                                    actualModel.IntersectingElementName,
-                                    actualModel.IntersectedSourceType,
-                                    actualModel.IntersectedSourceType,
-                                    actualModel.IntersectingElementTypeSize,
-                                    actualModel.IntersectedSourceType,
-                                    true,
-                                    UnitUtils.ConvertToInternalUnits(20, UnitTypeId.Millimeters),
-                                    true,
-                                    actualModel.IntersectedSourceThickness)));
-                    }
+            //            newHoles.AddRange(
+            //                newModels.Select(actualModel =>
+            //                    new ActualHoleModelDto(
+            //                        actualModel.IntersectingElement.Id.IntegerValue,
+            //                        actualModel.IntersectionPoint.ToString(),
+            //                        actualModel.IntersectingElementName,
+            //                        actualModel.SourceType,
+            //                        actualModel.SourceType,
+            //                        actualModel.IntersectingElementTypeSize,
+            //                        actualModel.SourceType,
+            //                        true,
+            //                        UnitUtils.ConvertToInternalUnits(20, UnitTypeId.Millimeters),
+            //                        true,
+            //                        actualModel.IntersectedSourceThickness)));
+            //        }
 
-                    foreach (var deletedPoint in deletedPoints)
-                    {
-                        foreach (var family in familyInstances)
-                        {
-                            var loc = family.Location as LocationPoint;
+            //        foreach (var deletedPoint in deletedPoints)
+            //        {
+            //            foreach (var family in familyInstances)
+            //            {
+            //                var loc = family.Location as LocationPoint;
 
-                            if (!deletedPoint.IsAlmostEqualTo(loc?.Point)) continue;
-                            var familyName = family.Symbol.Family.Name;
-                            outdatedFamilies.Add(new OutdatedFamilyDto(family.Id.IntegerValue, familyName));
-                        }
-                    }
-                }
-                else
-                {
-                    var j = 0;
-                    foreach (var hole in wallHoles)
-                    {
-                        var holeModel = new ActualHoleModelDto(
-                            j,
-                            hole.IntersectionPoint.ToString(),
-                            hole.IntersectingElementName,
-                            hole.IntersectedSourceType,
-                            hole.IntersectingElementType,
-                            hole.IntersectingElementTypeSize,
-                            "", hole.IsHoleRectangled, hole.HoleOffset, hole.IsInsert, hole.IntersectedSourceThickness);
+            //                if (!deletedPoint.IsAlmostEqualTo(loc?.Point)) continue;
+            //                var familyName = family.Symbol.Family.Name;
+            //                outdatedFamilies.Add(new OutdatedFamilyDto(family.Id.IntegerValue, familyName));
+            //            }
+            //        }
+            //    }
+            //    else
+            //    {
+            //        var j = 0;
+            //        foreach (var hole in wallHoles)
+            //        {
+            //            var holeModel = new ActualHoleModelDto(
+            //                j,
+            //                hole.IntersectionPoint.ToString(),
+            //                hole.IntersectingElementName,
+            //                hole.SourceType,
+            //                hole.IntersectingElementType,
+            //                hole.IntersectingElementTypeSize,
+            //                "", hole.IsHoleRectangled, hole.HoleOffset, hole.IsDelete, hole.IntersectedSourceThickness);
 
-                        actualHoles.Add(holeModel);
-                        j++;
-                    }
-                }
+            //            actualHoles.Add(holeModel);
+            //            j++;
+            //        }
+            //    }
 
-                Debug.Print($"{newIntersections.Count} точек {wallHoles.Count} отверстий");
+            //    Debug.Print($"{newIntersections.Count} точек {wallHoles.Count} отверстий");
 
-                //HolesVm holesVm = new HolesVm(newHoles, actualHoles, outdatedFamilies);
-                //HoleTaskView view = new HoleTaskView(holesVm);
-                //view.Show();
+            //    //HolesVm holesVm = new HolesVm(newHoles, actualHoles, outdatedFamilies);
+            //    //HoleTaskView view = new HoleTaskView(holesVm);
+            //    //view.Show();
 
-                //if (!holesVm.ButtonClicked) return Result.Cancelled;
+            //    //if (!holesVm.ButtonClicked) return Result.Cancelled;
 
-                ////TODO have to change family insert service, deleting points have to get from datagrid
+            //   
 
-                //var selectedHoles = holesVm.NewHoles.Where(x => x.IsInsert);
-                //if (selectedHoles.Count() > 0)
-                //{
-                //    Debug.Print($"have to insert {selectedHoles.Count()} families");
-                //}
+            //    //var selectedHoles = holesVm.NewHoles.Where(x => x.IsDelete);
+            //    //if (selectedHoles.Count() > 0)
+            //    //{
+            //    //    Debug.Print($"have to insert {selectedHoles.Count()} families");
+            //    //}
 
 
-                //transactionGroup.Start("Hole trash for walls with pipes");
+            //    //transactionGroup.Start("Hole trash for walls with pipes");
 
-                //using (Transaction t = new Transaction(doc))
-                //{
-                //    t.Start("Hole task for walls and floors with pipes");
+            //    //using (Transaction t = new Transaction(doc))
+            //    //{
+            //    //    t.Start("Hole task for walls and floors with pipes");
 
-                //    FamilyTypeFinder familyTypeFinder = new FamilyTypeFinder();
-                    
-                //    var wallsFamilyName = familyTypeFinder.GetFamilyType(BuiltInCategory.OST_Walls, true);
-                //    var wallsFamilyType = familyTypeFinder.FamilyParameters;
+            //    //    FamilyTypeFinderService familyTypeFinder = new FamilyTypeFinderService();
 
-                //    FamilySymbol symbol = familyTypeFinder.GetFamilySymbolToPlace(doc, wallsFamilyName);
-                //    FamilyInsertService insertService = new FamilyInsertService(doc, symbol);
+            //    //    var wallsFamilyName = familyTypeFinder.GetFamilyType(BuiltInCategory.OST_Walls, true);
+            //    //    var wallsFamilyType = familyTypeFinder.FamilyParameters;
 
-                //    foreach (var hole in selectedHoles)
-                //    {
-                //        //Reference r = new Reference(pipeElement);
-                //        //ReferenceIntersectionFinder refFinder = new ReferenceIntersectionFinder(doc, pipeElement, view3D);
+            //    //    FamilySymbol symbol = familyTypeFinder.GetFamilySymbolToPlace(doc, wallsFamilyName);
+            //    //    FamilyInsertService insertService = new FamilyInsertService(doc, symbol);
 
-                        
+            //    //    foreach (var hole in selectedHoles)
+            //    //    {
+            //    //        //Reference r = new Reference(pipeElement);
+            //    //        //ReferenceIntersectionFinder refFinder = new ReferenceIntersectionFinder(doc, pipeElement, view3D);
 
-                //        insertService.InsertFamily(symbol, offset, hole.SourceElementWidth, hole.IntersectingElementTypeSize, true);
-                //    }
 
-                //    //familyTypeFinder.GetFamilyType(BuiltInCategory.OST_Floors, true);
-                //    //var floorsFamilyName = familyTypeFinder.FamilyName;
-                //    //var floorsFamilyType = familyTypeFinder.FamilyParameters;
-                //    //symbol = familyTypeFinder.GetFamilySymbolToPlace(doc, floorsFamilyName);
-                //    //if (symbol != null)
-                //    //    foreach (var pipeElement in pipeCollector)
-                //    //    {
-                //    //        //InsertFamily(doc, pipeElement, view3D, 1, BuiltInCategory.OST_Floors, symbol, true);
-                //    //        //Reference r = new Reference(pipeElement);
-                //    //        ReferenceIntersectionFinder refFinder = new ReferenceIntersectionFinder(doc, pipeElement, view3D);
-                //    //        insertService = new FamilyInsertService(doc, symbol);
-                //    //        insertService.InsertFamily(symbol, offset, , true);
-                //    //    }
 
-                //    t.Commit();
-                //}
-                ////using (Transaction t = new Transaction(doc))
-                ////{
-                ////    t.Start("Hole task for walls and floors with ducts");
+            //    //        insertService.InsertFamily(symbol, offset, hole.SourceElementWidth, hole.IntersectingElementTypeSize, true);
+            //    //    }
 
-                ////    foreach (Element ductElement in ductCollector)
-                ////    {
+            //    //    //familyTypeFinder.GetFamilyType(BuiltInCategory.OST_Floors, true);
+            //    //    //var floorsFamilyName = familyTypeFinder.FamilyName;
+            //    //    //var floorsFamilyType = familyTypeFinder.FamilyParameters;
+            //    //    //symbol = familyTypeFinder.GetFamilySymbolToPlace(doc, floorsFamilyName);
+            //    //    //if (symbol != null)
+            //    //    //    foreach (var pipeElement in pipeCollector)
+            //    //    //    {
+            //    //    //        //InsertFamily(doc, pipeElement, view3D, 1, BuiltInCategory.OST_Floors, symbol, true);
+            //    //    //        //Reference r = new Reference(pipeElement);
+            //    //    //        ReferenceIntersectionFinder refFinder = new ReferenceIntersectionFinder(doc, pipeElement, view3D);
+            //    //    //        insertService = new FamilyInsertService(doc, symbol);
+            //    //    //        insertService.InsertFamily(symbol, offset, , true);
+            //    //    //    }
 
-                ////        InsertFamily(doc, ductElement, view3D, 1, BuiltInCategory.OST_Walls, true);
-                ////        InsertFamily(doc, ductElement, view3D, 1, BuiltInCategory.OST_Floors, true);
+            //    //    t.Commit();
+            //    //}
+            //    ////using (Transaction t = new Transaction(doc))
+            //    ////{
+            //    ////    t.Start("Hole task for walls and floors with ducts");
 
-                ////    }
+            //    ////    foreach (Element ductElement in ductCollector)
+            //    ////    {
 
-                ////    t.Commit();
-                ////}
+            //    ////        InsertFamily(doc, ductElement, view3D, 1, BuiltInCategory.OST_Walls, true);
+            //    ////        InsertFamily(doc, ductElement, view3D, 1, BuiltInCategory.OST_Floors, true);
 
-                //transactionGroup.Assimilate();
-            }
+            //    ////    }
+
+            //    ////    t.Commit();
+            //    ////}
+
+            //    //transactionGroup.Assimilate();
+            //}
 
             return Result.Succeeded;
         }
@@ -318,7 +318,6 @@ namespace UzlePlugins.RevitCore.Commands
         }
 
 
-        //TODO 
         private void SetCircledFamilyParameter(IList<Parameter> parameters, string familyLength, string familyWidth, Element element, double offset, ReferenceIntersectionFinder refFinder)
         {
             foreach (var parameter in parameters)
@@ -408,7 +407,7 @@ namespace UzlePlugins.RevitCore.Commands
         //            FindReferenceTarget.Element, view3D);
 
         //    refIntersector.FindReferencesInRevitLinks = true;
-        //    //todo
+        //    
         //    IList<ReferenceWithContext> referencesWithContext
         //        = refIntersector.Find(startPoint,
         //            rayDirection);

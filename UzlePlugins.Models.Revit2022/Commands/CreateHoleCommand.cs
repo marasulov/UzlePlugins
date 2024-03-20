@@ -3,9 +3,8 @@ using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using SimpleInjector;
 using UzlePlugins.Contracts;
-using UzlePlugins.Contracts.DTOs;
-using UzlePlugins.Models.Revit2022.Models;
 using UzlePlugins.Models.Revit2022.Services;
+using UzlePlugins.Settings;
 using UzlePlugins.Views;
 using UzlePlugins.Vm;
 using UzlePlugins.Vm.Commands;
@@ -15,6 +14,8 @@ namespace UzlePlugins.Models.Revit2022.Commands
     [Transaction(TransactionMode.Manual)]
     public class CreateHoleCommand : IExternalCommand
     {
+        private static HoleTaskView? _windowInstanse;
+
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             var uiDocument = commandData
@@ -31,30 +32,29 @@ namespace UzlePlugins.Models.Revit2022.Commands
             container.RegisterInstance(uiDocument);
             //container.Register<RevitRepository>();
 
+            container.Register<IFamilyInsertService, FamilyInsertService>();
             container.Register<IZoomEntity, ZoomElementService>();
-            
-            container.Register<CreateHoleModel>();
-           
-            var holeInserter = container
-                .GetInstance<CreateHoleModel>();
-
-            holeInserter.CreateHole();
-
-
-
-            //container.Register<ISettingsReader, SettingsReader>();
-
-            //container.Register<IGetEntities, GetElementsService>();
-            //container.Register<IPickEntities, PickElementsService>();
-
-            //container.Register<IWatchDocument, WatchDocumentService>();
-            //container.Register<IDeleteEnitity, DeleteElementService>();
-            //container.Register<ElementToDTOConverter>();
+            container.Register<IFindHoleService, FindHolesService>();
+            container.Register<ISettingsReader, SettingsReader>();
+            container.Register<EntityToDtoConverter>();
 
             var window = container
                 .GetInstance<HoleTaskView>();
 
-            window.ShowDialog();
+            var context = (HolesVm)window.DataContext;
+            context.FindHolesCommand.Execute(null);
+
+            if (_windowInstanse == null)
+            {
+                _windowInstanse = window;
+                window.ShowDialog();
+            }
+            else
+            {
+                window.Activate();
+            }
+
+            
 
             return Result.Succeeded;
         }
@@ -65,7 +65,7 @@ namespace UzlePlugins.Models.Revit2022.Commands
             var container = new Container();
             container.Register<CreateHolesCommand>();
             container.Register<ZoomToPointCommand>();
-            //container.Register<ZoomEntityCommand>();
+            container.Register<FindHolesCommand>();
             container.Register<HolesVm>();
             container.Register<HoleTaskView>();
             return container;
