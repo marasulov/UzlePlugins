@@ -55,7 +55,10 @@ namespace UzlePlugins.Models.Revit2022.Services
             View3D view3D = collector3dView
                 .OfClass(typeof(View3D))
                 .Cast<View3D>()
-                .First(isNotTemplate);
+                .FirstOrDefault(isNotTemplate);
+
+            if (view3D == null) TaskDialog.Show("3d view is absent", "Create 3d view");
+
 
             List<PointData> pointDatas = familyInstances.Select(familyInstance => new PointData(familyInstance.Id, (familyInstance.Location as LocationPoint).Point)).ToList();
 
@@ -63,8 +66,6 @@ namespace UzlePlugins.Models.Revit2022.Services
 
             var pipeCollector = new FilteredElementCollector(doc).OfClass(typeof(Pipe)).Cast<Pipe>()
                 .Where(w => w.Diameter > smallestDiametr);
-
-
 
             List<HoleFamilyModel> wallHoles = new List<HoleFamilyModel>();
 
@@ -118,8 +119,24 @@ namespace UzlePlugins.Models.Revit2022.Services
             }
 
             //TODO Last
-            var ductCollector = new FilteredElementCollector(doc).OfClass(typeof(Duct)).Cast<Duct>()
-                .Where(w => w.Width > smallestDiametr);
+            var allductCollector = new FilteredElementCollector(doc).OfClass(typeof(Duct)).Cast<Duct>();
+            var ductCollector = new List<Duct>();
+
+            foreach (var duct in allductCollector)
+            {
+                if (duct.DuctType.Shape == ConnectorProfileType.Round)
+                {
+                    if (duct.Diameter > smallestDiametr)
+                        ductCollector.Add(duct);
+                }
+                else
+                {
+                    if(duct.Width > smallestDiametr)
+                        ductCollector.Add(duct);
+                }
+            }
+             
+            //.Where(w => w.Width > smallestDiametr);
 
             //из коллекции труб создаем отверстия
 
@@ -205,12 +222,12 @@ namespace UzlePlugins.Models.Revit2022.Services
                             actualModel.IntersectingElementName,
                             actualModel.IntersectingElementType,
                             actualModel.SourceType,
-                            UnitUtils.ConvertFromInternalUnits(actualModel.IntersectingElementTypeSize,UnitTypeId.Millimeters),
+                            UnitUtils.ConvertFromInternalUnits(actualModel.IntersectingElementTypeSize, UnitTypeId.Millimeters),
                             actualModel.SourceType,
                             true,
                             20,
                             false,
-                            actualModel.IntersectedSourceThickness,
+                            actualModel.SourceThickness,
                             new PointDTO(actualModel.IntersectionPoint.X, actualModel.IntersectionPoint.Y, actualModel.IntersectionPoint.Z),
                             actualModel.IntersectingElementWidth,
                             actualModel.SourceName
@@ -230,15 +247,17 @@ namespace UzlePlugins.Models.Revit2022.Services
                                 actualModel.IntersectingElementType,
                                 actualModel.IntersectingElementName,
                                 actualModel.SourceType,
-                                actualModel.SourceType,
-                                UnitUtils.ConvertFromInternalUnits(actualModel.IntersectingElementTypeSize,UnitTypeId.Millimeters),
+                                UnitUtils.ConvertFromInternalUnits(actualModel.IntersectingElementTypeSize, UnitTypeId.Millimeters),
                                 actualModel.SourceType,
                                 "Square",
                                 20,
                                 true,
-                                actualModel.IntersectedSourceThickness,
+                                actualModel.SourceThickness,
                                 new PointDTO(actualModel.Normal.X, actualModel.Normal.Y, actualModel.Normal.Z),
-                                actualModel.IntersectedSourceThickness, actualModel.SourceName, actualModel.IntersectingElementHeight, actualModel.IntersectingElementWidth)));
+                                actualModel.SourceThickness,
+                                actualModel.SourceName,
+                                actualModel.IntersectingElementHeight,
+                                actualModel.IntersectingElementWidth)));
                 }
 
                 foreach (var deletedPoint in deletedPoints)
@@ -249,7 +268,7 @@ namespace UzlePlugins.Models.Revit2022.Services
 
                         if (deletedPoint.IsAlmostEqualTo(loc?.Point))
                         {
-                         
+
                             outdatedFamilies.Add(_entityToDTOConverter.Convert(family));
                         }
                     }
@@ -260,21 +279,27 @@ namespace UzlePlugins.Models.Revit2022.Services
                 //TODO have to delete family not intersecting object
                 foreach (var hole in wallHoles)
                 {
-                    var holeModel = new ActualHoleModelDto(
+                    var holeModel = new NewHolesDto(
                         hole.IntersectingElement.Id.IntegerValue,
                         new PointDTO(hole.IntersectionPoint.X, hole.IntersectionPoint.Y, hole.IntersectionPoint.Z),
-                        hole.IntersectingElementName,
-                        hole.SourceType,
                         hole.IntersectingElementType,
-                        hole.IntersectingElementTypeSize,
-                        "", hole.IsHoleRectangled, hole.HoleOffset, hole.IsInsert, hole.IntersectedSourceThickness,
+                        hole.IntersectingElementName,
+                        "",
+                        UnitUtils.ConvertFromInternalUnits(hole.IntersectingElementTypeSize, UnitTypeId.Millimeters),
+                        hole.SourceType,
+                        "Square",
+                        hole.HoleOffset,
+                        hole.IsInsert,
+                        hole.SourceThickness,
                         new PointDTO(hole.Normal.X, hole.Normal.Y, hole.Normal.Z),
-                        hole.IntersectedSourceThickness,
-                        hole.SourceName
+                        hole.SourceThickness,
+                        hole.SourceName,
+                        hole.IntersectingElementHeight,
+                        hole.IntersectingElementWidth
                     );
 
-                    actualHoles.Add(holeModel);
-                    
+                    newHoles.Add(holeModel);
+
                 }
             }
 

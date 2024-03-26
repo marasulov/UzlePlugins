@@ -7,7 +7,7 @@ namespace UzlePlugins.Views.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return (bool)value ? "Rectangled" : "Circled";   
+            return (bool)value ? "Rectangled" : "Circled";
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

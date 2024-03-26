@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using UzlePlugins.Contracts;
 using UzlePlugins.Contracts.DTOs;
 using UzlePlugins.Vm.Base;
 using UzlePlugins.Vm.Commands;
@@ -16,7 +15,7 @@ namespace UzlePlugins.Vm
         private bool _canExecute = true;
         private string[] _holeFigureTypes;
         private bool _isAllActualHoleSelected;
-        private bool _isAllNewHoleSelected;
+        private bool _isAllNewHoleSelected = true;
         private bool _isAllOutdatedHoleSelected;
 
         public HolesVm(
@@ -52,7 +51,7 @@ namespace UzlePlugins.Vm
                 OnPropertyChanged();
                 ActualHoles.ForEach(x => x.IsDelete = IsAllActualHoleSelected);
             }
-        }
+        } 
 
         public bool IsAllOutdatedHoleSelected
         {

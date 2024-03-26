@@ -1,10 +1,8 @@
-﻿using UzlePlugins.Contracts.DTOs;
-
-namespace UzlePlugins.Contracts
+﻿namespace UzlePlugins.Contracts
 {
     public interface IHoleModel //: IIntersectionPointZoom
     {
-        
+
 
     }
 }

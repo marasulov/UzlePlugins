@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using UzlePlugins.Contracts;
 using UzlePlugins.Contracts.DTOs;
 
@@ -21,7 +18,7 @@ namespace Mocks
             {
                 foreach (var newHolesDto in newHoles)
                 {
-                    Debug.WriteLine($"inserted {newHolesDto.Id }");
+                    Debug.WriteLine($"inserted {newHolesDto.Id}");
                 }
             }
 

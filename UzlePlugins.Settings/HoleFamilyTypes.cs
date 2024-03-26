@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
-using UzlePlugins.Contracts;
 
 namespace UzlePlugins.Settings
 {
-    
+
     public class Circled
     {
         public FamilyNames FamilyNames { get; set; }
@@ -28,7 +27,7 @@ namespace UzlePlugins.Settings
         public List<string> FamilyParameters { get; set; }
     }
 
-    public class HoleFamilyTypes 
+    public class HoleFamilyTypes
     {
         public FamilyTypes FamilyTypes { get; set; }
     }

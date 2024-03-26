@@ -39,12 +39,10 @@
                            ScrollViewer.CanContentScroll="True" 
                            ScrollViewer.VerticalScrollBarVisibility="Auto"
                            ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                           IsReadOnly="True"
                            Visibility="{Binding NewHoles, Converter={StaticResource EmptyListToVisibilityConverter}}"
                            >
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="#"  Binding="{Binding Id}" IsReadOnly="True"/>
-
                                 <DataGridTemplateColumn Header="Zoom">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
@@ -71,7 +69,7 @@
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                <DataGridTextColumn Header="Offset" Binding="{Binding HoleOffset}" IsReadOnly="True"/>
+                                <DataGridTextColumn Header="Offset" Binding="{Binding HoleOffset}"/>
                                 <DataGridTemplateColumn>
                                     <DataGridTemplateColumn.Header>
                                         <CheckBox Content="Delete All" 

@@ -8,7 +8,7 @@ namespace UzlePlugins.RevitCore.Services
     {
         public bool Equals(Reference x, Reference y)
         {
-            Debug.Print($"{x.GlobalPoint} - {y.GlobalPoint}\n" );
+            Debug.Print($"{x.GlobalPoint} - {y.GlobalPoint}\n");
             if (x.ElementId != y.ElementId) return false;
             return x.LinkedElementId == y.LinkedElementId;
         }

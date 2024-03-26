@@ -1,10 +1,5 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
-using System.Collections.ObjectModel;
-using System.Drawing;
-using System.Windows.Documents;
-using System.Windows.Media.Media3D;
-
 // Sample list of PointData instances
 List<PointData> pointDataList = new List<PointData>
 {

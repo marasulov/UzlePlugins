@@ -22,7 +22,7 @@ namespace UzlePlugins.RevitCore.Services
 
         public string GetFamilyType(BuiltInCategory builtInCategory, string shape)
         {
-            FamilyParameters = shape!="Circle" ? _familyTypes.FamilyTypes.Circled.FamilyParameters : _familyTypes.FamilyTypes.Rectangled.FamilyParameters;
+            FamilyParameters = shape != "Circle" ? _familyTypes.FamilyTypes.Circled.FamilyParameters : _familyTypes.FamilyTypes.Rectangled.FamilyParameters;
 
             string familyName;
 
@@ -34,7 +34,7 @@ namespace UzlePlugins.RevitCore.Services
             {
                 familyName = _familyTypes.FamilyTypes.Rectangled.FamilyNames.FloorType;
             }
-            else if (builtInCategory == BuiltInCategory.OST_Walls & shape=="Circle")
+            else if (builtInCategory == BuiltInCategory.OST_Walls & shape == "Circle")
             {
                 familyName = _familyTypes.FamilyTypes.Circled.FamilyNames.WallType;
             }

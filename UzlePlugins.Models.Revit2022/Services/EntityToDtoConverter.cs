@@ -1,7 +1,7 @@
 ﻿namespace UzlePlugins.Models.Revit2022.Services
 {
-    using UzlePlugins.Contracts.DTOs;
     using Autodesk.Revit.DB;
+    using UzlePlugins.Contracts.DTOs;
 
 
     public class EntityToDtoConverter

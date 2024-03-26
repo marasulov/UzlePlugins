@@ -4,8 +4,8 @@ using System.Windows.Input;
 namespace UzlePlugins.Vm
 {
     public class RelayCommand : ICommand
-	{
-		#region Fields
+    {
+        #region Fields
 
         /// <summary>
         /// Encapsulated the execute action
@@ -137,5 +137,5 @@ namespace UzlePlugins.Vm
         {
             return true;
         }
-	}
+    }
 }

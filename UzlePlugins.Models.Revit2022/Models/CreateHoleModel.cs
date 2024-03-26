@@ -1,18 +1,4 @@
-﻿using Autodesk.Revit.DB;
-using Autodesk.Revit.DB.Mechanical;
-using Autodesk.Revit.DB.Plumbing;
-using Autodesk.Revit.UI;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using UzlePlugins.Contracts;
-using UzlePlugins.Contracts.DTOs;
-using UzlePlugins.Models.Revit2022.Enities;
-using UzlePlugins.RevitCore.Models;
-using UzlePlugins.RevitCore.Services;
-using UzlePlugins.Settings;
-using UzlePlugins.Vm;
+﻿using Autodesk.Revit.UI;
 
 namespace UzlePlugins.Models.Revit2022.Models
 {
@@ -129,7 +115,7 @@ namespace UzlePlugins.Models.Revit2022.Models
         //        var actualPoints = pointDatas.Where(pd => newIntersections.Contains(pd.Point));
 
         //        //var actualPoints = newIntersections.Intersect(familyPoints, new XYZComparer()).ToArray();
-                
+
         //        var newPoints = newIntersections.Except(familyPoints, new XYZComparer()).ToArray(); // newIntersections.Except(familyPoints)
         //        var deletedPoints = familyPoints.Except(newIntersections, new XYZComparer()).ToArray(); // familyPoints.Except(newIntersections)
         //        var typeOfSource = "Wall";
@@ -151,7 +137,7 @@ namespace UzlePlugins.Models.Revit2022.Models
         //                    true,
         //                    UnitUtils.ConvertToInternalUnits(20, UnitTypeId.Millimeters),
         //                    false,
-        //                    actualModel.IntersectedSourceThickness,
+        //                    actualModel.SourceThickness,
         //                    new PointDTO(actualModel.IntersectionPoint.X, actualModel.IntersectionPoint.Y, actualModel.IntersectionPoint.Z),
         //                    actualModel.IntersectingElementWidth
         //                )));
@@ -176,7 +162,7 @@ namespace UzlePlugins.Models.Revit2022.Models
         //                        true,
         //                        UnitUtils.ConvertToInternalUnits(20, UnitTypeId.Millimeters),
         //                        true,
-        //                        actualModel.IntersectedSourceThickness,
+        //                        actualModel.SourceThickness,
         //                        new PointDTO(actualModel.IntersectionPoint.X, actualModel.IntersectionPoint.Y, actualModel.IntersectionPoint.Z),
         //                        actualModel.IntersectingElementWidth
         //                        )));
@@ -209,7 +195,7 @@ namespace UzlePlugins.Models.Revit2022.Models
         //                hole.SourceType,
         //                hole.IntersectingElementType,
         //                hole.IntersectingElementTypeSize,
-        //                "", hole.IsHoleRectangled, hole.HoleOffset, hole.IsDelete, hole.IntersectedSourceThickness,
+        //                "", hole.IsHoleRectangled, hole.HoleOffset, hole.IsDelete, hole.SourceThickness,
         //            new PointDTO(hole.IntersectionPoint.X, hole.IntersectionPoint.Y, hole.IntersectionPoint.Z),
         //                hole.IntersectingElementWidth
         //                );

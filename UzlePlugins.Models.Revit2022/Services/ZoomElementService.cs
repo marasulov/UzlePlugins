@@ -1,7 +1,6 @@
 ﻿using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using UzlePlugins.Contracts;
-using UzlePlugins.Contracts.DTOs;
 
 namespace UzlePlugins.Models.Revit2022.Services
 {

@@ -16,4 +16,16 @@
     <ProjectReference Include="..\UzlePlugins.Vm\UzlePlugins.Vm.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Update="System.Numerics">
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Update="System.Xaml">
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+
 </Project>

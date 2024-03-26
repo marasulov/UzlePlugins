@@ -12,7 +12,8 @@ namespace UzlePlugins.Models.Revit2022.Models
         private readonly Document _document;
         private readonly UIDocument _uiDocument;
 
-        public RevitRepository(Application application, Document document) {
+        public RevitRepository(Application application, Document document)
+        {
             _application = application;
             _uiApplication = new UIApplication(application);
 

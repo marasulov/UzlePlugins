@@ -1,10 +1,10 @@
 ﻿using System;
-using UzlePlugins.Contracts.DTOs;
 using UzlePlugins.Contracts;
+using UzlePlugins.Contracts.DTOs;
 
 namespace UzlePlugins.Vm.Commands
 {
-    public class FindHolesCommand :CommandBase
+    public class FindHolesCommand : CommandBase
     {
         private readonly IFindHoleService _findHoleService;
 

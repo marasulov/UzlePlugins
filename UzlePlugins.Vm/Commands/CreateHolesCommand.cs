@@ -30,7 +30,7 @@ namespace UzlePlugins.Vm.Commands
             var holesVm = (HolesVm)parameter;
             holesVm.CloseAction?.Invoke();
             var allHoles = new AllHolesDto(holesVm.NewHoles, holesVm.ActualHoles, holesVm.OutdatedHoles);
-            
+
             _familyInsertService?.InsertFamily(allHoles);
         }
 

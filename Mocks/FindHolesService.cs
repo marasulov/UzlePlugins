@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using UzlePlugins.Contracts;
 using UzlePlugins.Contracts.DTOs;
-using UzlePlugins.Vm.Commands;
 
 namespace Mocks
 {
@@ -17,7 +14,7 @@ namespace Mocks
 
             for (int i = 0; i < 50; i++)
             {
-                var newHoleDto = new NewHolesDto(i, new PointDTO(1, 2, 3), "Elementtype" + i, "AAA" + i, "324" + i, "holetype" + i, 3242 + i, "asdsad", "Circle", 20, true, 20, new PointDTO(i + 1, i + 2, i + 3), 50, "aaa",i,i);
+                var newHoleDto = new NewHolesDto(i, new PointDTO(1, 2, 3), "Elementtype" + i, "AAA" + i, "holetype" + i, 3242 + i, "asdsad", "Circle", 20, true, 20, new PointDTO(i + 1, i + 2, i + 3), 50, "aaa", i, i);
                 newHolesDtos.Add(newHoleDto);
             }
 

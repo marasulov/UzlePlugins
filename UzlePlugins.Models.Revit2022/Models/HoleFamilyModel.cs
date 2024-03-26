@@ -1,12 +1,11 @@
 ﻿using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
-using UzlePlugins.Contracts;
 
 namespace UzlePlugins.RevitCore.Models
 {
 
 
-    public record HoleFamilyModel 
+    public record HoleFamilyModel
     {
         private readonly UIDocument _uidoc;
 
@@ -30,7 +29,7 @@ namespace UzlePlugins.RevitCore.Models
         /// <param name="intersectingElementType"></param>
         /// <param name="intersectingElementTypeSize"></param>
         /// <param name="sourceType"></param>
-        /// <param name="intersectedSourceThickness"></param>
+        /// <param name="sourceThickness"></param>
         /// <param name="isHoleRectangled"></param>
         /// <param name="holeOffset"></param>
         /// <param name="isInsert"></param>
@@ -46,7 +45,7 @@ namespace UzlePlugins.RevitCore.Models
             string intersectingElementName,
             string intersectingElementType,
             double intersectingElementTypeSize,
-            double intersectedSourceThickness,
+            double sourceThickness,
             bool isHoleRectangled,
             double holeOffset,
             bool isInsert,
@@ -63,7 +62,7 @@ namespace UzlePlugins.RevitCore.Models
             IntersectingElementWidth = intersectingElementWidth;
             SourceType = sourceType;
             SourceName = sourceName;
-            IntersectedSourceThickness = intersectedSourceThickness;
+            SourceThickness = sourceThickness;
             IsHoleRectangled = isHoleRectangled;
             HoleOffset = holeOffset;
             IsInsert = isInsert;
@@ -86,7 +85,7 @@ namespace UzlePlugins.RevitCore.Models
         /// <summary>
         /// Название пересекающего элемента
         /// </summary>
-        public string IntersectingElementName{ get; set; }
+        public string IntersectingElementName { get; set; }
 
         /// <summary>
         /// Тип пересекающего элемента
@@ -106,7 +105,7 @@ namespace UzlePlugins.RevitCore.Models
         /// </summary>
         public string SourceType { get; set; }
 
-        public double IntersectedSourceThickness { get; }
+        public double SourceThickness { get; }
 
         /// <summary>
         /// Форма проема
@@ -116,7 +115,7 @@ namespace UzlePlugins.RevitCore.Models
         /// <summary>
         /// Смещение
         /// </summary>
-        public double HoleOffset { get; set; } 
+        public double HoleOffset { get; set; }
 
         /// <summary>
         /// Вставка

@@ -21,10 +21,62 @@ namespace UzlePlugins.Models.Revit2022.Services
             _doc = uiDocument.Document;
         }
 
+        public void InsertFamily(AllHolesDto allHoles)
+        {
+
+            var newHoles = allHoles.NewFamiliesDtos.Where(i => i.IsInsert);
+            var actualHoles = allHoles.ActualFamiliesDtos.Where(i => i.IsDelete).ToArray();
+            var outdatedHoles = allHoles.OutdatedFamiliesDtos.Where(i => i.IsDelete);
+
+            using var t = new Transaction(_doc);
+            t.Start("Hole task for walls and floors with pipes");
+
+            foreach (var hole in newHoles)
+            {
+                FamilyTypeFinderService familyTypeFinderService = new FamilyTypeFinderService();
+
+                var wallsFamilyName = hole.SourceType switch
+                {
+                    "Wall" => familyTypeFinderService.GetFamilyType(BuiltInCategory.OST_Walls, hole.Shape),
+                    "Floor" => familyTypeFinderService.GetFamilyType(BuiltInCategory.OST_Floors, hole.Shape),
+                    _ => default
+                };
+
+                var wallsFamilyType = familyTypeFinderService.FamilyParameters;
+
+                FamilySymbol symbol = familyTypeFinderService.GetFamilySymbolToPlace(_doc, wallsFamilyName);
+
+                //FamilyInsertService insertService = new FamilyInsertService(_doc, symbol);
+                //Reference r = new Reference(pipeElement);
+                //ReferenceIntersectionFinder refFinder = new ReferenceIntersectionFinder(doc, pipeElement, view3D);
+
+
+                InsertFamily(symbol, hole);
+            }
+
+            var actualHolesId = actualHoles.Select(x => new ElementId(x.Id)).ToArray();
+
+            foreach (var id in actualHolesId)
+            {
+                _doc.Delete(id);
+            }
+
+            var outdatedHolesids = outdatedHoles.Select(x => x.Id).ToArray();
+
+
+            foreach (var id in outdatedHolesids)
+            {
+                var i = int.Parse(id);
+                _doc.Delete(new ElementId(i));
+            }
+
+            t.Commit();
+        }
 
         public void InsertFamily(FamilySymbol symbol, NewHolesDto dto)
         {
             var point = new XYZ(dto.IntersectionPoint.X, dto.IntersectionPoint.Y, dto.IntersectionPoint.Z);
+            if( !symbol.IsActive ) symbol.Activate(); 
             FamilyInstance fi = _doc.Create.NewFamilyInstance(point, symbol, StructuralType.NonStructural);
             var basisY = fi.GetTransform().BasisY;
             var angle = basisY.AngleTo(new XYZ(dto.IntersectionNormal.X, dto.IntersectionNormal.Y, dto.IntersectionNormal.Z));
@@ -34,18 +86,29 @@ namespace UzlePlugins.Models.Revit2022.Services
             var parameters = fi.GetOrderedParameters();
 
             var offset = UnitUtils.ConvertToInternalUnits(dto.HoleOffset, UnitTypeId.Millimeters);
+            //var height = UnitUtils.ConvertToInternalUnits(dto.Height, UnitTypeId.Millimeters);
+            //var width = UnitUtils.ConvertToInternalUnits(dto.Width, UnitTypeId.Millimeters);
+            var intersectingElementSize = UnitUtils.ConvertToInternalUnits(dto.IntersectingElementTypeSize, UnitTypeId.Millimeters);
 
             switch (dto.Shape)
             {
-                case "Circle":
-                    SetCircledFamilyParameter(parameters, "Depth", "Diameter", dto.IntersectingElementTypeSize, offset, dto.SourceThickness);
+                case "Circle" when dto.IntersectingElementType == "Duct":
+                    var diameter = Math.Sqrt(Math.Pow(dto.Width, 2) + Math.Pow(dto.Height, 2));
+                    //if (dto.Width < dto.Height)
+                    //    diameter = dto.Height;
+                    SetCircledFamilyParameter(parameters, "Depth", "Diameter", diameter, offset, dto.SourceThickness);
                     break;
-                case "Square" when dto.IntersectingElementType == "Duct" && dto.Width !=0:
+                case "Circle":
+                    SetCircledFamilyParameter(parameters, "Depth", "Diameter", intersectingElementSize, offset, dto.SourceThickness);
+                    break;
+
+
+                case "Square" when dto.IntersectingElementType == "Duct" && dto.Height != 0:
                     SetSquaredFamilyParameter(parameters, "Depth", "Height", "Width", dto.Height, dto.Width,
                         offset, dto.SourceThickness);
                     break;
                 default:
-                    SetRectFamilyParameter(parameters, "Depth", "Height", "Width", dto.IntersectingElementTypeSize,offset, dto.SourceThickness);
+                    SetRectFamilyParameter(parameters, "Depth", "Height", "Width", intersectingElementSize, offset, dto.SourceThickness);
                     break;
             }
             //}
@@ -109,58 +172,6 @@ namespace UzlePlugins.Models.Revit2022.Services
 
 
             }
-        }
-
-        public void InsertFamily(AllHolesDto allHoles)
-        {
-
-            var newHoles = allHoles.NewFamiliesDtos.Where(i => i.IsInsert);
-            var actualHoles = allHoles.ActualFamiliesDtos.Where(i => i.IsDelete).ToArray();
-            var outdatedHoles = allHoles.OutdatedFamiliesDtos.Where(i => i.IsDelete);
-
-            using var t = new Transaction(_doc);
-            t.Start("Hole task for walls and floors with pipes");
-
-            foreach (var hole in newHoles)
-            {
-                FamilyTypeFinderService familyTypeFinderService = new FamilyTypeFinderService();
-
-                var wallsFamilyName = hole.SourceType switch
-                {
-                    "Wall" => familyTypeFinderService.GetFamilyType(BuiltInCategory.OST_Walls, hole.Shape),
-                    "Floor" => familyTypeFinderService.GetFamilyType(BuiltInCategory.OST_Floors, hole.Shape),
-                    _ => default
-                };
-
-                var wallsFamilyType = familyTypeFinderService.FamilyParameters;
-
-                FamilySymbol symbol = familyTypeFinderService.GetFamilySymbolToPlace(_doc, wallsFamilyName);
-
-                //FamilyInsertService insertService = new FamilyInsertService(_doc, symbol);
-                //Reference r = new Reference(pipeElement);
-                //ReferenceIntersectionFinder refFinder = new ReferenceIntersectionFinder(doc, pipeElement, view3D);
-
-                
-                InsertFamily(symbol, hole);
-            }
-
-            var actualHolesId = actualHoles.Select(x => new ElementId(x.Id)).ToArray();
-
-            foreach (var id in actualHolesId)
-            {
-                _doc.Delete(id);
-            }
-
-            var outdatedHolesids = outdatedHoles.Select(x => x.Id).ToArray();
-
-            
-            foreach (var id in outdatedHolesids)
-            {
-                var i = int.Parse(id);
-                _doc.Delete(new ElementId(i));
-            }
-
-            t.Commit();
         }
 
         private void DeleteFamily(ICollection<ElementId> deletedElementIds)

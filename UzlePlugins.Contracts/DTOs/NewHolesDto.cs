@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace UzlePlugins.Contracts.DTOs
 {
@@ -12,7 +8,7 @@ namespace UzlePlugins.Contracts.DTOs
     {
         private bool _isInsert;
 
-        public NewHolesDto(int id, PointDTO point, string intersectingElementType, string intersectingElementName, string description, string holeType,
+        public NewHolesDto(int id, PointDTO point, string intersectingElementType, string intersectingElementName, /*string description,*/ string holeType,
             double intersectingElementTypeSize, string sourceType, string shape, double holeOffset,
             bool isInsert, double sourceThickness, PointDTO intersectionNormal, double sourceWidth, string sourceName,
             double height, double width
@@ -22,7 +18,7 @@ namespace UzlePlugins.Contracts.DTOs
             IntersectionPoint = point;
             IntersectingElementType = intersectingElementType;
             IntersectingElementName = intersectingElementName;
-            Description = description;
+            //Description = description;
             HoleType = holeType;
             IntersectingElementTypeSize = intersectingElementTypeSize;
             SourceType = sourceType;
@@ -56,7 +52,7 @@ namespace UzlePlugins.Contracts.DTOs
 
         public bool IsInsert
         {
-            get=>_isInsert;
+            get => _isInsert;
             set
             {
                 _isInsert = value;

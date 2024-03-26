@@ -1,8 +1,8 @@
 ﻿using Autodesk.Revit.DB;
+using Autodesk.Revit.DB.Mechanical;
 using Autodesk.Revit.DB.Plumbing;
 using Autodesk.Revit.UI;
 using System.Collections.Generic;
-using Autodesk.Revit.DB.Mechanical;
 using UzlePlugins.RevitCore.Models;
 
 
@@ -64,9 +64,17 @@ namespace UzlePlugins.RevitCore.Services
                     {
                         var intersectElement = element as Duct;
                         elName = intersectElement.MEPSystem.Name;
-                        width = intersectElement.Width;
-                        height = intersectElement.Height;
-
+                        if (intersectElement.DuctType.Shape == ConnectorProfileType.Round)
+                        {
+                            width = intersectElement.Diameter;
+                            height = width;
+                        }
+                        else
+                        {
+                            width = intersectElement.Width;
+                            height = intersectElement.Height;
+                        }
+                        
                         //pipeSize = intersectElement.get_Parameter(BuiltInParameter.RBS_CALCULATED_SIZE).AsDouble();
                         break;
                     }

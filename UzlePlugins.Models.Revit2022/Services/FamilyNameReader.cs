@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UzlePlugins.Settings;
+﻿using UzlePlugins.Settings;
 
 namespace UzlePlugins.Models.Revit2022.Services
 {
@@ -14,7 +9,7 @@ namespace UzlePlugins.Models.Revit2022.Services
             var settingsReader = new SettingsReader();
             var recFamilyNames = settingsReader.GetFamilyTypes().FamilyTypes.Rectangled.FamilyNames;
             var circledFamilyNames = settingsReader.GetFamilyTypes().FamilyTypes.Circled.FamilyNames;
-            
+
         }
     }
 }

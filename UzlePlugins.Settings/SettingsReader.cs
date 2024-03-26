@@ -17,18 +17,18 @@ namespace UzlePlugins.Settings
                 "C:\\Users\\yusufzhon.marasulov\\source\\repos\\UzlePlugins\\UzlePlugins.Settings\\bin\\Debug\\net48\\";
 
 #if !DEBUG
-                assemblyFolder = Path.GetDirectoryName(Assembly.GetEntryAssembly().FullName);
+                assemblyFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 #endif
 
-            _jsonFileName = Path.Combine(assemblyFolder,"Settings.json");
+            _jsonFileName = Path.Combine(assemblyFolder, "Settings.json");
         }
 
-        public HoleFamilyTypes? GetFamilyTypes( )
+        public HoleFamilyTypes? GetFamilyTypes()
         {
             var options = new JsonSerializerOptions { WriteIndented = true };
 
             using FileStream fs = new FileStream(_jsonFileName, FileMode.Open);
-            return JsonSerializer.Deserialize<HoleFamilyTypes>(fs,options);
+            return JsonSerializer.Deserialize<HoleFamilyTypes>(fs, options);
         }
 
         public List<string> GetFamilyNames()
@@ -36,13 +36,14 @@ namespace UzlePlugins.Settings
             var options = new JsonSerializerOptions { WriteIndented = true };
 
             using FileStream fs = new FileStream(_jsonFileName, FileMode.Open);
-            var names = JsonSerializer.Deserialize<HoleFamilyNames>(fs,options);
+            var names = JsonSerializer.Deserialize<HoleFamilyNames>(fs, options);
 
             return names.FamilyNames;
 
         }
 
-        static string GetAssemblyDirectory(System.Reflection.Assembly assembly) {
+        static string GetAssemblyDirectory(System.Reflection.Assembly assembly)
+        {
             return System.IO.Path.GetDirectoryName(assembly.Location);
         }
 

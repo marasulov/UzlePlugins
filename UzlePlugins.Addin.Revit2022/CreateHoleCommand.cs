@@ -2,7 +2,6 @@
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using SimpleInjector;
-using System;
 using UzlePlugins.Contracts;
 using UzlePlugins.Models.Revit2022.Services;
 using UzlePlugins.Settings;
@@ -10,13 +9,14 @@ using UzlePlugins.Views;
 using UzlePlugins.Vm;
 using UzlePlugins.Vm.Commands;
 
-namespace UzlePlugins.Models.Revit2022.Commands
+namespace UzlePlugins.Addin.Revit2022
 {
+
     [Transaction(TransactionMode.Manual)]
     public class CreateHoleCommand : IExternalCommand
     {
-        private static HoleTaskView? _windowInstanse;
-        static AddInId addinId = new AddInId(new Guid("0596598B-2718-4D68-9988-ECE735BC437A"));
+        //private static HoleTaskView? _windowInstanse;
+        //static AddInId addinId = new AddInId(new Guid("0596598B-2718-4D68-9988-ECE735BC437A"));
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             var uiDocument = commandData
@@ -28,7 +28,7 @@ namespace UzlePlugins.Models.Revit2022.Commands
                 .Application;
 
             var container = ConfigureUI();
-
+            
             container.RegisterInstance(app);
             container.RegisterInstance(uiDocument);
             container.Register<ISettingsReader, SettingsReader>();

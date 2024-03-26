@@ -7,7 +7,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="System.Text.Json" Version="8.0.2" />
 	  <PackageReference Include="SimpleInjector" Version="5.4.4" />
 	</ItemGroup>
 
@@ -29,6 +28,24 @@
 	    <Private>False</Private>
 	  </Reference>
 	  <Reference Include="WindowsBase" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Reference Update="System">
+	    <Private>False</Private>
+	  </Reference>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Reference Update="System.Numerics">
+	    <Private>False</Private>
+	  </Reference>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Reference Update="System.IO.Compression.FileSystem">
+	    <Private>False</Private>
+	  </Reference>
 	</ItemGroup>
 
 </Project>
