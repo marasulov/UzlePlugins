@@ -2,6 +2,7 @@
 using Autodesk.Revit.DB.Mechanical;
 using Autodesk.Revit.DB.Plumbing;
 using Autodesk.Revit.UI;
+using Autodesk.Revit.UI.Selection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -58,7 +59,6 @@ namespace UzlePlugins.Models.Revit2022.Services
                 .FirstOrDefault(isNotTemplate);
 
             if (view3D == null) TaskDialog.Show("3d view is absent", "Create 3d view");
-
 
             List<PointData> pointDatas = familyInstances.Select(familyInstance => new PointData(familyInstance.Id, (familyInstance.Location as LocationPoint).Point)).ToList();
 
@@ -306,6 +306,35 @@ namespace UzlePlugins.Models.Revit2022.Services
             return new AllHolesDto(newHoles, actualHoles, outdatedFamilies);
         }
 
+        public void GetWalls(Document document, Reference pipeRef, Element pipeElem)
+        {
+            
+            LocationCurve lc = pipeElem.Location as LocationCurve;
+            Curve curve = lc.Curve;
 
+            ReferenceComparer reference1 = new ReferenceComparer();
+
+            ElementFilter filter = new
+                ElementCategoryFilter(BuiltInCategory.OST_Walls);
+
+            FilteredElementCollector collector = new FilteredElementCollector(document);
+            Func<View3D, bool> isNotTemplate = v3 => !(v3.IsTemplate);
+            View3D view3D = collector.OfClass(typeof(View3D)).Cast<View3D>()
+                .First<View3D>(isNotTemplate);
+
+            ReferenceIntersector refIntersector = new ReferenceIntersector(filter, FindReferenceTarget.Element, view3D);
+            refIntersector.FindReferencesInRevitLinks = true;
+            IList<ReferenceWithContext> referenceWithContext = refIntersector.Find(curve.GetEndPoint(0), (curve as Line).Direction);
+            IList<Reference> references = referenceWithContext.Select(p => p.GetReference()).Distinct(reference1).Where(p => p.GlobalPoint.DistanceTo(curve.GetEndPoint(0)) < curve.Length).ToList();
+            IList<Element> walls = new List<Element>();
+            foreach (Reference reference in references)
+            {
+                RevitLinkInstance instance = document.GetElement(reference) as RevitLinkInstance;
+                Document linkDoc = instance.GetLinkDocument();
+                Element element = linkDoc.GetElement(reference.LinkedElementId);
+                walls.Add(element);
+            }
+            TaskDialog.Show("Count of wall", walls.Count.ToString());
+        }
     }
 }

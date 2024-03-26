@@ -1,6 +1,9 @@
-﻿using Autodesk.Revit.DB;
+﻿using System;
+using Autodesk.Revit.DB;
 using System.Collections.Generic;
 using System.Linq;
+using Autodesk.Revit.UI;
+using Autodesk.Revit.UI.Selection;
 
 namespace UzlePlugins.RevitCore.Services
 {
@@ -64,7 +67,7 @@ namespace UzlePlugins.RevitCore.Services
 
         public List<XYZ> GetIntersectionsPoints(IList<Reference> references)
         {
-            List<XYZ> intersectPoints = new List<XYZ>();
+            var intersectPoints = new List<XYZ>();
 
             if (references.Count <= 0) return intersectPoints;
 
