@@ -65,7 +65,7 @@
                                         <DataTemplate>
                                             <ComboBox ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.HoleFigureTypes}"
                                                    SelectedIndex="0"
-                                                   SelectedItem="{Binding Shape, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}"/>
+                                                   SelectedItem="{Binding Shape, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>

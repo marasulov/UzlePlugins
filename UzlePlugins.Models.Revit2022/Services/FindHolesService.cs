@@ -93,8 +93,9 @@ namespace UzlePlugins.Models.Revit2022.Services
                         var holeFiller = new HolePropertiesFiller(doc, pipeElement, sourceElement, point);
                         holeFiller.GetHoles(point, _uiDocument, refFinder.Normal);
                         holes = holeFiller.HolesProps;
+                        wallHoles.AddRange(holes);
                     }
-                    wallHoles.AddRange(holes);
+                    
                 }
 
                 refFinder.GetStructuralReferences(BuiltInCategory.OST_Floors);
@@ -113,8 +114,9 @@ namespace UzlePlugins.Models.Revit2022.Services
                         var holeFiller = new HolePropertiesFiller(doc, pipeElement, sourceElement, point);
                         holeFiller.GetHoles(point, _uiDocument, refFinder.Normal);
                         holes = holeFiller.HolesProps;
+                        wallHoles.AddRange(holes);
                     }
-                    wallHoles.AddRange(holes);
+                    
                 }
             }
 
@@ -161,8 +163,9 @@ namespace UzlePlugins.Models.Revit2022.Services
                         var holeFiller = new HolePropertiesFiller(doc, pipeElement, sourceElement, point);
                         holeFiller.GetHoles(point, _uiDocument, refFinder.Normal);
                         holes = holeFiller.HolesProps;
+                        wallHoles.AddRange(holes);
                     }
-                    wallHoles.AddRange(holes);
+                    
                 }
 
                 refFinder.GetStructuralReferences(BuiltInCategory.OST_Floors);
@@ -181,11 +184,11 @@ namespace UzlePlugins.Models.Revit2022.Services
                         var holeFiller = new HolePropertiesFiller(doc, pipeElement, sourceElement, point);
                         holeFiller.GetHoles(point, _uiDocument, refFinder.Normal);
                         holes = holeFiller.HolesProps;
+                        wallHoles.AddRange(holes);
                     }
-                    wallHoles.AddRange(holes);
+                    
                 }
             }
-
 
             List<ActualHoleModelDto> actualHoles = new();
             List<NewHolesDto> newHoles = new();

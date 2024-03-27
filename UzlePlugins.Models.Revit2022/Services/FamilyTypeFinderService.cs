@@ -1,4 +1,5 @@
 ﻿using Autodesk.Revit.DB;
+using Autodesk.Revit.UI;
 using System.Collections.Generic;
 using System.Linq;
 using UzlePlugins.Settings;
@@ -48,15 +49,13 @@ namespace UzlePlugins.RevitCore.Services
 
         public FamilySymbol GetFamilySymbolToPlace(Document doc, string familyName/*, string familyTypeName*/)
         {
-            FamilySymbol symbol = null;
-            foreach (FamilySymbol fSym in new FilteredElementCollector(doc).OfClass(typeof(FamilySymbol))
-                         .Cast<FamilySymbol>())
-            {
-                if (fSym.FamilyName != familyName) continue;
-                symbol = fSym;
-                break;
-            }
-            return symbol;
+            var symbol = new FilteredElementCollector(doc).OfClass(typeof(FamilySymbol))
+                .Cast<FamilySymbol>()
+                .FirstOrDefault(fSym => fSym.FamilyName == familyName);
+            if (symbol != null) return symbol;
+            TaskDialog.Show("Family absent", $"Famly {familyName} is absent in project. Please add family to the project");
+            return null;
+
         }
     }
 

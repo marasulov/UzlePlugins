@@ -42,10 +42,14 @@ namespace UzlePlugins.Models.Revit2022.Services
                     _ => default
                 };
 
-                var wallsFamilyType = familyTypeFinderService.FamilyParameters;
+                //var wallsFamilyType = familyTypeFinderService.FamilyParameters;
 
                 FamilySymbol symbol = familyTypeFinderService.GetFamilySymbolToPlace(_doc, wallsFamilyName);
 
+                if (symbol == null)
+                {
+                    break;
+                }
                 //FamilyInsertService insertService = new FamilyInsertService(_doc, symbol);
                 //Reference r = new Reference(pipeElement);
                 //ReferenceIntersectionFinder refFinder = new ReferenceIntersectionFinder(doc, pipeElement, view3D);
@@ -76,7 +80,7 @@ namespace UzlePlugins.Models.Revit2022.Services
         public void InsertFamily(FamilySymbol symbol, NewHolesDto dto)
         {
             var point = new XYZ(dto.IntersectionPoint.X, dto.IntersectionPoint.Y, dto.IntersectionPoint.Z);
-            if( !symbol.IsActive ) symbol.Activate(); 
+            if (!symbol.IsActive) symbol.Activate();
             FamilyInstance fi = _doc.Create.NewFamilyInstance(point, symbol, StructuralType.NonStructural);
             var basisY = fi.GetTransform().BasisY;
             var angle = basisY.AngleTo(new XYZ(dto.IntersectionNormal.X, dto.IntersectionNormal.Y, dto.IntersectionNormal.Z));
@@ -107,7 +111,7 @@ namespace UzlePlugins.Models.Revit2022.Services
                     SetSquaredFamilyParameter(parameters, "Depth", "Height", "Width", dto.Height, dto.Width,
                         offset, dto.SourceThickness);
                     break;
-                default:
+                case "Square":
                     SetRectFamilyParameter(parameters, "Depth", "Height", "Width", intersectingElementSize, offset, dto.SourceThickness);
                     break;
             }

@@ -71,16 +71,22 @@ namespace UzlePlugins.RevitCore.Services
 
             if (references.Count <= 0) return intersectPoints;
 
-            var firstFaceRef = references[0];
-            var secondFaceRef = references[0 + 1];
 
-            if (firstFaceRef.ElementId != secondFaceRef.ElementId) return intersectPoints;
-            Thickness = firstFaceRef.GlobalPoint.DistanceTo(secondFaceRef.GlobalPoint);
-            var intPoint = new XYZ(
-                (firstFaceRef.GlobalPoint.X + secondFaceRef.GlobalPoint.X) / 2,
-                (firstFaceRef.GlobalPoint.Y + secondFaceRef.GlobalPoint.Y) / 2,
-                firstFaceRef.GlobalPoint.Z);
-            intersectPoints.Add(intPoint);
+            for (int i = 0; i < references.Count; i+=2)
+            {
+                var firstFaceRef = references[i];
+                var secondFaceRef = references[i + 1];
+
+                if (firstFaceRef.ElementId != secondFaceRef.ElementId) return intersectPoints;
+                Thickness = firstFaceRef.GlobalPoint.DistanceTo(secondFaceRef.GlobalPoint);
+                var intPoint = new XYZ(
+                    (firstFaceRef.GlobalPoint.X + secondFaceRef.GlobalPoint.X) / 2,
+                    (firstFaceRef.GlobalPoint.Y + secondFaceRef.GlobalPoint.Y) / 2,
+                    firstFaceRef.GlobalPoint.Z);
+                intersectPoints.Add(intPoint);
+            }
+
+            
 
             return intersectPoints;
         }
@@ -100,13 +106,13 @@ namespace UzlePlugins.RevitCore.Services
                 Element el = ldoc.GetElement(r.LinkedElementId) as HostObject;
                 double structuralParameter;
 
-                Dictionary<BuiltInCategory, BuiltInParameter> builtInParameters =
-                    new Dictionary<BuiltInCategory, BuiltInParameter>()
-                    {
-                        {BuiltInCategory.OST_Walls,  BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT},
-                        {BuiltInCategory.OST_Floors, BuiltInParameter.FLOOR_PARAM_IS_STRUCTURAL}
+                //Dictionary<BuiltInCategory, BuiltInParameter> builtInParameters =
+                //    new Dictionary<BuiltInCategory, BuiltInParameter>()
+                //    {
+                //        {BuiltInCategory.OST_Walls,  BuiltInParameter.WALL_STRUCTURAL_SIGNIFICANT},
+                //        {BuiltInCategory.OST_Floors, BuiltInParameter.FLOOR_PARAM_IS_STRUCTURAL}
 
-                    };
+                //    };
 
 
                 //structuralParameter = el.get_Parameter(builtInParameters[builtInCategory])
