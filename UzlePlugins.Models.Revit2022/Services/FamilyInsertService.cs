@@ -83,7 +83,7 @@ namespace UzlePlugins.Models.Revit2022.Services
             if (!symbol.IsActive) symbol.Activate();
             FamilyInstance fi = _doc.Create.NewFamilyInstance(point, symbol, StructuralType.NonStructural);
             var basisY = fi.GetTransform().BasisY;
-            var angle = basisY.AngleTo(point);
+            var angle = basisY.AngleTo(new XYZ(dto.Intersection.IntersectionNormal.X, dto.Intersection.IntersectionNormal.Y, dto.Intersection.IntersectionNormal.Z));
 
             Line axis = Line.CreateBound(point, point + XYZ.BasisZ);
             ElementTransformUtils.RotateElement(_doc, fi.Id, axis, -angle);
