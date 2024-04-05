@@ -29,21 +29,6 @@ namespace UzlePlugins.Models.Revit2022.Services
         public XYZ IntersectionPoint { get; set; }
         public List<HoleFamilyEntity> HolesProps { get; set; } = new();
 
-
-        //public void FillHoleProps(IList<Reference> references, List<XYZ> points)
-        //{
-        //    var holes = new List<HoleFamilyEntity>();
-        //    foreach (var point in points)
-        //    {
-        //        var sourceElement = references[0];
-        //        if (sourceElement == null) continue;
-        //        var holeFiller = new HolePropertiesFiller(_doc, pipeElement, sourceElement, point);
-        //        holeFiller.GetHoles(point, refFinder.Normal);
-        //        holes = holeFiller.HolesProps;
-        //        wallHoles.AddRange(holes);
-        //    }
-        //}
-
         public void GetHoles(XYZ point, XYZ normal)
         {
             if (IntersectedSourceElement == null) return;
@@ -124,7 +109,7 @@ namespace UzlePlugins.Models.Revit2022.Services
             };
 
             var intersectionParams = new IntersectionParameters(intPoint, element,elName,elType.Name, normal,pipeSize,height, width);
-            var sourceProps = new SourceParameters(sourceElement.Name, sourceType.Name, shape, sourceThickness);
+            var sourceProps = new SourceParameters(sourceElement.Name, sourceType.Name, sourceThickness);
             var holeFamilyModel = HoleFamilyEntity.CreateInstance(intersectionParams, sourceProps, true, true);
 
             return holeFamilyModel;

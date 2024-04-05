@@ -323,7 +323,19 @@ namespace UzlePlugins.Models.Revit2022.Services
         }
 
        
-
+        public void FillHoleProps(Document doc, IList<Reference> references, List<XYZ> points, Element pipeElement, XYZ normal, ref List<HoleFamilyEntity>  wallHoles)
+        {
+            var holes = new List<HoleFamilyEntity>();
+            foreach (var point in points)
+            {
+                var sourceElement = references[0];
+                if (sourceElement == null) continue;
+                var holeFiller = new HolePropertiesFiller(doc, pipeElement, sourceElement, point);
+                holeFiller.GetHoles(point, normal);
+                holes = holeFiller.HolesProps;
+                wallHoles.AddRange(holes);
+            }
+        }
 
         public void GetWalls(Document document, Reference pipeRef, Element pipeElem)
         {
