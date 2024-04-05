@@ -20,11 +20,6 @@ namespace UzlePlugins.Vm.Commands
             remove => CommandManager.RequerySuggested -= value;
         }
 
-        public bool CanExecute(object parameter)
-        {
-            return parameter is HolesVm;
-        }
-
         public override void Execute(object parameter)
         {
             var holesVm = (HolesVm)parameter;

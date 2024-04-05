@@ -31,10 +31,13 @@ namespace UzlePlugins.Models.Revit2022.Commands
 
             container.RegisterInstance(app);
             container.RegisterInstance(uiDocument);
-            container.Register<ISettingsReader, SettingsReader>();
+            container.Register(typeof(SettingsReader<>));
+            //container.Register<ISettingsReader, SettingsReader>();
             container.Register<IFamilyInsertService, FamilyInsertService>();
             container.Register<IZoomEntity, ZoomElementService>();
             container.Register<IFindHoleService, FindHolesService>();
+            container.Register<IOffsetManagerService, OffsetManagerService>();
+            
             container.Register<EntityToDtoConverter>();
 
             var window = container
@@ -55,6 +58,8 @@ namespace UzlePlugins.Models.Revit2022.Commands
             container.Register<CreateHolesCommand>();
             container.Register<ZoomToPointCommand>();
             container.Register<FindHolesCommand>();
+            container.Register<FillOffsetSettingsCommand>();
+            container.Register<SaveOffsetsCommand>();
             container.Register<HolesVm>();
             container.Register<HoleTaskView>();
             return container;

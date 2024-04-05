@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:local ="clr-namespace:UzlePlugins.Views.Converters"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         Name="HoleView"
         mc:Ignorable="d"
         xmlns:vms="clr-namespace:UzlePlugins.Vm;assembly=UzlePlugins.Vm"
@@ -15,8 +16,9 @@
         <local:EmptyListToVisibilityConverter x:Key="EmptyListToVisibilityConverter"/>
     </Window.Resources>
     <Grid>
+        
         <TabControl Width="Auto" Height="Auto">
-            <TabItem Header="Connection">
+            <TabItem Header="Intersections">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -54,11 +56,12 @@
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
 
-                                <DataGridTextColumn Header="Element type" Binding="{Binding IntersectingElementType}" IsReadOnly="True"/>
-                                <DataGridTextColumn Header="Element name" Binding="{Binding IntersectingElementName}" IsReadOnly="True"/>
-                                <DataGridTextColumn Header="Element size" Binding="{Binding IntersectingElementTypeSize}" IsReadOnly="True"/>
-                                <DataGridTextColumn Header="Source type" Binding="{Binding SourceType}" IsReadOnly="True"/>
-                                <DataGridTextColumn Header="Source name" Binding="{Binding SourceName}" IsReadOnly="True"/>
+                                <DataGridTextColumn Header="Element type" Binding="{Binding Intersection.IntersectingElementType}" IsReadOnly="True"/>
+                                <DataGridTextColumn Header="Element name" Binding="{Binding  Intersection.IntersectingElementName}" IsReadOnly="True"/>
+                                <DataGridTextColumn Header="Element shape" Binding="{Binding Intersection.IntersectingElementShape}" IsReadOnly="True"/>
+                                <DataGridTextColumn Header="Element size" Binding="{Binding Intersection.IntersectingElementTypeSize}" IsReadOnly="True"/>
+                                <DataGridTextColumn Header="HoleSource type" Binding="{Binding  HoleSource.SourceType}" IsReadOnly="True"/>
+                                <DataGridTextColumn Header="HoleSource name" Binding="{Binding HoleSource.SourceName}" IsReadOnly="True"/>
 
                                 <DataGridTemplateColumn Header="Hole Type">
                                     <DataGridTemplateColumn.CellTemplate>
@@ -69,10 +72,10 @@
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                <DataGridTextColumn Header="Offset" Binding="{Binding HoleOffset}"/>
+                                <DataGridTextColumn Header="Offset" Binding="{Binding Hole.Offset}"/>
                                 <DataGridTemplateColumn>
                                     <DataGridTemplateColumn.Header>
-                                        <CheckBox Content="Delete All" 
+                                        <CheckBox Content="Insert" 
                                                   IsChecked="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.IsAllNewHoleSelected, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged }" />
                                     </DataGridTemplateColumn.Header>
                                     <DataGridTemplateColumn.CellTemplate>
@@ -116,16 +119,16 @@
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                <DataGridTextColumn Header="Hole type" Binding="{Binding IntersectingElementType}" IsReadOnly="True"/>
-                                <DataGridTextColumn Header="Hole name" Binding="{Binding IntersectingElementName}" IsReadOnly="True"/>
-                                <DataGridTextColumn Header="Size" Binding="{Binding IntersectingElementTypeSize}" IsReadOnly="True"/>
-                                <DataGridTextColumn Header="Source type" Binding="{Binding SourceType}" IsReadOnly="True"/>
-                                <DataGridTextColumn Header="Source name" Binding="{Binding SourceName}" IsReadOnly="True" />
-                                <DataGridTextColumn Header="Shape" Binding="{Binding IsHoleRectangled}" IsReadOnly="False"/>
-                                <DataGridTextColumn Header="Offset" Binding="{Binding HoleOffset}" IsReadOnly="False"/>
+                                <DataGridTextColumn Header="Hole type" Binding="{Binding Intersection.IntersectingElementType}" IsReadOnly="True"/>
+                                <DataGridTextColumn Header="Hole name" Binding="{Binding Intersection.IntersectingElementName}" IsReadOnly="True"/>
+                                <DataGridTextColumn Header="Size" Binding="{Binding Intersection.IntersectingElementTypeSize}" IsReadOnly="True"/>
+                                <DataGridTextColumn Header="HoleSource type" Binding="{Binding  HoleSource.SourceType}" IsReadOnly="True"/>
+                                <DataGridTextColumn Header="HoleSource name" Binding="{Binding  HoleSource.SourceName}" IsReadOnly="True" />
+                                <DataGridTextColumn Header="Shape" Binding="{Binding  Hole.IsRectangled}" IsReadOnly="False"/>
+                                <DataGridTextColumn Header="Offset" Binding="{Binding  Hole.Offset}" IsReadOnly="False"/>
                                 <DataGridTemplateColumn >
                                     <DataGridTemplateColumn.Header>
-                                        <CheckBox Content="Delete All" 
+                                        <CheckBox Content="Delete" 
                                             IsChecked="{Binding RelativeSource={RelativeSource AncestorType=Window}, 
                                             Path=DataContext.IsAllActualHoleSelected,
                                             Mode=TwoWay,UpdateSourceTrigger=PropertyChanged }" />
@@ -168,7 +171,7 @@
                                 <DataGridTextColumn Header="Family name" Binding="{Binding Name}" IsReadOnly="True" />
                                 <DataGridTemplateColumn>
                                     <DataGridTemplateColumn.Header>
-                                    <CheckBox Content="Delete All" 
+                                        <CheckBox Content="Delete" 
                                               IsChecked="{Binding RelativeSource={RelativeSource AncestorType=Window}, 
                                             Path=DataContext.IsAllOutdatedHoleSelected,
                                             Mode=TwoWay,UpdateSourceTrigger=PropertyChanged }" />
@@ -209,6 +212,87 @@
                         <TextBlock Margin="3">Settings</TextBlock>
                     </StackPanel>
                 </TabItem.Header>
+
+                <GroupBox>
+                    <GroupBox.Header>
+                        <Label Content="Offset settings by default"/>
+                    </GroupBox.Header >
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions >
+                        <StackPanel Grid.Row="0" Orientation="Horizontal">
+                            <TextBlock Margin="5 0 20 5">Select category</TextBlock>
+                            <ComboBox ItemsSource="{Binding IntersectingType}" 
+                                      SelectedIndex="0" 
+                                      SelectedItem="{Binding SelectedType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+                        </StackPanel>
+                        <Grid Row="1">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Text="Header" Grid.Row="0"/>
+
+                            <ItemsControl Grid.Row="1" 
+                                          ItemsSource="{Binding SelectedOffsets, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBox Text="{Binding From, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                     Grid.Column="0"/>
+                                            <TextBox Text="{Binding To, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                                     Grid.Column="1"/>
+                                            <TextBox Text="{Binding Offset, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                                     Grid.Column="2"/>
+                                            <CheckBox IsChecked ="{Binding IsDelete}" 
+                                                     Grid.Column="3"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <Grid Grid.Row="2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Name="AddFromTextBox"  Grid.Column="0" Text="{Binding NewFrom}"/>
+                                <TextBox Name="AddToTextBox" Grid.Column="1"  Text="{Binding NewTo}"/>
+                                <TextBox Name="AddOffsetTextBox"  Grid.Column="2"  Text="{Binding NewOffset}"/>
+                            </Grid>
+
+                        </Grid>
+                        <Grid Row="2" HorizontalAlignment="Center" VerticalAlignment="Bottom" >
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions >
+                            <Button Name="AddRow" Grid.Column="0" Width="100" Height="20" Content="Add" Margin="5"
+                                    Command="{Binding AddOffsetCommand}" />
+                            <Button Name="DeleteRow" Grid.Column="1" Width="100" Height="20" Content="Delete" Margin="5"
+                                    Command="{Binding DeleteOffsetCommand}"/>
+
+                            <Button Name="SaveToJson" Grid.Column="2" Width="100" Height="20" Content="Accept" 
+                                    Command="{Binding SaveOffsetsCommand}" CommandParameter="{Binding }"/>
+                        </Grid>
+                    </Grid>
+                </GroupBox>
             </TabItem>
 
         </TabControl>

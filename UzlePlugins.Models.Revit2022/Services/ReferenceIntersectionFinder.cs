@@ -1,22 +1,17 @@
-﻿using System;
-using Autodesk.Revit.DB;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using Autodesk.Revit.UI;
-using Autodesk.Revit.UI.Selection;
+using Autodesk.Revit.DB;
 
-namespace UzlePlugins.RevitCore.Services
+namespace UzlePlugins.Models.Revit2022.Services
 {
     public class ReferenceIntersectionFinder
     {
         private readonly Document _document;
         private readonly Curve _curve;
         private readonly View3D _view3D;
-        private readonly Element _intersectingElement;
 
         public ReferenceIntersectionFinder(Document document, Element intersectingElement, View3D view3D)
         {
-            _intersectingElement = intersectingElement;
             Reference reference = new Reference(intersectingElement);
             _document = document;
             _view3D = view3D;
@@ -40,8 +35,8 @@ namespace UzlePlugins.RevitCore.Services
         public XYZ Normal { get; set; }
 
 
-        //public List<HoleFamilyModel<Wall>> HolesProps { get; } = new List<HoleFamilyModel<Wall>>();
-        //public List<HoleFamilyModel<Floor>> FloorHoles { get; } = new List<HoleFamilyModel<Floor>>();
+        //public List<HoleFamilyEntity<Wall>> HolesProps { get; } = new List<HoleFamilyEntity<Wall>>();
+        //public List<HoleFamilyEntity<Floor>> FloorHoles { get; } = new List<HoleFamilyEntity<Floor>>();
 
         private List<Reference> GetAllReferences(BuiltInCategory builtInCategory)
         {

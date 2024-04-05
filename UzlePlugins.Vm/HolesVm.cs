@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using UzlePlugins.Contracts.DTOs;
 using UzlePlugins.Vm.Base;
 using UzlePlugins.Vm.Commands;
@@ -8,28 +10,99 @@ namespace UzlePlugins.Vm
 {
     public class HolesVm : BaseViewModel
     {
-        private List<ActualHoleModelDto> _actualHoles;
+        private List<ActualHoleDto> _actualHoles;
         private List<OutdatedFamilyDto> _outdatedHoles;
-        private List<NewHolesDto> _newHoles;
+        private List<NewHoleDto> _newHoles;
 
         private bool _canExecute = true;
         private string[] _holeFigureTypes;
         private bool _isAllActualHoleSelected;
         private bool _isAllNewHoleSelected = true;
         private bool _isAllOutdatedHoleSelected;
+        private ObservableCollection<OffsetRanges> _ductOffsets;
+        private ObservableCollection<OffsetRanges> _pipeOffsets;
+        private ObservableCollection<string> _intersectingType;
+        private string _selectedType = "Ducts";
+        private ObservableCollection<OffsetRanges> _selectedOffsets ;
 
-        public HolesVm(
-            FindHolesCommand findHolesCommand,
+        public HolesVm(FindHolesCommand findHolesCommand,
             CreateHolesCommand createHolesCommand,
-            ZoomToPointCommand zoomToPointCommand)
+            ZoomToPointCommand zoomToPointCommand,
+            FillOffsetSettingsCommand fillOffsetSettingsCommand, SaveOffsetsCommand savetoJson)
         {
+            HoleFigureTypes = new[] { "Square", "Circle" };
+            IntersectingType = new ObservableCollection<string> { "Ducts", "Pipes", "Cable trays" };
+
             FindHolesCommand = findHolesCommand;
             findHolesCommand.ResultObtained += FindHolesCommand_ResultObtained;
+
+            FillOffsetSettingsCommand = fillOffsetSettingsCommand;
+            
+            fillOffsetSettingsCommand.ResultObtained += FillOffsetSettingsCommand_ResultObtained;
+
             CreateHolesCommand = createHolesCommand;
             ZoomToPointCommand = zoomToPointCommand;
-            HoleFigureTypes = new[] { "Square", "Circle" };
+            UpdateSelectedOffsets();
+            
+            AddOffsetCommand =  new RelayCommand(AddToList);
+            DeleteOffsetCommand = new RelayCommand(DeleteFromList);
+            
+            SaveOffsetsCommand = savetoJson;
+
         }
 
+        private void DeleteFromList(object obj)
+        {
+            switch (SelectedType)
+            {
+                case "Ducts":
+                {
+                    var selected = SelectedOffsets.Where(s => s.IsDelete).ToList();
+                    foreach (var offset in selected)
+                    {
+                        DuctOffsets.Remove(offset);
+                    }
+
+                    break;
+                }
+                case "Pipes":
+                {
+                    var selected = SelectedOffsets.Where(s => s.IsDelete).ToList();
+                    foreach (var offset in selected)
+                    {
+                        PipeOffsets.Remove(offset);
+                    }
+
+                    break;
+                }
+            }
+        }
+
+        public RelayCommand DeleteOffsetCommand { get; set; }
+
+        private void AddToList(object obj)
+        {
+            switch (SelectedType)
+            {
+                case "Ducts":
+                    DuctOffsets.Add(new OffsetRanges(NewFrom, NewTo, NewOffset));
+                    break;
+                case "Pipes":
+                    PipeOffsets.Add(new OffsetRanges(NewFrom, NewTo, NewOffset));
+                    break;
+            }
+           
+            NewFrom = default;
+            NewTo = default;
+            NewOffset = default;
+
+            OnPropertyChanged(nameof(NewFrom));
+            OnPropertyChanged(nameof(NewTo));
+            OnPropertyChanged(nameof(NewOffset));
+
+        }
+
+        public RelayCommand AddOffsetCommand { get; set; }
 
         public bool IsAllNewHoleSelected
         {
@@ -64,6 +137,12 @@ namespace UzlePlugins.Vm
             }
         }
 
+        private void FillOffsetSettingsCommand_ResultObtained(OffsetsDto obj)
+        {
+            DuctOffsets = obj.Duct;
+            PipeOffsets = obj.Pipe;
+        }
+
         private void FindHolesCommand_ResultObtained(AllHolesDto obj)
         {
             ActualHoles = obj.ActualFamiliesDtos;
@@ -77,13 +156,13 @@ namespace UzlePlugins.Vm
             set => Set(ref _holeFigureTypes, value);
         }
 
-        public List<NewHolesDto> NewHoles
+        public List<NewHoleDto> NewHoles
         {
             get => _newHoles;
             set => Set(ref _newHoles, value);
         }
 
-        public List<ActualHoleModelDto> ActualHoles
+        public List<ActualHoleDto> ActualHoles
         {
             get => _actualHoles;
             set => Set(ref _actualHoles, value);
@@ -95,12 +174,64 @@ namespace UzlePlugins.Vm
             set => Set(ref _outdatedHoles, value);
         }
 
+        public ObservableCollection<OffsetRanges> DuctOffsets
+        {
+            get => _ductOffsets;
+            set => Set(ref _ductOffsets, value);
+        }
+
+        public ObservableCollection<OffsetRanges> PipeOffsets
+        {
+            get => _pipeOffsets;
+            set => Set(ref _pipeOffsets, value);
+        }
+
         public Action CloseAction { get; set; }
 
+        public FillOffsetSettingsCommand FillOffsetSettingsCommand { get; }
         public FindHolesCommand FindHolesCommand { get; }
 
         public CreateHolesCommand CreateHolesCommand { get; }
 
         public ZoomToPointCommand ZoomToPointCommand { get; }
+
+        public ObservableCollection<string> IntersectingType
+        {
+            get=>_intersectingType;
+            set => Set(ref _intersectingType, value);
+        }
+
+        public string SelectedType
+        {
+            get => _selectedType;
+            set
+            {
+                _selectedType = value;
+                OnPropertyChanged();
+                UpdateSelectedOffsets();
+            }
+        }
+
+        private void UpdateSelectedOffsets()
+        {
+            
+            SelectedOffsets = SelectedType switch
+            {
+                "Ducts" => DuctOffsets,
+                "Pipes" => PipeOffsets,
+                _ => SelectedOffsets
+            };
+        }
+
+        public ObservableCollection<OffsetRanges> SelectedOffsets
+        {
+            get => _selectedOffsets;
+            set => Set(ref _selectedOffsets, value);
+        }
+
+        public int NewFrom { get; set; }
+        public int NewTo { get; set; }
+        public int NewOffset { get; set; }
+        public SaveOffsetsCommand SaveOffsetsCommand { get; }
     }
 }

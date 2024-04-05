@@ -1,129 +1,111 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
-// Sample list of PointData instances
-List<PointData> pointDataList = new List<PointData>
+using System.IO;
+using System.Reflection;
+using System.Text.Json;
+using UzlePlugins.Contracts.DTOs;
+using UzlePlugins.Settings;
+
+var reader = new SettingsReader<OffsetsDto>();
+var r = reader.Read("Settings.json");
+
+var manager = new OffsetManagerService();
+
+var dto = manager.Read();
+
+Console.ReadLine();
+
+namespace UzlePlugins.TestConsole
 {
-    new PointData(1, new XYZ(1, 2, 3)),
-    new PointData(2, new XYZ(4, 5, 6)),
-    new PointData(3, new XYZ(7, 8, 9))
-};
-
-// Select all XYZ objects from the list of PointData instances
-var allXYZs = pointDataList.Select(pd => pd.Position);
-
-// Output the selected XYZ objects
-Console.WriteLine("All XYZ objects from the list of PointData:");
-foreach (var xyz in allXYZs)
-{
-    Console.WriteLine($"({xyz.X}, {xyz.Y}, {xyz.Z})");
-}
-
-// Your XYZ class
-public class XYZ
-{
-    public int X { get; set; }
-    public int Y { get; set; }
-    public int Z { get; set; }
-
-    public XYZ(int x, int y, int z)
+    public class JsonDataManager
     {
-        X = x;
-        Y = y;
-        Z = z;
-    }
-}
+        private string filePath;
 
-public class PointData
-{
-    public int ID { get; set; }
-    public XYZ Position { get; set; }
-
-    public PointData(int id, XYZ position)
-    {
-        ID = id;
-        Position = position;
-    }
-}
-
-public class Part : IEquatable<Part>
-{
-    public string PartName { get; set; }
-    public int PartId { get; set; }
-
-    public override string ToString()
-    {
-        return "ID: " + PartId + "   IntersectingElementName: " + PartName;
-    }
-    public override bool Equals(object obj)
-    {
-        if (obj == null) return false;
-        Part objAsPart = obj as Part;
-        if (objAsPart == null) return false;
-        else return Equals(objAsPart);
-    }
-    public override int GetHashCode()
-    {
-        return PartId;
-    }
-    public bool Equals(Part other)
-    {
-        if (other == null) return false;
-        return (this.PartId.Equals(other.PartId));
-    }
-    // Should also override == and != operators.
-}
-public class Example
-{
-    public static void Main()
-    {
-        // Create a list of parts.
-        List<Part> parts = new List<Part>();
-
-        // Add parts to the list.
-        parts.Add(new Part() { PartName = "crank arm", PartId = 1234 });
-        parts.Add(new Part() { PartName = "chain ring", PartId = 1334 });
-        parts.Add(new Part() { PartName = "regular seat", PartId = 1434 });
-        parts.Add(new Part() { PartName = "banana seat", PartId = 1444 });
-        parts.Add(new Part() { PartName = "cassette", PartId = 1534 });
-        parts.Add(new Part() { PartName = "shift lever", PartId = 1634 }); ;
-
-        // Write out the parts in the list. This will call the overridden ToString method
-        // in the Part class.
-        Console.WriteLine();
-        foreach (Part aPart in parts)
+        public JsonDataManager()
         {
-            Console.WriteLine(aPart);
+            string assemblyFolder =
+                "C:\\Users\\yusufzhon.marasulov\\holeSource\\repos\\UzlePlugins\\UzlePlugins.Settings\\bin\\Debug\\net48\\";
+
+#if !DEBUG
+                assemblyFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+#endif
+
+            filePath = Path.Combine(assemblyFolder, "Offset.json");
+
         }
 
-        // Check the list for part #1734. This calls the IEquatable.Equals method
-        // of the Part class, which checks the PartId for equality.
-        Console.WriteLine("\nContains: Part with Id=1734: {0}",
-            parts.Contains(new Part { PartId = 1734, PartName = "" }));
+        public Offsets? ReadData()
+        {
+            try
+            {
+                // Проверяем, существует ли файл
+                if (File.Exists(filePath))
+                {
+                    // Читаем JSON из файла
+                    string jsonString = File.ReadAllText(filePath);
 
-        // Find items where name contains "seat".
-        Console.WriteLine("\nFind: Part where name contains \"seat\": {0}",
-            parts.Find(x => x.PartName.Contains("seat")));
+                    // Десериализуем JSON в объект
+                    var data = JsonSerializer.Deserialize<Offsets>(jsonString);
 
-        // Check if an item with Id 1444 exists.
-        Console.WriteLine("\nExists: Part with Id=1444: {0}",
-            parts.Exists(x => x.PartId == 1444));
+                    Console.WriteLine("Duct:");
+                    foreach (var range in data.Duct)
+                    {
+                        Console.WriteLine($"Диапазон от {range.From} до {range.To}, смещение: {range.Offset}");
+                    }
 
-        /*This code example produces the following output:
+                    Console.WriteLine("\nPipe:");
+                    foreach (var range in data.Pipe)
+                    {
+                        Console.WriteLine($"Диапазон от {range.From} до {range.To}, смещение: {range.Offset}");
+                    }
 
-        ID: 1234   IntersectingElementName: crank arm
-        ID: 1334   IntersectingElementName: chain ring
-        ID: 1434   IntersectingElementName: regular seat
-        ID: 1444   IntersectingElementName: banana seat
-        ID: 1534   IntersectingElementName: cassette
-        ID: 1634   IntersectingElementName: shift lever
+                    return data;
+                }
 
-        Contains: Part with Id=1734: False
+                Console.WriteLine("Файл не существует.");
+                return null;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка при чтении из файла: {ex.Message}");
+                return null;
+            }
+        }
 
-        Find: Part where name contains "seat": ID: 1434   IntersectingElementName: regular seat
+        public void WriteData(Offsets data)
+        {
+            try
+            {
+                // Сериализуем объект в JSON
+                string jsonString = JsonSerializer.Serialize(data);
 
-        Exists: Part with Id=1444: True
-         */
+                // Записываем JSON в файл
+                File.WriteAllText(filePath, jsonString);
+
+                Console.WriteLine("Данные успешно записаны в файл.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка при записи в файл: {ex.Message}");
+            }
+        }
     }
 
 
+
+
+
+
+    public class Offsets
+    {
+        public List<OffsetTypes> Duct { get; set; }
+        public List<OffsetTypes> Pipe { get; set; }
+    }
+
+    public class OffsetTypes
+    {
+        public int From { get; set; }
+        public int To { get; set; }
+        public int Offset { get; set; }
+    }
 }

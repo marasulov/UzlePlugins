@@ -2,8 +2,8 @@
 
 namespace UzlePlugins.Contracts
 {
-    public interface ISettingsReader
+    public interface ISettingsReader<T>
     {
-        List<string> GetFamilyNames();
+        T Read(string filename);
     }
 }

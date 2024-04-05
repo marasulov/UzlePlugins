@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Linq;
 using UzlePlugins.Contracts;
 using UzlePlugins.Contracts.DTOs;
-using UzlePlugins.RevitCore.Services;
 
 namespace UzlePlugins.Models.Revit2022.Services
 {
@@ -35,7 +34,7 @@ namespace UzlePlugins.Models.Revit2022.Services
             {
                 FamilyTypeFinderService familyTypeFinderService = new FamilyTypeFinderService();
 
-                var wallsFamilyName = hole.SourceType switch
+                var wallsFamilyName = hole.HoleSource.SourceType switch
                 {
                     "Wall" => familyTypeFinderService.GetFamilyType(BuiltInCategory.OST_Walls, hole.Shape),
                     "Floor" => familyTypeFinderService.GetFamilyType(BuiltInCategory.OST_Floors, hole.Shape),
@@ -77,42 +76,43 @@ namespace UzlePlugins.Models.Revit2022.Services
             t.Commit();
         }
 
-        public void InsertFamily(FamilySymbol symbol, NewHolesDto dto)
+        public void InsertFamily(FamilySymbol symbol, NewHoleDto dto)
         {
-            var point = new XYZ(dto.IntersectionPoint.X, dto.IntersectionPoint.Y, dto.IntersectionPoint.Z);
+            var dtoPoint = dto.Intersection.IntersectionPoint;
+            var point = new XYZ(dtoPoint.X, dtoPoint.Y, dtoPoint.Z);
             if (!symbol.IsActive) symbol.Activate();
             FamilyInstance fi = _doc.Create.NewFamilyInstance(point, symbol, StructuralType.NonStructural);
             var basisY = fi.GetTransform().BasisY;
-            var angle = basisY.AngleTo(new XYZ(dto.IntersectionNormal.X, dto.IntersectionNormal.Y, dto.IntersectionNormal.Z));
+            var angle = basisY.AngleTo(point);
 
             Line axis = Line.CreateBound(point, point + XYZ.BasisZ);
             ElementTransformUtils.RotateElement(_doc, fi.Id, axis, -angle);
             var parameters = fi.GetOrderedParameters();
 
-            var offset = UnitUtils.ConvertToInternalUnits(dto.HoleOffset, UnitTypeId.Millimeters);
+            var offset = UnitUtils.ConvertToInternalUnits(dto.Hole.Offset, UnitTypeId.Millimeters);
             //var height = UnitUtils.ConvertToInternalUnits(dto.Height, UnitTypeId.Millimeters);
             //var width = UnitUtils.ConvertToInternalUnits(dto.Width, UnitTypeId.Millimeters);
-            var intersectingElementSize = UnitUtils.ConvertToInternalUnits(dto.IntersectingElementTypeSize, UnitTypeId.Millimeters);
+            var intersectingElementSize = UnitUtils.ConvertToInternalUnits(dto.Intersection.IntersectingElementTypeSize, UnitTypeId.Millimeters);
 
             switch (dto.Shape)
             {
-                case "Circle" when dto.IntersectingElementType == "Duct":
+                case "Circle" when dto.Intersection.IntersectingElementType == "Duct":
                     var diameter = Math.Sqrt(Math.Pow(dto.Width, 2) + Math.Pow(dto.Height, 2));
                     //if (dto.Width < dto.Height)
                     //    diameter = dto.Height;
-                    SetCircledFamilyParameter(parameters, "Depth", "Diameter", diameter, offset, dto.SourceThickness);
+                    SetCircledFamilyParameter(parameters, "Depth", "Diameter", diameter, offset, dto.HoleSource.SourceThickness);
                     break;
                 case "Circle":
-                    SetCircledFamilyParameter(parameters, "Depth", "Diameter", intersectingElementSize, offset, dto.SourceThickness);
+                    SetCircledFamilyParameter(parameters, "Depth", "Diameter", intersectingElementSize, offset, dto.HoleSource.SourceThickness);
                     break;
 
 
-                case "Square" when dto.IntersectingElementType == "Duct" && dto.Height != 0:
+                case "Square" when dto.Intersection.IntersectingElementType == "Duct" && dto.Height != 0:
                     SetSquaredFamilyParameter(parameters, "Depth", "Height", "Width", dto.Height, dto.Width,
-                        offset, dto.SourceThickness);
+                        offset, dto.HoleSource.SourceThickness);
                     break;
                 case "Square":
-                    SetRectFamilyParameter(parameters, "Depth", "Height", "Width", intersectingElementSize, offset, dto.SourceThickness);
+                    SetRectFamilyParameter(parameters, "Depth", "Height", "Width", intersectingElementSize, offset, dto.HoleSource.SourceThickness);
                     break;
             }
             //}

@@ -1,10 +1,10 @@
-﻿using Autodesk.Revit.DB;
-using Autodesk.Revit.UI;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using Autodesk.Revit.DB;
+using Autodesk.Revit.UI;
 using UzlePlugins.Settings;
 
-namespace UzlePlugins.RevitCore.Services
+namespace UzlePlugins.Models.Revit2022.Services
 {
     public class FamilyTypeFinderService
     {
@@ -12,14 +12,12 @@ namespace UzlePlugins.RevitCore.Services
 
         public FamilyTypeFinderService()
         {
-            SettingsReader reader = new SettingsReader();
-            _familyTypes = reader.GetFamilyTypes();
+            SettingsReader<HoleFamilyTypes> reader = new SettingsReader<HoleFamilyTypes>();
+            _familyTypes = reader.Read("Settings.json");
         }
 
         public List<string> FamilyParameters { get; set; }
 
-        public string FamilyName { get; set; }
-        //public FamilySymbol FamilySymbol { get; set; }
 
         public string GetFamilyType(BuiltInCategory builtInCategory, string shape)
         {

@@ -64,7 +64,7 @@ namespace UzlePlugins.Models.Revit2022.Models
         //    var ductCollector = new FilteredElementCollector(doc).OfClass(typeof(Duct)).Cast<Duct>()
         //        .Where(w => w.Width > smallestDiametr);
 
-        //    List<HoleFamilyModel> wallHoles = new List<HoleFamilyModel>();
+        //    List<HoleFamilyEntity> wallHoles = new List<HoleFamilyEntity>();
 
         //    //исходные точки
         //    var newIntersections = new List<XYZ>();
@@ -83,7 +83,7 @@ namespace UzlePlugins.Models.Revit2022.Models
         //            newIntersections.AddRange(points);
         //            int i = 0;
 
-        //            var holes = new List<HoleFamilyModel>();
+        //            var holes = new List<HoleFamilyEntity>();
         //            foreach (var point in points)
         //            {
         //                var sourceElement = refFinder.WallReferences[i];
@@ -102,8 +102,8 @@ namespace UzlePlugins.Models.Revit2022.Models
         //        }
         //    }
 
-        //    List<ActualHoleModelDto> actualHoles = new();
-        //    List<NewHolesDto> newHoles = new();
+        //    List<ActualHoleDto> actualHoles = new();
+        //    List<NewHoleDto> newHoles = new();
 
         //    var outdatedFamilies = new List<OutdatedFamilyDto>();
 
@@ -126,18 +126,18 @@ namespace UzlePlugins.Models.Revit2022.Models
         //                actualPoint.Point == holeFamilyModel.IntersectionPoint);
 
         //            actualHoles.AddRange(actualModels.Select(actualModel =>
-        //                new ActualHoleModelDto(
+        //                new ActualHoleDto(
         //                    actualPoint.Id.IntegerValue,
         //                    new PointDTO(actualModel.IntersectionPoint.X, actualModel.IntersectionPoint.Y, actualModel.IntersectionPoint.Z),
         //                    actualModel.IntersectingElementName,
-        //                    actualModel.SourceType,
-        //                    actualModel.SourceType,
+        //                    actualModel.Type,
+        //                    actualModel.Type,
         //                    actualModel.IntersectingElementTypeSize,
-        //                    actualModel.SourceType,
+        //                    actualModel.Type,
         //                    true,
         //                    UnitUtils.ConvertToInternalUnits(20, UnitTypeId.Millimeters),
         //                    false,
-        //                    actualModel.SourceThickness,
+        //                    actualModel.Thickness,
         //                    new PointDTO(actualModel.IntersectionPoint.X, actualModel.IntersectionPoint.Y, actualModel.IntersectionPoint.Z),
         //                    actualModel.IntersectingElementWidth
         //                )));
@@ -151,18 +151,18 @@ namespace UzlePlugins.Models.Revit2022.Models
 
         //            newHoles.AddRange(
         //                newModels.Select(actualModel =>
-        //                    new NewHolesDto(
+        //                    new NewHoleDto(
         //                        actualModel.IntersectingElement.Id.IntegerValue,
         //                        new PointDTO(actualModel.IntersectionPoint.X, actualModel.IntersectionPoint.Y, actualModel.IntersectionPoint.Z),
         //                        actualModel.IntersectingElementName,
-        //                        actualModel.SourceType,
-        //                        actualModel.SourceType,
+        //                        actualModel.Type,
+        //                        actualModel.Type,
         //                        actualModel.IntersectingElementTypeSize,
-        //                        actualModel.SourceType,
+        //                        actualModel.Type,
         //                        true,
         //                        UnitUtils.ConvertToInternalUnits(20, UnitTypeId.Millimeters),
         //                        true,
-        //                        actualModel.SourceThickness,
+        //                        actualModel.Thickness,
         //                        new PointDTO(actualModel.IntersectionPoint.X, actualModel.IntersectionPoint.Y, actualModel.IntersectionPoint.Z),
         //                        actualModel.IntersectingElementWidth
         //                        )));
@@ -188,14 +188,14 @@ namespace UzlePlugins.Models.Revit2022.Models
         //        var j = 0;
         //        foreach (var hole in wallHoles)
         //        {
-        //            var holeModel = new ActualHoleModelDto(
+        //            var holeModel = new ActualHoleDto(
         //                j,
         //                new PointDTO(hole.IntersectionPoint.X, hole.IntersectionPoint.Y, hole.IntersectionPoint.Z),
         //                hole.IntersectingElementName,
-        //                hole.SourceType,
+        //                hole.Type,
         //                hole.IntersectingElementType,
         //                hole.IntersectingElementTypeSize,
-        //                "", hole.IsHoleRectangled, hole.HoleOffset, hole.IsDelete, hole.SourceThickness,
+        //                "", hole.IsRectangled, hole.Offset, hole.IsDelete, hole.Thickness,
         //            new PointDTO(hole.IntersectionPoint.X, hole.IntersectionPoint.Y, hole.IntersectionPoint.Z),
         //                hole.IntersectingElementWidth
         //                );

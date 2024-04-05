@@ -1,61 +1,62 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using System.Text.Json;
 using UzlePlugins.Contracts;
 
 namespace UzlePlugins.Settings
 {
-    public class SettingsReader : ISettingsReader
+    public class SettingsReader<T> : ISettingsReader<T>
     {
-        private readonly string _jsonFileName;
-
-        public SettingsReader()
+        private string _settings;
+        private JsonSerializerOptions _options;
+        
+        public void ReadSettings(string filename)
         {
-            string assemblyFolder =
-                "C:\\Users\\yusufzhon.marasulov\\source\\repos\\UzlePlugins\\UzlePlugins.Settings\\bin\\Debug\\net48\\";
+            Filename = filename;
+            FileReader reader = new FileReader();
+            _settings = reader.ReadFile(filename);
 
-#if !DEBUG
-                assemblyFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-#endif
-
-            _jsonFileName = Path.Combine(assemblyFolder, "Settings.json");
+            _options = new JsonSerializerOptions { WriteIndented = true };
         }
 
-        public HoleFamilyTypes? GetFamilyTypes()
+        public T Read(string filename)
         {
-            var options = new JsonSerializerOptions { WriteIndented = true };
-
-            using FileStream fs = new FileStream(_jsonFileName, FileMode.Open);
-            return JsonSerializer.Deserialize<HoleFamilyTypes>(fs, options);
-        }
-
-        public List<string> GetFamilyNames()
-        {
-            var options = new JsonSerializerOptions { WriteIndented = true };
-
-            using FileStream fs = new FileStream(_jsonFileName, FileMode.Open);
-            var names = JsonSerializer.Deserialize<HoleFamilyNames>(fs, options);
-
-            return names.FamilyNames;
-
-        }
-
-        static string GetAssemblyDirectory(System.Reflection.Assembly assembly)
-        {
-            return System.IO.Path.GetDirectoryName(assembly.Location);
-        }
-
-        public static string AssemblyDirectory
-        {
-            get
+            try
             {
-                string codeBase = Assembly.GetExecutingAssembly().CodeBase;
-                UriBuilder uri = new UriBuilder(codeBase);
-                string path = Uri.UnescapeDataString(uri.Path);
-                return Path.GetDirectoryName(path);
+                ReadSettings(filename);
+                if (_settings != null)
+                {
+                    var jsonObject = JsonSerializer.Deserialize<T>(_settings, _options);
+                    return jsonObject;
+                }
+
+                return default;
+            }
+            catch (Exception e)
+            {
+                return default;
+            }
+
+        }
+
+        public void WriteData<T>(T data, string filename)
+        {
+            try
+            {
+                var options = new JsonSerializerOptions { WriteIndented = true };
+                string jsonString = JsonSerializer.Serialize(data, options);
+
+                File.WriteAllText(filename, jsonString);
+
+                Console.WriteLine($"Данные успешно записаны в файл {filename}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Произошла ошибка при записи в файл: {ex.Message}");
             }
         }
+
+
+        public string Filename { get; private set; }
     }
 }

@@ -2,15 +2,13 @@
 using Autodesk.Revit.DB.Mechanical;
 using Autodesk.Revit.DB.Plumbing;
 using Autodesk.Revit.UI;
-using Autodesk.Revit.UI.Selection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using UzlePlugins.Contracts;
 using UzlePlugins.Contracts.DTOs;
-using UzlePlugins.Models.Revit2022.Enities;
-using UzlePlugins.RevitCore.Models;
-using UzlePlugins.RevitCore.Services;
+using UzlePlugins.Contracts.DTOs.BaseDtos;
+using UzlePlugins.Models.Revit2022.Entities;
 using UzlePlugins.Settings;
 
 namespace UzlePlugins.Models.Revit2022.Services
@@ -29,17 +27,15 @@ namespace UzlePlugins.Models.Revit2022.Services
         public AllHolesDto FindHoles()
         {
             var doc = _uiDocument.Document;
-            var offset = 1.1;
             double pipeDiametrForFilter = 50;
-            var settingsReader = new SettingsReader();
-            var names = settingsReader.GetFamilyNames();
-
+            var settingsReader = new SettingsReader<HoleFamilyNames>();
+            var names = settingsReader.Read("Settings.json");
 
             //var recFamilyNames = settingsReader.GetFamilyTypes().FamilyTypes.Rectangled.FamilyNames;
             //var circledFamilyNames = settingsReader.GetFamilyTypes().FamilyTypes.Circled.FamilyNames;
             //var linkedDocs = GetLinkedDocuments(doc);
 
-            var familyNames = new HashSet<string?>(names);
+            var familyNames = new HashSet<string?>(names.FamilyNames);
             var familyInstances = new FilteredElementCollector(doc)
                 .WhereElementIsNotElementType()
                 .OfClass(typeof(FamilyInstance))
@@ -67,7 +63,7 @@ namespace UzlePlugins.Models.Revit2022.Services
             var pipeCollector = new FilteredElementCollector(doc).OfClass(typeof(Pipe)).Cast<Pipe>()
                 .Where(w => w.Diameter > smallestDiametr);
 
-            List<HoleFamilyModel> wallHoles = new List<HoleFamilyModel>();
+            List<HoleFamilyEntity> wallHoles = new List<HoleFamilyEntity>();
 
             //исходные точки
             var newIntersections = new List<XYZ>();
@@ -83,44 +79,42 @@ namespace UzlePlugins.Models.Revit2022.Services
                     var points = refFinder.GetIntersectionsPoints(refFinder.WallReferences);
 
                     newIntersections.AddRange(points);
-                    int i = 0;
+                    //int i = 0;
 
-                    var holes = new List<HoleFamilyModel>();
+                    var holes = new List<HoleFamilyEntity>();
                     foreach (var point in points)
                     {
-                        var sourceElement = refFinder.WallReferences[i];
+                        var sourceElement = refFinder.WallReferences[0];
                         if (sourceElement == null) continue;
                         var holeFiller = new HolePropertiesFiller(doc, pipeElement, sourceElement, point);
-                        holeFiller.GetHoles(point, _uiDocument, refFinder.Normal);
+                        holeFiller.GetHoles(point, refFinder.Normal);
                         holes = holeFiller.HolesProps;
                         wallHoles.AddRange(holes);
                     }
-                    
+
                 }
 
                 refFinder.GetStructuralReferences(BuiltInCategory.OST_Floors);
-                if (refFinder.FloorReferences.Count > 0)
+                if (refFinder.FloorReferences.Count <= 0) continue;
                 {
                     var points = refFinder.GetIntersectionsPoints(refFinder.FloorReferences);
                     newIntersections.AddRange(points);
 
-                    int i = 0;
+                    //int i = 0;
 
-                    var holes = new List<HoleFamilyModel>();
+                    var holes = new List<HoleFamilyEntity>();
                     foreach (var point in points)
                     {
-                        var sourceElement = refFinder.FloorReferences[i];
+                        var sourceElement = refFinder.FloorReferences[0];
                         if (sourceElement == null) continue;
                         var holeFiller = new HolePropertiesFiller(doc, pipeElement, sourceElement, point);
-                        holeFiller.GetHoles(point, _uiDocument, refFinder.Normal);
+                        holeFiller.GetHoles(point, refFinder.Normal);
                         holes = holeFiller.HolesProps;
                         wallHoles.AddRange(holes);
                     }
-                    
                 }
             }
 
-            //TODO Last
             var allductCollector = new FilteredElementCollector(doc).OfClass(typeof(Duct)).Cast<Duct>();
             var ductCollector = new List<Duct>();
 
@@ -133,14 +127,16 @@ namespace UzlePlugins.Models.Revit2022.Services
                 }
                 else
                 {
-                    if(duct.Width > smallestDiametr)
+                    if (duct.Width > smallestDiametr)
                         ductCollector.Add(duct);
                 }
             }
-             
+
             //.Where(w => w.Width > smallestDiametr);
 
-            //из коллекции труб создаем отверстия
+            //из коллекции воздуховодов создаем отверстия
+            IOffsetManagerService manager = new OffsetManagerService();
+            var offsets = manager.Read();
 
             foreach (Element pipeElement in ductCollector)
             {
@@ -153,19 +149,18 @@ namespace UzlePlugins.Models.Revit2022.Services
                     var points = refFinder.GetIntersectionsPoints(refFinder.WallReferences);
 
                     newIntersections.AddRange(points);
-                    int i = 0;
-
-                    var holes = new List<HoleFamilyModel>();
+                    
+                    var holes = new List<HoleFamilyEntity>();
                     foreach (var point in points)
                     {
-                        var sourceElement = refFinder.WallReferences[i];
+                        var sourceElement = refFinder.WallReferences[0];
                         if (sourceElement == null) continue;
                         var holeFiller = new HolePropertiesFiller(doc, pipeElement, sourceElement, point);
-                        holeFiller.GetHoles(point, _uiDocument, refFinder.Normal);
+                        holeFiller.GetHoles(point, refFinder.Normal);
                         holes = holeFiller.HolesProps;
                         wallHoles.AddRange(holes);
                     }
-                    
+
                 }
 
                 refFinder.GetStructuralReferences(BuiltInCategory.OST_Floors);
@@ -176,26 +171,27 @@ namespace UzlePlugins.Models.Revit2022.Services
 
                     var i = 0;
 
-                    var holes = new List<HoleFamilyModel>();
+                    var holes = new List<HoleFamilyEntity>();
                     foreach (var point in points)
                     {
                         var sourceElement = refFinder.FloorReferences[i];
                         if (sourceElement == null) continue;
                         var holeFiller = new HolePropertiesFiller(doc, pipeElement, sourceElement, point);
-                        holeFiller.GetHoles(point, _uiDocument, refFinder.Normal);
+                        holeFiller.GetHoles(point, refFinder.Normal);
                         holes = holeFiller.HolesProps;
                         wallHoles.AddRange(holes);
                     }
-                    
+
                 }
             }
 
-            List<ActualHoleModelDto> actualHoles = new();
-            List<NewHolesDto> newHoles = new();
+            List<ActualHoleDto> actualHoles = new();
+            List<NewHoleDto> newHoles = new();
             List<OutdatedFamilyDto> outdatedFamilies = new();
 
             // если есть семейства значит не первый раз вставляются семейства отверстий
-
+            var pipeOffsets = offsets.Pipe;
+            var ductOffsets = offsets.Duct;
             if (pointDatas.Count > 0)
             {
                 var familyPoints = pointDatas.Select(x => x.Point);
@@ -216,51 +212,67 @@ namespace UzlePlugins.Models.Revit2022.Services
                 foreach (var actualPoint in actualPoints)
                 {
                     var actualModels = wallHoles.Where(holeFamilyModel =>
-                        actualPoint.Point.IsAlmostEqualTo(holeFamilyModel.IntersectionPoint));
+                        actualPoint.Point.IsAlmostEqualTo(holeFamilyModel.IntersectionParameters.IntersectionPoint));
 
                     actualHoles.AddRange(actualModels.Select(actualModel =>
-                        new ActualHoleModelDto(
+                    {
+                        var intParams = actualModel.IntersectionParameters;
+                        var intersectionPoint = intParams.IntersectionPoint;
+                        return new ActualHoleDto(
                             actualPoint.Id.IntegerValue,
-                            new PointDTO(actualModel.IntersectionPoint.X, actualModel.IntersectionPoint.Y, actualModel.IntersectionPoint.Z),
-                            actualModel.IntersectingElementName,
-                            actualModel.IntersectingElementType,
-                            actualModel.SourceType,
-                            UnitUtils.ConvertFromInternalUnits(actualModel.IntersectingElementTypeSize, UnitTypeId.Millimeters),
-                            actualModel.SourceType,
-                            true,
-                            20,
-                            false,
-                            actualModel.SourceThickness,
-                            new PointDTO(actualModel.IntersectionPoint.X, actualModel.IntersectionPoint.Y, actualModel.IntersectionPoint.Z),
-                            actualModel.IntersectingElementWidth,
-                            actualModel.SourceName
-                        )));
+                            new IntersectionData(
+                                XYZPointToDtoConverter.ConvertToDTO(intersectionPoint),
+                                intParams.IntersectingElementName,
+                                intParams.IntersectingElementType,
+                                UnitUtils.ConvertFromInternalUnits(intParams.IntersectingElementTypeSize, UnitTypeId.Millimeters),
+                                XYZPointToDtoConverter.ConvertToDTO(actualModel.IntersectionParameters.Normal), "Square"
+                            ),
+                            new HoleData("", actualModel.GetOffset(pipeOffsets), true),
+                            new HoleSourceData(
+                                actualModel.SourceParameters.SourceType,
+                                actualModel.SourceParameters.SourceThickness,
+                                0,
+                                actualModel.SourceParameters.SourceName
+                            ),
+                            false);
+
+
+                    }));
+
                 }
 
                 foreach (var newPoint in newPoints)
                 {
                     var newModels = wallHoles.Where(holeFamilyModel =>
-                        newPoint == holeFamilyModel.IntersectionPoint);
+                        newPoint == holeFamilyModel.IntersectionParameters.IntersectionPoint);
 
                     newHoles.AddRange(
-                        newModels.Select(actualModel =>
-                            new NewHolesDto(
-                                actualModel.IntersectingElement.Id.IntegerValue,
-                                new PointDTO(actualModel.IntersectionPoint.X, actualModel.IntersectionPoint.Y, actualModel.IntersectionPoint.Z),
-                                actualModel.IntersectingElementType,
-                                actualModel.IntersectingElementName,
-                                actualModel.SourceType,
-                                UnitUtils.ConvertFromInternalUnits(actualModel.IntersectingElementTypeSize, UnitTypeId.Millimeters),
-                                actualModel.SourceType,
+                        newModels.Select(newModel =>
+                        {
+                            var intParams = newModel.IntersectionParameters;
+                            var intersectionPoint = intParams.IntersectionPoint;
+                            return new NewHoleDto(
+                                intParams.IntersectingElement.Id.IntegerValue,
+                                new IntersectionData(XYZPointToDtoConverter.ConvertToDTO(intersectionPoint),
+                                    intParams.IntersectingElementName,
+                                    intParams.IntersectingElementType,
+                                    UnitUtils.ConvertFromInternalUnits(intParams.IntersectingElementTypeSize, UnitTypeId.Millimeters),
+                                    XYZPointToDtoConverter.ConvertToDTO(intParams.Normal),"Square"
+                                    ),
+                                new HoleData("", newModel.GetOffset(pipeOffsets), true),
+                                new HoleSourceData(
+                                    newModel.SourceParameters.SourceType,
+                                    newModel.SourceParameters.SourceThickness,
+                                    0,
+                                    newModel.SourceParameters.SourceName
+                                ),
                                 "Square",
-                                20,
-                                true,
-                                actualModel.SourceThickness,
-                                new PointDTO(actualModel.Normal.X, actualModel.Normal.Y, actualModel.Normal.Z),
-                                actualModel.SourceThickness,
-                                actualModel.SourceName,
-                                actualModel.IntersectingElementHeight,
-                                actualModel.IntersectingElementWidth)));
+                                intParams.IntersectingElementHeight,
+                                intParams.IntersectingElementWidth,
+                                true
+                            );
+                        }));
+
                 }
 
                 foreach (var deletedPoint in deletedPoints)
@@ -280,38 +292,42 @@ namespace UzlePlugins.Models.Revit2022.Services
             else
             {
                 //TODO have to delete family not intersecting object
-                foreach (var hole in wallHoles)
+                newHoles.AddRange(wallHoles.Select(hole =>
                 {
-                    var holeModel = new NewHolesDto(
-                        hole.IntersectingElement.Id.IntegerValue,
-                        new PointDTO(hole.IntersectionPoint.X, hole.IntersectionPoint.Y, hole.IntersectionPoint.Z),
-                        hole.IntersectingElementType,
-                        hole.IntersectingElementName,
-                        "",
-                        UnitUtils.ConvertFromInternalUnits(hole.IntersectingElementTypeSize, UnitTypeId.Millimeters),
-                        hole.SourceType,
+                    var intParams = hole.IntersectionParameters;
+                    var intersectionPoint = intParams.IntersectionPoint;
+                    return new NewHoleDto(
+                        intParams.IntersectingElement.Id.IntegerValue,
+                        new IntersectionData(XYZPointToDtoConverter.ConvertToDTO(intersectionPoint),
+                            intParams.IntersectingElementName,
+                            intParams.IntersectingElementType,
+                            UnitUtils.ConvertFromInternalUnits(intParams.IntersectingElementTypeSize, UnitTypeId.Millimeters),
+                            XYZPointToDtoConverter.ConvertToDTO(intParams.Normal),"Square"
+                        ),
+                        new HoleData("", hole.GetOffset(pipeOffsets), true),
+                        new HoleSourceData(
+                            hole.SourceParameters.SourceType,
+                            hole.SourceParameters.SourceThickness,
+                            0,
+                            hole.SourceParameters.SourceName
+                        ),
                         "Square",
-                        hole.HoleOffset,
-                        hole.IsInsert,
-                        hole.SourceThickness,
-                        new PointDTO(hole.Normal.X, hole.Normal.Y, hole.Normal.Z),
-                        hole.SourceThickness,
-                        hole.SourceName,
-                        hole.IntersectingElementHeight,
-                        hole.IntersectingElementWidth
+                        intParams.IntersectingElementHeight,
+                        intParams.IntersectingElementWidth,
+                        true
                     );
-
-                    newHoles.Add(holeModel);
-
-                }
+                }));
             }
 
             return new AllHolesDto(newHoles, actualHoles, outdatedFamilies);
         }
 
+       
+
+
         public void GetWalls(Document document, Reference pipeRef, Element pipeElem)
         {
-            
+
             LocationCurve lc = pipeElem.Location as LocationCurve;
             Curve curve = lc.Curve;
 

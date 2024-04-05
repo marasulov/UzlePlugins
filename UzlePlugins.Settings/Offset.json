@@ -1,0 +1,36 @@
+{
+  "Duct": [
+    {
+      "From": 0,
+      "To": 50,
+      "Offset": 20
+    },
+    {
+      "From": 50,
+      "To": 100,
+      "Offset": 40
+    },
+    {
+      "From": 100,
+      "To": 200,
+      "Offset": 60
+    }
+  ],
+  "Pipe": [
+    {
+      "From": 0,
+      "To": 50,
+      "Offset": 50
+    },
+    {
+      "From": 50,
+      "To": 100,
+      "Offset": 70
+    },
+    {
+      "From": 100,
+      "To": 200,
+      "Offset": 90
+    }
+  ]
+}

@@ -32,6 +32,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -66,6 +69,10 @@
     <ProjectReference Include="..\..\UzlePlugins.Contracts\UzlePlugins.Contracts.csproj">
       <Project>{04dc4de9-b5bd-4c12-9f63-a733254d5c24}</Project>
       <Name>UzlePlugins.Contracts</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\UzlePlugins.Settings\UzlePlugins.Settings.csproj">
+      <Project>{CCCDBE7E-4860-40D9-A27C-BE639B4C2073}</Project>
+      <Name>UzlePlugins.Settings</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\UzlePlugins.Views\UzlePlugins.Views.csproj">
       <Project>{c6a13d3b-64ad-4ddd-968a-031211f6eedd}</Project>

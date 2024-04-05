@@ -1,7 +1,7 @@
-﻿using Autodesk.Revit.DB;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using Autodesk.Revit.DB;
 
-namespace UzlePlugins.RevitCore.Services;
+namespace UzlePlugins.Models.Revit2022.Services;
 
 public class XYZComparer : IEqualityComparer<XYZ>
 {

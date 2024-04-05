@@ -2,7 +2,6 @@
 
 namespace UzlePlugins.Settings
 {
-
     public class Circled
     {
         public FamilyNames FamilyNames { get; set; }

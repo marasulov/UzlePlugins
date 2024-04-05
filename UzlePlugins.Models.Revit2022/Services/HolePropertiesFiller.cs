@@ -1,18 +1,22 @@
-﻿using Autodesk.Revit.DB;
+﻿using System.Collections.Generic;
+using System.Runtime.Serialization.Configuration;
+using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Mechanical;
 using Autodesk.Revit.DB.Plumbing;
-using Autodesk.Revit.UI;
-using System.Collections.Generic;
-using UzlePlugins.RevitCore.Models;
+using UzlePlugins.Contracts;
+using UzlePlugins.Models.Revit2022.Entities;
 
-
-namespace UzlePlugins.RevitCore.Services
+namespace UzlePlugins.Models.Revit2022.Services
 {
     public class HolePropertiesFiller
     {
         private readonly Document _doc;
 
-        public HolePropertiesFiller(Document doc, Element intersectingElement, Reference intersectedSourceElement, XYZ intersectionPoint)
+        public HolePropertiesFiller(
+            Document doc, 
+            Element intersectingElement, 
+            Reference intersectedSourceElement, 
+            XYZ intersectionPoint)
         {
             _doc = doc;
             IntersectingElement = intersectingElement;
@@ -23,12 +27,25 @@ namespace UzlePlugins.RevitCore.Services
         public Element IntersectingElement { get; set; }
         public Reference IntersectedSourceElement { get; set; }
         public XYZ IntersectionPoint { get; set; }
-        public List<HoleFamilyModel> HolesProps { get; set; } = new();
+        public List<HoleFamilyEntity> HolesProps { get; set; } = new();
 
-        public void GetHoles(XYZ point, UIDocument uidoc, XYZ normal)
+
+        //public void FillHoleProps(IList<Reference> references, List<XYZ> points)
+        //{
+        //    var holes = new List<HoleFamilyEntity>();
+        //    foreach (var point in points)
+        //    {
+        //        var sourceElement = references[0];
+        //        if (sourceElement == null) continue;
+        //        var holeFiller = new HolePropertiesFiller(_doc, pipeElement, sourceElement, point);
+        //        holeFiller.GetHoles(point, refFinder.Normal);
+        //        holes = holeFiller.HolesProps;
+        //        wallHoles.AddRange(holes);
+        //    }
+        //}
+
+        public void GetHoles(XYZ point, XYZ normal)
         {
-            int i = 0;
-
             if (IntersectedSourceElement == null) return;
 
             if (_doc.GetElement(IntersectedSourceElement.ElementId) is not RevitLinkInstance link) return;
@@ -48,7 +65,13 @@ namespace UzlePlugins.RevitCore.Services
             HolesProps.Add(holeFamily);
         }
 
-        public HoleFamilyModel GetHoleProps(XYZ intPoint, Element sourceElement, Element element, XYZ normal)
+        
+
+        private HoleFamilyEntity GetHoleProps(
+            XYZ intPoint, 
+            Element sourceElement, 
+            Element element, 
+            XYZ normal)
         {
 
             var elType = element.GetType();
@@ -57,6 +80,7 @@ namespace UzlePlugins.RevitCore.Services
 
             double width = default;
             double height = default;
+            string shape = default;
             switch (elType.Name)
             {
                 //TODO 
@@ -64,7 +88,9 @@ namespace UzlePlugins.RevitCore.Services
                     {
                         var intersectElement = element as Duct;
                         elName = intersectElement.MEPSystem.Name;
-                        if (intersectElement.DuctType.Shape == ConnectorProfileType.Round)
+                        var elShape = intersectElement.DuctType.Shape;
+                        shape = elShape.ToString();
+                        if (elShape == ConnectorProfileType.Round)
                         {
                             width = intersectElement.Diameter;
                             height = width;
@@ -75,38 +101,35 @@ namespace UzlePlugins.RevitCore.Services
                             height = intersectElement.Height;
                         }
                         
-                        //pipeSize = intersectElement.get_Parameter(BuiltInParameter.RBS_CALCULATED_SIZE).AsDouble();
+                        pipeSize = width;
                         break;
                     }
                 case "Pipe":
                     {
                         var intersectElement = element as Pipe;
                         elName = intersectElement.PipeType.Name;
+                        shape = intersectElement.PipeType.Shape.ToString();
                         pipeSize = intersectElement.get_Parameter(BuiltInParameter.RBS_PIPE_OUTER_DIAMETER).AsDouble();
                         break;
                     }
             }
 
             var sourceType = sourceElement.GetType();
-            double sourceElementThickness = default;
-            switch (sourceType.Name)
+            var sourceThickness = sourceType.Name switch
             {
-                case "Wall":
-                    {
-                        sourceElementThickness = (sourceElement as Wall).Width;
-                        break;
-                    }
-                case "Floor":
-                    {
-                        sourceElementThickness = (sourceElement as Floor).get_Parameter(BuiltInParameter.FLOOR_ATTR_THICKNESS_PARAM).AsDouble();
-                        break;
-                    }
-            }
+                "Wall" => (sourceElement as Wall).Width,
+                "Floor" => (sourceElement as Floor).get_Parameter(BuiltInParameter.FLOOR_ATTR_THICKNESS_PARAM)
+                    .AsDouble(),
+                _ => default
+            };
 
-            var holeFamilyModel = new HoleFamilyModel(intPoint, element, normal, sourceElement.Name, sourceType.Name, elName, elType.Name, pipeSize,
-                sourceElementThickness, true, 20, true, height, width);
+            var intersectionParams = new IntersectionParameters(intPoint, element,elName,elType.Name, normal,pipeSize,height, width);
+            var sourceProps = new SourceParameters(sourceElement.Name, sourceType.Name, shape, sourceThickness);
+            var holeFamilyModel = HoleFamilyEntity.CreateInstance(intersectionParams, sourceProps, true, true);
 
             return holeFamilyModel;
         }
+
+       
     }
 }

@@ -1,6 +1,6 @@
 ﻿using Autodesk.Revit.DB;
 
-namespace UzlePlugins.Models.Revit2022.Enities
+namespace UzlePlugins.Models.Revit2022.Entities
 {
     public class PointData
     {
