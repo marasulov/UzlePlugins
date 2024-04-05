@@ -79,12 +79,12 @@ namespace UzlePlugins.Models.Revit2022.Services
                     var points = refFinder.GetIntersectionsPoints(refFinder.WallReferences);
 
                     newIntersections.AddRange(points);
-                    //int i = 0;
+                    int i = 0;
 
                     var holes = new List<HoleFamilyEntity>();
                     foreach (var point in points)
                     {
-                        var sourceElement = refFinder.WallReferences[0];
+                        var sourceElement = refFinder.WallReferences[i];
                         if (sourceElement == null) continue;
                         var holeFiller = new HolePropertiesFiller(doc, pipeElement, sourceElement, point);
                         holeFiller.GetHoles(point, refFinder.Normal);
@@ -100,12 +100,12 @@ namespace UzlePlugins.Models.Revit2022.Services
                     var points = refFinder.GetIntersectionsPoints(refFinder.FloorReferences);
                     newIntersections.AddRange(points);
 
-                    //int i = 0;
+                    int i = 0;
 
                     var holes = new List<HoleFamilyEntity>();
                     foreach (var point in points)
                     {
-                        var sourceElement = refFinder.FloorReferences[0];
+                        var sourceElement = refFinder.FloorReferences[i];
                         if (sourceElement == null) continue;
                         var holeFiller = new HolePropertiesFiller(doc, pipeElement, sourceElement, point);
                         holeFiller.GetHoles(point, refFinder.Normal);
@@ -149,11 +149,12 @@ namespace UzlePlugins.Models.Revit2022.Services
                     var points = refFinder.GetIntersectionsPoints(refFinder.WallReferences);
 
                     newIntersections.AddRange(points);
-                    
+                    int i = 0;
                     var holes = new List<HoleFamilyEntity>();
                     foreach (var point in points)
                     {
-                        var sourceElement = refFinder.WallReferences[0];
+                        
+                        var sourceElement = refFinder.WallReferences[i];
                         if (sourceElement == null) continue;
                         var holeFiller = new HolePropertiesFiller(doc, pipeElement, sourceElement, point);
                         holeFiller.GetHoles(point, refFinder.Normal);
