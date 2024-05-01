@@ -98,7 +98,7 @@ namespace UzlePlugins.Models.Revit2022.Services
 
                 var ldoc = link.GetLinkDocument();
 
-                Element el = ldoc.GetElement(r.LinkedElementId) as HostObject;
+                Element el = ldoc.GetElement(r.LinkedElementId) as HostObject;  
                 double structuralParameter;
 
                 //Dictionary<BuiltInCategory, BuiltInParameter> builtInParameters =

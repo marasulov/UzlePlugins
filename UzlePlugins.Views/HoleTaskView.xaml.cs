@@ -15,6 +15,13 @@ namespace UzlePlugins.Views
             DataContext = holesVm;
 
             holesVm.CloseAction ??= new Action(this.Close);
+
+            //Loaded += On_Loaded;
+        }
+
+        private void On_Loaded(object sender, RoutedEventArgs e)
+        {
+            Style = (Style)FindResource("WindowElementStyle");
         }
     }
 

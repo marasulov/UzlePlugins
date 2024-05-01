@@ -4,138 +4,234 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
-        xmlns:local ="clr-namespace:UzlePlugins.Views.Converters"
+        xmlns:local="clr-namespace:UzlePlugins.Views.Converters"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         Name="HoleView"
         mc:Ignorable="d"
         xmlns:vms="clr-namespace:UzlePlugins.Vm;assembly=UzlePlugins.Vm"
         d:DataContext="{d:DesignInstance {x:Type vms:HolesVm}, IsDesignTimeCreatable=False}"
-        Title="Hole Inserter" MaxHeight="800" MaxWidth="900" 
-        >
+        Title="Hole Inserter" MaxHeight="800" MaxWidth="900">
     <Window.Resources>
-        <local:EmptyListToVisibilityConverter x:Key="EmptyListToVisibilityConverter"/>
+        <local:EmptyListToVisibilityConverter x:Key="EmptyListToVisibilityConverter" />
     </Window.Resources>
     <Grid>
-        
+
         <TabControl Width="Auto" Height="Auto">
             <TabItem Header="Intersections">
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions >
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
 
                     <!-- New holes -->
                     <GroupBox Grid.Row="0" Grid.Column="0">
                         <GroupBox.Header>
                             <Label Content="{Binding ElementName=NewHolesGrid, Path=Items.Count}"
-                                ContentStringFormat="New ActualHoles {0}"/>
-                        </GroupBox.Header >
-                        <DataGrid Name="NewHolesGrid" 
-                           VerticalAlignment="Top"
-                           MaxHeight="220"
-                           ItemsSource="{Binding NewHoles}"
-                           AutoGenerateColumns="False"
-                           ScrollViewer.CanContentScroll="True" 
-                           ScrollViewer.VerticalScrollBarVisibility="Auto"
-                           ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                           Visibility="{Binding NewHoles, Converter={StaticResource EmptyListToVisibilityConverter}}"
-                           >
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="#"  Binding="{Binding Id}" IsReadOnly="True"/>
-                                <DataGridTemplateColumn Header="Zoom">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <Button Command="{Binding ElementName = HoleView,
-                                                Path= DataContext.ZoomToPointCommand}" 
-                                                    CommandParameter="{Binding Id}" 
-                                                    Content="Show"/>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
+                                   ContentStringFormat="New ActualHoles {0}" />
+                        </GroupBox.Header>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <DataGrid Name="NewHolesCircleGrid"
+                                      Grid.Row="0"
+                                      VerticalAlignment="Top"
+                                      MaxHeight="220"
+                                      ItemsSource="{Binding NewHoles}"
+                                      AutoGenerateColumns="False"
+                                      ScrollViewer.CanContentScroll="True"
+                                      ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                      ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                      Visibility="{Binding NewHoles, Converter={StaticResource EmptyListToVisibilityConverter}}">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="#" Binding="{Binding Id}" IsReadOnly="True" />
+                                    <DataGridTemplateColumn Header="Zoom">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Button
+                                                    Command="{Binding ElementName = HoleView,
+                                                Path= DataContext.ZoomToPointCommand}"
+                                                    CommandParameter="{Binding Id}"
+                                                    Content="Show" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
 
-                                <DataGridTextColumn Header="Element type" Binding="{Binding Intersection.IntersectingElementType}" IsReadOnly="True"/>
-                                <DataGridTextColumn Header="Element name" Binding="{Binding  Intersection.IntersectingElementName}" IsReadOnly="True"/>
-                                <DataGridTextColumn Header="Element shape" Binding="{Binding Intersection.IntersectingElementShape}" IsReadOnly="True"/>
-                                <DataGridTextColumn Header="Element size" Binding="{Binding Intersection.IntersectingElementTypeSize}" IsReadOnly="True"/>
-                                <DataGridTextColumn Header="HoleSource type" Binding="{Binding  HoleSource.SourceType}" IsReadOnly="True"/>
-                                <DataGridTextColumn Header="HoleSource name" Binding="{Binding HoleSource.SourceName}" IsReadOnly="True"/>
+                                    <DataGridTextColumn Header="Element type"
+                                                        Binding="{Binding Intersection.IntersectingElementType}"
+                                                        IsReadOnly="True" />
+                                    <DataGridTextColumn Header="Element name"
+                                                        Binding="{Binding  Intersection.IntersectingElementName}"
+                                                        IsReadOnly="True" />
+                                    <DataGridTextColumn Header="Element shape"
+                                                        Binding="{Binding Intersection.IntersectingElementShape}"
+                                                        IsReadOnly="True" />
+                                    <DataGridTextColumn Header="Element size"
+                                                        Binding="{Binding Intersection.IntersectingElementTypeSize}"
+                                                        IsReadOnly="True" />
+                                    <DataGridTextColumn Header="HoleSource type"
+                                                        Binding="{Binding  HoleSource.SourceType}" IsReadOnly="True" />
+                                    <DataGridTextColumn Header="HoleSource name"
+                                                        Binding="{Binding HoleSource.SourceName}" IsReadOnly="True" />
 
-                                <DataGridTemplateColumn Header="Hole Type">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <ComboBox ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.HoleFigureTypes}"
-                                                   SelectedIndex="0"
-                                                   SelectedItem="{Binding Shape, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-                                <DataGridTextColumn Header="Offset" Binding="{Binding Hole.Offset}"/>
-                                <DataGridTemplateColumn>
-                                    <DataGridTemplateColumn.Header>
-                                        <CheckBox Content="Insert" 
-                                                  IsChecked="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.IsAllNewHoleSelected, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged }" />
-                                    </DataGridTemplateColumn.Header>
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <CheckBox IsChecked="{Binding IsInsert, UpdateSourceTrigger=PropertyChanged}" />
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-                            </DataGrid.Columns>
-                        </DataGrid>
-                    </GroupBox >
+                                    <DataGridTemplateColumn Header="Hole Type">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <ComboBox
+                                                    ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.HoleFigureTypes}"
+                                                    SelectedIndex="0"
+                                                    SelectedItem="{Binding Shape, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTextColumn Header="Offset" Binding="{Binding Hole.Offset}" />
+                                    <DataGridTemplateColumn>
+                                        <DataGridTemplateColumn.Header>
+                                            <CheckBox Content="Insert"
+                                                      IsChecked="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.IsAllNewHoleSelected, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged }" />
+                                        </DataGridTemplateColumn.Header>
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <CheckBox
+                                                    IsChecked="{Binding IsInsert, UpdateSourceTrigger=PropertyChanged}" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                            
+                            <DataGrid Name="NewHolesRectGrid"
+                                      Grid.Row="1"
+                                      VerticalAlignment="Top"
+                                      MaxHeight="220"
+                                      ItemsSource="{Binding NewHolesRect}"
+                                      AutoGenerateColumns="False"
+                                      ScrollViewer.CanContentScroll="True"
+                                      ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                      ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                      Visibility="{Binding NewHoles, Converter={StaticResource EmptyListToVisibilityConverter}}">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="#" Binding="{Binding Id}" IsReadOnly="True" />
+                                    <DataGridTemplateColumn Header="Zoom">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Button
+                                                    Command="{Binding ElementName = HoleView,
+                                                Path= DataContext.ZoomToPointCommand}"
+                                                    CommandParameter="{Binding Id}"
+                                                    Content="Show" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+
+                                    <DataGridTextColumn Header="Element type"
+                                                        Binding="{Binding Intersection.IntersectingElementType}"
+                                                        IsReadOnly="True" />
+                                    <DataGridTextColumn Header="Element name"
+                                                        Binding="{Binding  Intersection.IntersectingElementName}"
+                                                        IsReadOnly="True" />
+                                    <DataGridTextColumn Header="Element shape"
+                                                        Binding="{Binding Intersection.IntersectingElementShape}"
+                                                        IsReadOnly="True" />
+                                    <DataGridTextColumn Header="Element size"
+                                                        Binding="{Binding Intersection.IntersectingElementTypeSize}"
+                                                        IsReadOnly="True" />
+                                    <DataGridTextColumn Header="HoleSource type"
+                                                        Binding="{Binding  HoleSource.SourceType}" IsReadOnly="True" />
+                                    <DataGridTextColumn Header="HoleSource name"
+                                                        Binding="{Binding HoleSource.SourceName}" IsReadOnly="True" />
+
+                                    <DataGridTemplateColumn Header="Hole Type">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <ComboBox
+                                                    ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.HoleFigureTypes}"
+                                                    SelectedIndex="0"
+                                                    SelectedItem="{Binding Shape, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTextColumn Header="Offset" Binding="{Binding Hole.Offset}" />
+                                    <DataGridTemplateColumn>
+                                        <DataGridTemplateColumn.Header>
+                                            <CheckBox Content="Insert"
+                                                      IsChecked="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.IsAllNewRectHoleSelected, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged }" />
+                                        </DataGridTemplateColumn.Header>
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <CheckBox
+                                                    IsChecked="{Binding IsInsert, UpdateSourceTrigger=PropertyChanged}" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Grid>
+
+                        
+
+                    </GroupBox>
 
                     <!-- Exist holes -->
                     <GroupBox Grid.Row="1" Grid.Column="0">
-                        <GroupBox.Header >
+                        <GroupBox.Header>
                             <Label Content="{Binding ElementName=ExistHolesGrid, Path=Items.Count}"
-                                ContentStringFormat="ExistHolesGrid {0}"/>
-
-                        </GroupBox.Header >
-                        <DataGrid Name="ExistHolesGrid" 
-                           VerticalAlignment="Top"
-                           MaxHeight="200"
-                           ItemsSource="{Binding ActualHoles}"
-                           AutoGenerateColumns="False"
-                           ScrollViewer.CanContentScroll="True" 
-                           ScrollViewer.VerticalScrollBarVisibility="Auto"
-                           ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                           Visibility="{Binding ActualHoles, Converter={StaticResource EmptyListToVisibilityConverter}}"
-                        >
+                                   ContentStringFormat="ExistHolesGrid {0}" />
+                        </GroupBox.Header>
+                        <DataGrid Name="ExistHolesGrid"
+                                  VerticalAlignment="Top"
+                                  MaxHeight="200"
+                                  ItemsSource="{Binding ActualHoles}"
+                                  AutoGenerateColumns="False"
+                                  ScrollViewer.CanContentScroll="True"
+                                  ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                  ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                  Visibility="{Binding ActualHoles, Converter={StaticResource EmptyListToVisibilityConverter}}">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="#"  Binding="{Binding Id}" IsReadOnly="True"/>
+                                <DataGridTextColumn Header="#" Binding="{Binding Id}" IsReadOnly="True" />
                                 <DataGridTemplateColumn Header="Zoom">
 
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <Button 
+                                            <Button
                                                 Command="{Binding ElementName = HoleView, 
-                                                Path= DataContext.ZoomToPointCommand}" 
-                                                CommandParameter="{Binding Id}" 
-                                                Content="Show"/>
+                                                Path= DataContext.ZoomToPointCommand}"
+                                                CommandParameter="{Binding Id}"
+                                                Content="Show" />
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                <DataGridTextColumn Header="Hole type" Binding="{Binding Intersection.IntersectingElementType}" IsReadOnly="True"/>
-                                <DataGridTextColumn Header="Hole name" Binding="{Binding Intersection.IntersectingElementName}" IsReadOnly="True"/>
-                                <DataGridTextColumn Header="Size" Binding="{Binding Intersection.IntersectingElementTypeSize}" IsReadOnly="True"/>
-                                <DataGridTextColumn Header="HoleSource type" Binding="{Binding  HoleSource.SourceType}" IsReadOnly="True"/>
-                                <DataGridTextColumn Header="HoleSource name" Binding="{Binding  HoleSource.SourceName}" IsReadOnly="True" />
-                                <DataGridTextColumn Header="Shape" Binding="{Binding  Hole.IsRectangled}" IsReadOnly="False"/>
-                                <DataGridTextColumn Header="Offset" Binding="{Binding  Hole.Offset}" IsReadOnly="False"/>
-                                <DataGridTemplateColumn >
+                                <DataGridTextColumn Header="Hole type"
+                                                    Binding="{Binding Intersection.IntersectingElementType}"
+                                                    IsReadOnly="True" />
+                                <DataGridTextColumn Header="Hole name"
+                                                    Binding="{Binding Intersection.IntersectingElementName}"
+                                                    IsReadOnly="True" />
+                                <DataGridTextColumn Header="Size"
+                                                    Binding="{Binding Intersection.IntersectingElementTypeSize}"
+                                                    IsReadOnly="True" />
+                                <DataGridTextColumn Header="HoleSource type" Binding="{Binding  HoleSource.SourceType}"
+                                                    IsReadOnly="True" />
+                                <DataGridTextColumn Header="HoleSource name" Binding="{Binding  HoleSource.SourceName}"
+                                                    IsReadOnly="True" />
+                                <DataGridTextColumn Header="Shape" Binding="{Binding  Hole.IsRectangled}"
+                                                    IsReadOnly="False" />
+                                <DataGridTextColumn Header="Offset" Binding="{Binding  Hole.Offset}" IsReadOnly="False" />
+                                <DataGridTemplateColumn>
                                     <DataGridTemplateColumn.Header>
-                                        <CheckBox Content="Delete" 
-                                            IsChecked="{Binding RelativeSource={RelativeSource AncestorType=Window}, 
+                                        <CheckBox Content="Delete"
+                                                  IsChecked="{Binding RelativeSource={RelativeSource AncestorType=Window}, 
                                             Path=DataContext.IsAllActualHoleSelected,
                                             Mode=TwoWay,UpdateSourceTrigger=PropertyChanged }" />
                                     </DataGridTemplateColumn.Header>
-                                    <DataGridTemplateColumn.CellTemplate >
+                                    <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <CheckBox IsChecked="{Binding IsDelete, Mode=TwoWay,  UpdateSourceTrigger=PropertyChanged}"/>
+                                            <CheckBox
+                                                IsChecked="{Binding IsDelete, Mode=TwoWay,  UpdateSourceTrigger=PropertyChanged}" />
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
@@ -147,38 +243,40 @@
                     <GroupBox Grid.Row="2" Grid.Column="0">
                         <GroupBox.Header>
                             <Label Content="{Binding ElementName=OutdatedGrid, Path=Items.Count}"
-                                ContentStringFormat="Outdated holes {0}"/>
-                        </GroupBox.Header >
-                        <DataGrid Name="OutdatedGrid" 
-                           VerticalAlignment="Top"
-                           MaxHeight="170"
-                           ItemsSource="{Binding OutdatedHoles}"
-                           AutoGenerateColumns="False"
-                           ScrollViewer.CanContentScroll="True" 
-                           ScrollViewer.VerticalScrollBarVisibility="Auto"
-                           ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                           Visibility="{Binding OutdatedHoles, Converter={StaticResource EmptyListToVisibilityConverter}}"
-                           >
+                                   ContentStringFormat="Outdated holes {0}" />
+                        </GroupBox.Header>
+                        <DataGrid Name="OutdatedGrid"
+                                  VerticalAlignment="Top"
+                                  MaxHeight="170"
+                                  ItemsSource="{Binding OutdatedHoles}"
+                                  AutoGenerateColumns="False"
+                                  ScrollViewer.CanContentScroll="True"
+                                  ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                  ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                  Visibility="{Binding OutdatedHoles, Converter={StaticResource EmptyListToVisibilityConverter}}">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="#"  Binding="{Binding Id}" IsReadOnly="True" />
+                                <DataGridTextColumn Header="#" Binding="{Binding Id}" IsReadOnly="True" />
                                 <DataGridTemplateColumn>
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <Button Command="{Binding ElementName = HoleView, Path= DataContext.ZoomToPointCommand}" CommandParameter="{Binding Id}" Content="Show"/>
+                                            <Button
+                                                Command="{Binding ElementName = HoleView, Path= DataContext.ZoomToPointCommand}"
+                                                CommandParameter="{Binding Id}" Content="Show" />
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
                                 <DataGridTextColumn Header="Family name" Binding="{Binding Name}" IsReadOnly="True" />
                                 <DataGridTemplateColumn>
                                     <DataGridTemplateColumn.Header>
-                                        <CheckBox Content="Delete" 
-                                              IsChecked="{Binding RelativeSource={RelativeSource AncestorType=Window}, 
+                                        <CheckBox Content="Delete"
+                                                  IsChecked="{Binding RelativeSource={RelativeSource AncestorType=Window}, 
                                             Path=DataContext.IsAllOutdatedHoleSelected,
                                             Mode=TwoWay,UpdateSourceTrigger=PropertyChanged }" />
                                     </DataGridTemplateColumn.Header>
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <CheckBox IsChecked="{Binding IsDelete, UpdateSourceTrigger=PropertyChanged}" />
+                                            <CheckBox
+                                                IsChecked="{Binding IsDelete, UpdateSourceTrigger=PropertyChanged}" />
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
@@ -186,20 +284,20 @@
                         </DataGrid>
                     </GroupBox>
 
-                    <Grid Row="3" HorizontalAlignment="Center" VerticalAlignment="Bottom" >
+                    <Grid Row="3" HorizontalAlignment="Center" VerticalAlignment="Bottom">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions >
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
                         <Button Name="OkButton" Grid.Column="0" Width="100" Height="20" Content="Ok" Margin="5"
-                         Command="{Binding CreateHolesCommand}" CommandParameter="{Binding }"/>
+                                Command="{Binding CreateHolesCommand}" CommandParameter="{Binding }" />
 
                         <Button Name="CancelButton" Grid.Column="1" Width="100" Height="20" Content="Cancel">
                             <b:Interaction.Triggers>
                                 <b:EventTrigger EventName="Click">
                                     <b:CallMethodAction MethodName="Close"
-                                                     TargetObject="{Binding RelativeSource={RelativeSource
-                                                                     Mode=FindAncestor, AncestorType=Window}}"/>
+                                                        TargetObject="{Binding RelativeSource={RelativeSource
+                                                                     Mode=FindAncestor, AncestorType=Window}}" />
                                 </b:EventTrigger>
                             </b:Interaction.Triggers>
                         </Button>
@@ -215,81 +313,85 @@
 
                 <GroupBox>
                     <GroupBox.Header>
-                        <Label Content="Offset settings by default"/>
-                    </GroupBox.Header >
+                        <Label Content="Offset settings by default" />
+                    </GroupBox.Header>
                     <Grid>
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions >
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
                         <StackPanel Grid.Row="0" Orientation="Horizontal">
                             <TextBlock Margin="5 0 20 5">Select category</TextBlock>
-                            <ComboBox ItemsSource="{Binding IntersectingType}" 
-                                      SelectedIndex="0" 
-                                      SelectedItem="{Binding SelectedType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            <ComboBox ItemsSource="{Binding IntersectingType}"
+                                      SelectedIndex="0"
+                                      SelectedItem="{Binding SelectedType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
                         </StackPanel>
                         <Grid Row="1">
                             <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="*"/>
-                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="*" />
                             </Grid.RowDefinitions>
 
-                            <TextBlock Text="Header" Grid.Row="0"/>
+                            <TextBlock Text="Header" Grid.Row="0" />
 
-                            <ItemsControl Grid.Row="1" 
+                            <ItemsControl Grid.Row="1"
                                           ItemsSource="{Binding SelectedOffsets, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        
+
                                         <Grid>
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="*" />
                                             </Grid.ColumnDefinitions>
-                                            <TextBox Text="{Binding From, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                     Grid.Column="0"/>
-                                            <TextBox Text="{Binding To, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-                                                     Grid.Column="1"/>
-                                            <TextBox Text="{Binding Offset, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-                                                     Grid.Column="2"/>
-                                            <CheckBox IsChecked ="{Binding IsDelete}" 
-                                                     Grid.Column="3"/>
+                                            <TextBox
+                                                Text="{Binding From, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                Grid.Column="0" />
+                                            <TextBox
+                                                Text="{Binding To, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                Grid.Column="1" />
+                                            <TextBox
+                                                Text="{Binding Offset, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                Grid.Column="2" />
+                                            <CheckBox IsChecked="{Binding IsDelete}"
+                                                      Grid.Column="3" />
                                         </Grid>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
                             <Grid Grid.Row="2">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
-                                <TextBox Name="AddFromTextBox"  Grid.Column="0" Text="{Binding NewFrom}"/>
-                                <TextBox Name="AddToTextBox" Grid.Column="1"  Text="{Binding NewTo}"/>
-                                <TextBox Name="AddOffsetTextBox"  Grid.Column="2"  Text="{Binding NewOffset}"/>
+                                <TextBox Name="AddFromTextBox" Grid.Column="0" Text="{Binding NewFrom}" />
+                                <TextBox Name="AddToTextBox" Grid.Column="1" Text="{Binding NewTo}" />
+                                <TextBox Name="AddOffsetTextBox" Grid.Column="2" Text="{Binding NewOffset}" />
                             </Grid>
 
                         </Grid>
-                        <Grid Row="2" HorizontalAlignment="Center" VerticalAlignment="Bottom" >
+                        <Grid Row="2" HorizontalAlignment="Center" VerticalAlignment="Bottom">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions >
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
                             <Button Name="AddRow" Grid.Column="0" Width="100" Height="20" Content="Add" Margin="5"
                                     Command="{Binding AddOffsetCommand}" />
-                            <Button Name="DeleteRow" Grid.Column="1" Width="100" Height="20" Content="Delete" Margin="5"
-                                    Command="{Binding DeleteOffsetCommand}"/>
+                            <Button Name="DeleteRow" Grid.Column="1" Width="100" Height="20" Content="Delete"
+                                    Margin="5"
+                                    Command="{Binding DeleteOffsetCommand}" />
 
-                            <Button Name="SaveToJson" Grid.Column="2" Width="100" Height="20" Content="Accept" 
-                                    Command="{Binding SaveOffsetsCommand}" CommandParameter="{Binding }"/>
+                            <Button Name="SaveToJson" Grid.Column="2" Width="100" Height="20" Content="Accept"
+                                    Command="{Binding SaveOffsetsCommand}" CommandParameter="{Binding }" />
                         </Grid>
                     </Grid>
                 </GroupBox>

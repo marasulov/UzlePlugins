@@ -66,6 +66,7 @@ namespace UzlePlugins.Models.Revit2022.Services
             double width = default;
             double height = default;
             string shape = default;
+
             switch (elType.Name)
             {
                 //TODO 
@@ -108,7 +109,7 @@ namespace UzlePlugins.Models.Revit2022.Services
                 _ => default
             };
 
-            var intersectionParams = new IntersectionParameters(intPoint, element,elName,elType.Name, normal,pipeSize,height, width);
+            var intersectionParams = new IntersectionParameters(intPoint, element,elName,elType.Name, normal,pipeSize,height, width, shape);
             var sourceProps = new SourceParameters(sourceElement.Name, sourceType.Name, sourceThickness);
             var holeFamilyModel = HoleFamilyEntity.CreateInstance(intersectionParams, sourceProps, true, true);
 

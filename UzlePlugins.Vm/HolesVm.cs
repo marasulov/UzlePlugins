@@ -13,22 +13,27 @@ namespace UzlePlugins.Vm
         private List<ActualHoleDto> _actualHoles;
         private List<OutdatedFamilyDto> _outdatedHoles;
         private List<NewHoleDto> _newHoles;
+        private List<NewHoleDto> _newHolesRect;
 
         private bool _canExecute = true;
         private string[] _holeFigureTypes;
         private bool _isAllActualHoleSelected;
         private bool _isAllNewHoleSelected = true;
+        private bool _isAllNewRectHoleSelected = true;
         private bool _isAllOutdatedHoleSelected;
         private ObservableCollection<OffsetRanges> _ductOffsets;
         private ObservableCollection<OffsetRanges> _pipeOffsets;
         private ObservableCollection<string> _intersectingType;
         private string _selectedType = "Ducts";
         private ObservableCollection<OffsetRanges> _selectedOffsets ;
+        
 
-        public HolesVm(FindHolesCommand findHolesCommand,
+        public HolesVm (
+            FindHolesCommand findHolesCommand,
             CreateHolesCommand createHolesCommand,
             ZoomToPointCommand zoomToPointCommand,
-            FillOffsetSettingsCommand fillOffsetSettingsCommand, SaveOffsetsCommand savetoJson)
+            FillOffsetSettingsCommand fillOffsetSettingsCommand, 
+            SaveOffsetsCommand savetoJson)
         {
             HoleFigureTypes = new[] { "Square", "Circle" };
             IntersectingType = new ObservableCollection<string> { "Ducts", "Pipes", "Cable trays" };
@@ -46,7 +51,6 @@ namespace UzlePlugins.Vm
             
             AddOffsetCommand =  new RelayCommand(AddToList);
             DeleteOffsetCommand = new RelayCommand(DeleteFromList);
-            
             SaveOffsetsCommand = savetoJson;
 
         }
@@ -115,6 +119,15 @@ namespace UzlePlugins.Vm
             }
         }
 
+        public bool IsAllNewRectHoleSelected {  
+            get => _isAllNewRectHoleSelected;
+            set
+            {
+                _isAllNewRectHoleSelected = value;
+                OnPropertyChanged();
+                NewHolesRect.ForEach(x => x.IsInsert = IsAllNewHoleSelected);
+            } }
+        
         public bool IsAllActualHoleSelected
         {
             get => _isAllActualHoleSelected;
@@ -160,6 +173,12 @@ namespace UzlePlugins.Vm
         {
             get => _newHoles;
             set => Set(ref _newHoles, value);
+        }
+        
+        public List<NewHoleDto> NewHolesRect
+        {
+            get => _newHolesRect;
+            set => Set(ref _newHolesRect, value);
         }
 
         public List<ActualHoleDto> ActualHoles
@@ -233,5 +252,6 @@ namespace UzlePlugins.Vm
         public int NewTo { get; set; }
         public int NewOffset { get; set; }
         public SaveOffsetsCommand SaveOffsetsCommand { get; }
+
     }
 }

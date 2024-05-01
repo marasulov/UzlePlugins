@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Autodesk.Revit.DB;
+﻿using Autodesk.Revit.DB;
 
 namespace UzlePlugins.Models.Revit2022.Entities
 {
@@ -52,6 +47,8 @@ namespace UzlePlugins.Models.Revit2022.Entities
         /// </summary>
         public double IntersectingElementWidth { get; }
 
+        public string intersectingElementShape { get; }
+
         public IntersectionParameters(
             XYZ intersectionPoint, 
             Element intersectingElement, 
@@ -60,7 +57,7 @@ namespace UzlePlugins.Models.Revit2022.Entities
             XYZ normal, 
             double intersectingElementTypeSize, 
             double intersectingElementHeight, 
-            double intersectingElementWidth)
+            double intersectingElementWidth, string intShape)
         {
             IntersectionPoint = intersectionPoint;
             IntersectingElement = intersectingElement;
@@ -70,7 +67,7 @@ namespace UzlePlugins.Models.Revit2022.Entities
             IntersectingElementTypeSize = intersectingElementTypeSize;
             IntersectingElementHeight = intersectingElementHeight;
             IntersectingElementWidth = intersectingElementWidth;
-
+            intersectingElementShape = intShape;
         }
 
         
