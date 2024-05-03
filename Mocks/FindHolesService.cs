@@ -17,9 +17,20 @@ namespace Mocks
             var actualHoleModelDtos = new List<ActualHoleDto>();
             var outdatedFamilyDtos = new List<OutdatedFamilyDto>();
 
-            for (int i = 0; i < 50; i++)
+            for (int i = 0; i < 20; i++)
             {
-                var newIntData = new IntersectionData(new PointDTO(1, 2, 3),"ElementName" + i, "ElementType" + i, i, new PointDTO(1, 2, 3), "shape"+i);
+                var newIntData = new IntersectionData(
+                    new PointDTO(1, 2, 3),"ElementName" + i, "ElementType" + i, i, new PointDTO(1, 2, 3), "Round");
+                var holeData = new HoleData("type"+i, i+50, true);
+                var soursaData = new HoleSourceData("sourceType" + i, i + 20, 30 + i, "sourceName" + i);
+                var newHoleDto = new NewHoleDto(i, newIntData, holeData, soursaData,"shape"+i, i+50, 50+i, true );
+                newHolesDtos.Add(newHoleDto);
+            }
+
+            for (int i = 0; i < 10; i++)
+            {
+                var newIntData = new IntersectionData(
+                    new PointDTO(1, 2, 3),"ElementName" + i, "ElementType" + i, i, new PointDTO(1, 2, 3), "Rectangular");
                 var holeData = new HoleData("type"+i, i+50, true);
                 var soursaData = new HoleSourceData("sourceType" + i, i + 20, 30 + i, "sourceName" + i);
                 var newHoleDto = new NewHoleDto(i, newIntData, holeData, soursaData,"shape"+i, i+50, 50+i, true );

@@ -24,6 +24,7 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
+                        <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
 
                     <!-- New holes -->
@@ -34,14 +35,19 @@
                         </GroupBox.Header>
                         <Grid>
                             <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
                                 <RowDefinition Height="*" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
                                 <RowDefinition Height="*" />
                             </Grid.RowDefinitions>
+                            <Label Grid.Row="0" Content="Intersection with circle shape" FontSize="12" FontWeight="DemiBold"/>
                             <DataGrid Name="NewHolesCircleGrid"
-                                      Grid.Row="0"
+                                      Grid.Row="1"
                                       VerticalAlignment="Top"
                                       MaxHeight="220"
-                                      ItemsSource="{Binding NewHoles}"
+                                      ItemsSource="{Binding  NewHolesCircle}"
                                       AutoGenerateColumns="False"
                                       ScrollViewer.CanContentScroll="True"
                                       ScrollViewer.VerticalScrollBarVisibility="Auto"
@@ -67,9 +73,7 @@
                                     <DataGridTextColumn Header="Element name"
                                                         Binding="{Binding  Intersection.IntersectingElementName}"
                                                         IsReadOnly="True" />
-                                    <DataGridTextColumn Header="Element shape"
-                                                        Binding="{Binding Intersection.IntersectingElementShape}"
-                                                        IsReadOnly="True" />
+                                   
                                     <DataGridTextColumn Header="Element size"
                                                         Binding="{Binding Intersection.IntersectingElementTypeSize}"
                                                         IsReadOnly="True" />
@@ -92,7 +96,9 @@
                                     <DataGridTemplateColumn>
                                         <DataGridTemplateColumn.Header>
                                             <CheckBox Content="Insert"
-                                                      IsChecked="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.IsAllNewHoleSelected, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged }" />
+                                                      IsChecked="{Binding RelativeSource={RelativeSource AncestorType=Window}, 
+                                                Path=DataContext.IsAllNewHoleSelected, 
+                                                Mode=TwoWay,UpdateSourceTrigger=PropertyChanged }" />
                                         </DataGridTemplateColumn.Header>
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
@@ -103,12 +109,22 @@
                                     </DataGridTemplateColumn>
                                 </DataGrid.Columns>
                             </DataGrid>
-                            
+                            <Grid Row="2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Label Content="Same offset"/>
+                                <!--<CheckBox Grid.Column="1" VerticalAlignment="Center" Margin="10 0"/>-->
+                                <TextBox Grid.Column="2" Width="30" VerticalAlignment="Center"/>
+                            </Grid>
+                            <Label Grid.Row="3" Content="Intersection with rectangle shape" FontSize="12" FontWeight="DemiBold"/>
                             <DataGrid Name="NewHolesRectGrid"
-                                      Grid.Row="1"
+                                      Grid.Row="4"
                                       VerticalAlignment="Top"
                                       MaxHeight="220"
-                                      ItemsSource="{Binding NewHolesRect}"
+                                      ItemsSource="{Binding  NewHolesRect}"
                                       AutoGenerateColumns="False"
                                       ScrollViewer.CanContentScroll="True"
                                       ScrollViewer.VerticalScrollBarVisibility="Auto"
@@ -134,9 +150,6 @@
                                     <DataGridTextColumn Header="Element name"
                                                         Binding="{Binding  Intersection.IntersectingElementName}"
                                                         IsReadOnly="True" />
-                                    <DataGridTextColumn Header="Element shape"
-                                                        Binding="{Binding Intersection.IntersectingElementShape}"
-                                                        IsReadOnly="True" />
                                     <DataGridTextColumn Header="Element size"
                                                         Binding="{Binding Intersection.IntersectingElementTypeSize}"
                                                         IsReadOnly="True" />
@@ -155,7 +168,8 @@
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
-                                    <DataGridTextColumn Header="Offset" Binding="{Binding Hole.Offset}" />
+                                    <DataGridTextColumn Header="Vertical Gap" Binding="{Binding Hole.Offset}" Width="Auto"/>
+                                    <DataGridTextColumn Header="Horizontal Gap" Binding="{Binding Hole.Offset}" Width="Auto" />
                                     <DataGridTemplateColumn>
                                         <DataGridTemplateColumn.Header>
                                             <CheckBox Content="Insert"
@@ -171,8 +185,6 @@
                                 </DataGrid.Columns>
                             </DataGrid>
                         </Grid>
-
-                        
 
                     </GroupBox>
 

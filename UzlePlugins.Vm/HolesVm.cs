@@ -26,7 +26,8 @@ namespace UzlePlugins.Vm
         private ObservableCollection<string> _intersectingType;
         private string _selectedType = "Ducts";
         private ObservableCollection<OffsetRanges> _selectedOffsets ;
-        
+        private List<NewHoleDto> _newHolesCircle;
+
 
         public HolesVm (
             FindHolesCommand findHolesCommand,
@@ -172,12 +173,41 @@ namespace UzlePlugins.Vm
         public List<NewHoleDto> NewHoles
         {
             get => _newHoles;
-            set => Set(ref _newHoles, value);
+            set
+            {
+                Set(ref _newHoles, value);
+                UpdateFilteredLists();
+            }
         }
-        
+
+        private void UpdateFilteredLists()
+        {
+            
+            NewHolesCircle?.Clear();
+            NewHolesRect?.Clear();
+
+            foreach (var hole in NewHoles)
+            {
+                switch (hole.Intersection.IntersectingElementShape)
+                {
+                    case "Round":
+                        NewHolesCircle.Add(hole);
+                        break;
+                    case "Rectangular":
+                        NewHolesRect.Add(hole);
+                        break;
+                }
+            }
+        }
+        public List<NewHoleDto> NewHolesCircle
+        {
+            get => _newHolesCircle ?? (_newHolesCircle = new List<NewHoleDto>());
+            set => Set(ref _newHolesCircle, value);
+        }
+
         public List<NewHoleDto> NewHolesRect
         {
-            get => _newHolesRect;
+            get => _newHolesRect ?? (_newHolesRect = new List<NewHoleDto>());
             set => Set(ref _newHolesRect, value);
         }
 
