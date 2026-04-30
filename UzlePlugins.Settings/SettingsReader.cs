@@ -13,14 +13,10 @@ namespace UzlePlugins.Settings
 
         public SettingsReader()
         {
-            string assemblyFolder =
-                "C:\\Users\\yusufzhon.marasulov\\source\\repos\\UzlePlugins\\UzlePlugins.Settings\\bin\\Debug\\net48\\";
 
-#if !DEBUG
-                assemblyFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-#endif
 
-            _jsonFileName = Path.Combine(assemblyFolder, "Settings.json");
+            _jsonFileName = @"C:\Users\y.marasulov\source\repos\marasulov\UzlePlugins\UzlePlugins.Models.Revit2022\bin\Debug\net48\Settings.json";
+
         }
 
         public HoleFamilyTypes? GetFamilyTypes()
