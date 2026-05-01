@@ -51,14 +51,26 @@ namespace UzlePlugins.Models.Revit2022.Services
 
             using TransactionGroup transactionGroup = new TransactionGroup(doc);
 
-            var collector3dView = new FilteredElementCollector(doc);
-            Func<View3D, bool> isNotTemplate = v3 => !(v3.IsTemplate);
-            View3D view3D = collector3dView
-                .OfClass(typeof(View3D))
-                .Cast<View3D>()
-                .FirstOrDefault(isNotTemplate);
+            //var collector3dView = new FilteredElementCollector(doc);
+            //Func<View3D, bool> isNotTemplate = v3 => !(v3.IsTemplate);
+            //View3D view3D = collector3dView
+            //    .OfClass(typeof(View3D))
+            //    .Cast<View3D>()
+            //    .FirstOrDefault(isNotTemplate);
 
-            if (view3D == null) TaskDialog.Show("3d view is absent", "Create 3d view");
+            //if (view3D == null) TaskDialog.Show("3d view is absent", "Create 3d view");
+
+            View3D view3D = new FilteredElementCollector(doc)
+    .OfClass(typeof(View3D))
+    .Cast<View3D>()
+    .FirstOrDefault(v => v.Name == "Hole_Check" && !v.IsTemplate);
+
+            if (view3D == null)
+            {
+                TaskDialog.Show("Ошибка", "Создайте 3D вид с именем 'Hole_Check', отключите на нем границу подрезки (Section Box) и включите все связанные файлы!");
+                return null; // Прерываем работу, так как без вида луч не полетит
+            }
+
 
             List<PointData> pointDatas = familyInstances.Select(familyInstance => new PointData(familyInstance.Id, (familyInstance.Location as LocationPoint).Point)).ToList();
 
@@ -75,119 +87,129 @@ namespace UzlePlugins.Models.Revit2022.Services
             foreach (Element pipeElement in pipeCollector)
             {
                 ReferenceIntersectionFinder refFinder = new ReferenceIntersectionFinder(doc, pipeElement, view3D);
+                refFinder.TestThickestLayerLogic(BuiltInCategory.OST_Walls);
 
                 refFinder.GetStructuralReferences(BuiltInCategory.OST_Walls);
 
                 if (refFinder.WallReferences.Count > 0)
                 {
-                    var points = refFinder.GetIntersectionsPoints(refFinder.WallReferences);
+                    // Получаем список наших объектов IntersecResult
+                    var intersectResults = refFinder.GetIntersectionsPoints(refFinder.WallReferences);
 
-                    newIntersections.AddRange(points);
-                    int i = 0;
+                    // ИСПРАВЛЕНИЕ 1: Извлекаем только координаты (XYZ) для списка newIntersections
+                    newIntersections.AddRange(intersectResults.Select(r => r.Point));
 
                     var holes = new List<HoleFamilyModel>();
-                    foreach (var point in points)
+
+                    // ИСПРАВЛЕНИЕ 2: Перебираем наши готовые результаты, а не просто точки!
+                    foreach (var result in intersectResults)
                     {
-                        var sourceElement = refFinder.WallReferences[i];
+                        // Берем элемент-основу прямо из нашего результата (это будет та самая несущая стена 400 мм)
+                        var sourceElement = result.SourceReference;
                         if (sourceElement == null) continue;
-                        var holeFiller = new HolePropertiesFiller(doc, pipeElement, sourceElement, point);
-                        holeFiller.GetHoles(point, _uiDocument, refFinder.Normal);
+
+                        // Берем правильную центральную точку из результата
+                        var exactPoint = result.Point;
+
+                        // Передаем правильные данные в твой класс заполнения свойств
+                        var holeFiller = new HolePropertiesFiller(doc, pipeElement, sourceElement, exactPoint);
+                        holeFiller.GetHoles(exactPoint, _uiDocument, refFinder.Normal);
+
                         holes = holeFiller.HolesProps;
                         wallHoles.AddRange(holes);
                     }
-                    
                 }
 
-                refFinder.GetStructuralReferences(BuiltInCategory.OST_Floors);
-                if (refFinder.FloorReferences.Count > 0)
+                //    refFinder.GetStructuralReferences(BuiltInCategory.OST_Floors);
+                //    if (refFinder.FloorReferences.Count > 0)
+                //    {
+                //        var points = refFinder.GetIntersectionsPoints(refFinder.FloorReferences);
+                //        newIntersections.AddRange(points);
+
+                //        int i = 0;
+
+                //        var holes = new List<HoleFamilyModel>();
+                //        foreach (var point in points)
+                //        {
+                //            var sourceElement = refFinder.FloorReferences[i];
+                //            if (sourceElement == null) continue;
+                //            var holeFiller = new HolePropertiesFiller(doc, pipeElement, sourceElement, point);
+                //            holeFiller.GetHoles(point, _uiDocument, refFinder.Normal);
+                //            holes = holeFiller.HolesProps;
+                //            wallHoles.AddRange(holes);
+                //        }
+
+                //    }
+                //}
+
+                //TODO Last
+                var allductCollector = new FilteredElementCollector(doc).OfClass(typeof(Duct)).Cast<Duct>();
+                var ductCollector = new List<Duct>();
+
+                foreach (var duct in allductCollector)
                 {
-                    var points = refFinder.GetIntersectionsPoints(refFinder.FloorReferences);
-                    newIntersections.AddRange(points);
-
-                    int i = 0;
-
-                    var holes = new List<HoleFamilyModel>();
-                    foreach (var point in points)
+                    if (duct.DuctType.Shape == ConnectorProfileType.Round)
                     {
-                        var sourceElement = refFinder.FloorReferences[i];
-                        if (sourceElement == null) continue;
-                        var holeFiller = new HolePropertiesFiller(doc, pipeElement, sourceElement, point);
-                        holeFiller.GetHoles(point, _uiDocument, refFinder.Normal);
-                        holes = holeFiller.HolesProps;
-                        wallHoles.AddRange(holes);
+                        if (duct.Diameter > smallestDiametr)
+                            ductCollector.Add(duct);
                     }
-                    
-                }
-            }
-
-            //TODO Last
-            var allductCollector = new FilteredElementCollector(doc).OfClass(typeof(Duct)).Cast<Duct>();
-            var ductCollector = new List<Duct>();
-
-            foreach (var duct in allductCollector)
-            {
-                if (duct.DuctType.Shape == ConnectorProfileType.Round)
-                {
-                    if (duct.Diameter > smallestDiametr)
-                        ductCollector.Add(duct);
-                }
-                else
-                {
-                    if(duct.Width > smallestDiametr)
-                        ductCollector.Add(duct);
-                }
-            }
-             
-            //.Where(w => w.Width > smallestDiametr);
-
-            //из коллекции труб создаем отверстия
-
-            foreach (Element pipeElement in ductCollector)
-            {
-                ReferenceIntersectionFinder refFinder = new ReferenceIntersectionFinder(doc, pipeElement, view3D);
-
-                refFinder.GetStructuralReferences(BuiltInCategory.OST_Walls);
-
-                if (refFinder.WallReferences.Count > 0)
-                {
-                    var points = refFinder.GetIntersectionsPoints(refFinder.WallReferences);
-
-                    newIntersections.AddRange(points);
-                    int i = 0;
-
-                    var holes = new List<HoleFamilyModel>();
-                    foreach (var point in points)
+                    else
                     {
-                        var sourceElement = refFinder.WallReferences[i];
-                        if (sourceElement == null) continue;
-                        var holeFiller = new HolePropertiesFiller(doc, pipeElement, sourceElement, point);
-                        holeFiller.GetHoles(point, _uiDocument, refFinder.Normal);
-                        holes = holeFiller.HolesProps;
-                        wallHoles.AddRange(holes);
+                        if (duct.Width > smallestDiametr)
+                            ductCollector.Add(duct);
                     }
-                    
                 }
 
-                refFinder.GetStructuralReferences(BuiltInCategory.OST_Floors);
-                if (refFinder.FloorReferences.Count > 0)
-                {
-                    var points = refFinder.GetIntersectionsPoints(refFinder.FloorReferences);
-                    newIntersections.AddRange(points);
+                //.Where(w => w.Width > smallestDiametr);
 
-                    var i = 0;
+                //из коллекции труб создаем отверстия
 
-                    var holes = new List<HoleFamilyModel>();
-                    foreach (var point in points)
-                    {
-                        var sourceElement = refFinder.FloorReferences[i];
-                        if (sourceElement == null) continue;
-                        var holeFiller = new HolePropertiesFiller(doc, pipeElement, sourceElement, point);
-                        holeFiller.GetHoles(point, _uiDocument, refFinder.Normal);
-                        holes = holeFiller.HolesProps;
-                        wallHoles.AddRange(holes);
-                    }
-                    
-                }
+                //foreach (Element pipeElement in ductCollector)
+                //{
+                //    ReferenceIntersectionFinder refFinder = new ReferenceIntersectionFinder(doc, pipeElement, view3D);
+
+                //    refFinder.GetStructuralReferences(BuiltInCategory.OST_Walls);
+
+                //    if (refFinder.WallReferences.Count > 0)
+                //    {
+                //        var points = refFinder.GetIntersectionsPoints(refFinder.WallReferences);
+
+                //        newIntersections.AddRange(points);
+                //        int i = 0;
+
+                //        var holes = new List<HoleFamilyModel>();
+                //        foreach (var point in points)
+                //        {
+                //            var sourceElement = refFinder.WallReferences[i];
+                //            if (sourceElement == null) continue;
+                //            var holeFiller = new HolePropertiesFiller(doc, pipeElement, sourceElement, point);
+                //            holeFiller.GetHoles(point, _uiDocument, refFinder.Normal);
+                //            holes = holeFiller.HolesProps;
+                //            wallHoles.AddRange(holes);
+                //        }
+
+                //    }
+
+                //    refFinder.GetStructuralReferences(BuiltInCategory.OST_Floors);
+                //    if (refFinder.FloorReferences.Count > 0)
+                //    {
+                //        var points = refFinder.GetIntersectionsPoints(refFinder.FloorReferences);
+                //        newIntersections.AddRange(points);
+
+                //        var i = 0;
+
+                //        var holes = new List<HoleFamilyModel>();
+                //        foreach (var point in points)
+                //        {
+                //            var sourceElement = refFinder.FloorReferences[i];
+                //            if (sourceElement == null) continue;
+                //            var holeFiller = new HolePropertiesFiller(doc, pipeElement, sourceElement, point);
+                //            holeFiller.GetHoles(point, _uiDocument, refFinder.Normal);
+                //            holes = holeFiller.HolesProps;
+                //            wallHoles.AddRange(holes);
+                //        }
+
+                //    }
             }
 
             List<ActualHoleModelDto> actualHoles = new();
@@ -311,7 +333,7 @@ namespace UzlePlugins.Models.Revit2022.Services
 
         public void GetWalls(Document document, Reference pipeRef, Element pipeElem)
         {
-            
+
             LocationCurve lc = pipeElem.Location as LocationCurve;
             Curve curve = lc.Curve;
 
